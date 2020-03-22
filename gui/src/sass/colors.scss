@@ -1,0 +1,43 @@
+$color-1: #2C689B;
+$color-2: #7CC3FF;
+$color-3: #5AA6E8;
+$color-4: #9B6A1D;
+$color-5: #E8B15A;
+
+$color-dark-text: #172A3B;
+
+$color-error: #E24E28;
+$color-success: $color-1;
+$color-warning: #E8E24C;
+
+.color-error {
+	color: $color-error;
+}
+
+.color-success {
+	color: $color-success;
+}
+
+.color-warning {
+	color: $color-warning;
+}
+
+.color-one {
+	color: $color-1;
+}
+
+.color-two {
+	color: $color-2;
+}
+
+.color-three {
+	color: $color-3;
+}
+
+.color-four {
+	color: $color-4;
+}
+
+.color-five {
+	color: $color-5;
+}

@@ -1,0 +1,11 @@
+# Files
+config.*.json
+*.pyc
+*.sublime-project
+*.sublime-workspace
+install.log
+_upgrade.log
+
+# Folders
+__pycache__
+node_modules

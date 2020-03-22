@@ -1,0 +1,74 @@
+{
+	"developer": {
+		"emails": ["bast@maleexcel.com"]
+	},
+
+	"domain": {
+		"primary": "mecsr.local",
+		"protocol": "http"
+	},
+
+	"email": {
+		"errors": "bast@maleexcel.com",
+		"from": "noreply@maleexcel.com",
+		"method": "queue",
+		"smtp": {
+			"host": "mail.maleexcel.com",
+			"port": 587,
+			"tls": false,
+			"user": "email@maleexcel.com",
+			"passwd": "Chris123"
+		}
+	},
+
+	"mysql": {
+		"hosts": {
+			"primary": {
+				"host": "dev.cu2protekygc.us-east-1.rds.amazonaws.com",
+				"port": 3306,
+				"user": "jbo",
+				"pass": "superman20"
+			}
+		}
+	},
+
+	"redis": {
+		"session": {
+			"host": "localhost",
+			"port": 6879,
+			"db": 0,
+			"charset": "utf8"
+		},
+		"sync": {
+			"host": "localhost",
+			"port": 6879,
+			"db": 1,
+			"charset": "utf8"
+		}
+	},
+
+	"rest": {
+		"default": {
+			"domain": "localhost",
+			"host": "0.0.0.0",
+			"port": 8000,
+			"protocol": "http",
+			"workers": 2
+		},
+		"services": {
+			"auth": {"port":2},
+			"communications": {"port":3},
+			"external": {"port": 4},
+			"webpoll": {"port": 6}
+		}
+	},
+
+	"services": {
+		"salt": null
+	},
+
+	"websocket": {
+		"host": "0.0.0.0",
+		"port": 8001
+	}
+}

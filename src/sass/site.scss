@@ -1,0 +1,102 @@
+/* html5doctor reset */
+@import '3rd/reset';
+
+/* variables */
+@import 'colors';
+@import 'zindex';
+
+/* generic */
+@import 'loader';
+
+/* components */
+@import 'format';
+@import 'header';
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* site */
+#root {
+	height: 100%;
+}
+
+#content {
+	margin-top: 56px;
+	padding: 10px;
+}
+
+a, a:active, a:hover, a:link, a:visited {
+	color: inherit;
+	text-decoration: none;
+}
+
+.fakeAnchor {
+	cursor: pointer;
+}
+
+.form, .search {
+
+	.actions {
+		flex: 0 0 auto;
+		display: flex;
+		padding: 8px;
+		align-items: center;
+		justify-content: flex-end;
+
+		.MuiButtonBase-root {
+			margin-left: 10px;
+		}
+	}
+}
+
+.permissions {
+
+	.title {
+		font-weight: bold;
+	}
+
+	.name {
+		padding-top: 22px !important;
+	}
+}
+
+.MuiPaper-root.padded {
+	margin-bottom: 20px;
+	padding: 10px;
+}
+
+.MuiTypography-h1, .MuiTypography-h2, .MuiTypography-h3,
+.MuiTypography-h4, .MuiTypography-h5, .MuiTypography-h6 {
+	margin-bottom: 5px;
+}
+
+.pageHeader {
+	display: flex;
+
+	.title {
+		flex-grow: 1
+	}
+
+	.icon {
+		font-size: 3.5rem;
+	}
+}
+
+.MuiTableContainer-root.results {
+	.MuiTableCell-root.actions {
+		.MuiSvgIcon-root {
+			margin-left: 10px;
+		}
+	}
+}

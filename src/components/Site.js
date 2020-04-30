@@ -11,7 +11,7 @@
 // NPM modules
 import React from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
-import { SnackbarProvider, withSnackbar } from 'notistack';
+import { SnackbarProvider } from 'notistack';
 
 // Material UI
 import Container from '@material-ui/core/Container';
@@ -22,11 +22,14 @@ import Hash from '../generic/hash';
 import Rest from '../generic/rest';
 
 // Component modules
+import Alerts from './composites/Alerts';
 import Header from './composites/Header';
 import Signin from './composites/Signin';
+import Unclaimed from './pages/Unclaimed';
 
 // Local modules
 import Loader from '../loader';
+import Utils from '../utils';
 
 // css
 import '../sass/site.scss';
@@ -65,58 +68,6 @@ Loader.hide();
 // Make Events available from console
 window.Events = Events;
 
-class LibraryWritersAreOftenIdiots extends React.Component {
-
-	constructor(props) {
-
-		// Call the parent constructor
-		super(props);
-
-		// Bind methods to this instance
-		this.error = this.error.bind(this);
-		this.popup = this.popup.bind(this);
-		this.warning = this.warning.bind(this);
-	}
-
-	componentDidMount() {
-
-		// Track any popup events
-		Events.add('error', this.error);
-		Events.add('popup', this.popup);
-		Events.add('success', this.popup);
-		Events.add('warning', this.warning);
-	}
-
-	componentWillUnmount() {
-
-		// Stop tracking any popup events
-		Events.remove('error', this.error);
-		Events.remove('popup', this.popup);
-		Events.remove('success', this.popup);
-		Events.remove('warning', this.warning);
-	}
-
-	error(msg) {
-		this.popup(msg, 'error');
-	}
-
-	popup(text, type='success') {
-
-		// Add the popup
-		this.props.enqueueSnackbar(text, {variant: type});
-	}
-
-	render() {
-		return <div />
-	}
-
-	warning(msg) {
-		this.popup(msg, 'warning');
-	}
-}
-
-let TotalIdiots = withSnackbar(LibraryWritersAreOftenIdiots);
-
 // Site
 class Site extends React.Component {
 
@@ -130,6 +81,7 @@ class Site extends React.Component {
 
 		// Initialise the state
 		this.state = {
+			"claimed": [],
 			"user": false
 		};
 
@@ -152,20 +104,52 @@ class Site extends React.Component {
 		Events.remove('signedOut', this.signedOut);
 	}
 
+	fetchClaimed() {
+
+		// Fetch the claimed
+		Rest.read('memo', 'msgs/claimed', {}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				console.log('Claimed:');
+				console.log(res.data);
+
+				// Set the state
+				this.setState({
+					claimed: res.data
+				});
+			}
+		});
+	}
+
 	render() {
 		return (
 			<SnackbarProvider maxSnack={3}>
-				<TotalIdiots />
+				<Alerts />
 				<BrowserRouter>
 					<div className="site">
 						{this.state.user === false &&
 							<Signin />
 						}
 						<Header user={this.state.user} />
-						<Container id="content">
+						<div id="content">
 							<Switch>
+								<Route path="/unclaimed">
+									<Unclaimed user={this.state.user} />
+								</Route>
 							</Switch>
-						</Container>
+						</div>
 					</div>
 				</BrowserRouter>
 			</SnackbarProvider>
@@ -175,13 +159,18 @@ class Site extends React.Component {
 	signedIn(user) {
 
 		// Set the user
-		this.setState({"user": user});
+		this.setState({"user": user}, () => {
+			this.fetchClaimed();
+		});
 	}
 
 	signedOut() {
 
 		// Remove the user
-		this.setState({"user": false});
+		this.setState({
+			"claimed": [],
+			"user": false
+		});
 	}
 }
 

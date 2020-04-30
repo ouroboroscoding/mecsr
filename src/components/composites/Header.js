@@ -46,13 +46,15 @@ class Header extends React.Component {
 
 		// Initialise the state
 		this.state = {
-			"menu": false,
+			"mobile": false,
+			"menu": true,
 			"user": props.user || false
 		}
 
 		// Bind methods to this instance
 		this.menuClose = this.menuClose.bind(this);
 		this.menuToggle = this.menuToggle.bind(this);
+		this.resize = this.resize.bind(this);
 		this.signedIn = this.signedIn.bind(this);
 		this.signedOut = this.signedOut.bind(this);
 		this.signout = this.signout.bind(this);
@@ -63,6 +65,10 @@ class Header extends React.Component {
 		// Track any signedIn/signedOut events
 		Events.add('signedIn', this.signedIn);
 		Events.add('signedOut', this.signedOut);
+
+		// Capture resizes
+		window.addEventListener("resize", this.resize);
+		this.resize();
 	}
 
 	componentWillUnmount() {
@@ -70,6 +76,9 @@ class Header extends React.Component {
 		// Stop tracking any signedIn/signedOut events
 		Events.remove('signedIn', this.signedIn);
 		Events.remove('signedOut', this.signedOut);
+
+		// Stop capturing resizes
+		window.removeEventListener("resize", this.resize);
 	}
 
 	menuClose() {
@@ -87,13 +96,27 @@ class Header extends React.Component {
 	}
 
 	render() {
+
+		let drawer = (
+			<List>
+				<Link to="/unclaimed" onClick={this.menuClose}>
+					<ListItem button key="Users">
+						<ListItemIcon><GroupIcon /></ListItemIcon>
+						<ListItemText primary="Unclaimed" />
+					</ListItem>
+				</Link>
+			</List>
+		);
+
 		return (
 			<div id="header">
 				<AppBar position="fixed">
 					<Toolbar>
-						<IconButton edge="start" color="inherit" aria-label="menu" onClick={this.menuToggle}>
-							<MenuIcon />
-						</IconButton>
+						{this.state.mobile &&
+							<IconButton edge="start" color="inherit" aria-label="menu" onClick={this.menuToggle}>
+								<MenuIcon />
+							</IconButton>
+						}
 						<Typography variant="h6" className="title">
 							<Link to="/">
 								MeCSR
@@ -107,22 +130,36 @@ class Header extends React.Component {
 						}
 					</Toolbar>
 				</AppBar>
-				<Drawer
-					anchor="left"
-					open={this.state.menu}
-					onClose={this.menuToggle}
-				>
-					<List>
-						<Link to="/users" onClick={this.menuClose}>
-							<ListItem button key="Users">
-								<ListItemIcon><GroupIcon /></ListItemIcon>
-								<ListItemText primary="Users" />
-							</ListItem>
-						</Link>
-					</List>
-				</Drawer>
+				{this.state.mobile ?
+					<Drawer
+						anchor="left"
+						open={this.state.menu}
+						onClose={this.menuClose}
+						variant="temporary"
+					>
+						{drawer}
+					</Drawer>
+				:
+					<Drawer
+						anchor="left"
+						open
+						variant="permanent"
+					>
+						{drawer}
+					</Drawer>
+				}
 			</div>
 		);
+	}
+
+	resize() {
+
+		// If the size is less than 600px
+		if(document.documentElement.clientWidth < 600) {
+			this.setState({"mobile": true});
+		} else {
+			this.setState({"mobile": false});
+		}
 	}
 
 	signedIn(user) {

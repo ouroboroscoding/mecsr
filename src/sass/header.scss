@@ -1,7 +1,29 @@
 #header {
 	flex-grow: 1;
 
-	.title {
-		flex-grow: 1
+	.MuiAppBar-root {
+		margin-left: 200px;
+		width: calc(100% - 200px);
+
+		.title {
+			flex-grow: 1
+		}
+	}
+
+	.MuiDrawer-root {
+		.MuiPaper-root {
+			width: 200px;
+		}
+	}
+
+}
+
+@media (max-width: 600px) {
+
+	#header {
+		.MuiAppBar-root {
+			width: 100%;
+			margin-left: 0;
+		}
 	}
 }

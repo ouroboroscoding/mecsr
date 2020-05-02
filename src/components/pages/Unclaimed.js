@@ -12,7 +12,7 @@
 import React from 'react';
 
 // Material UI
-import Typography from '@material-ui/core/Typography';
+//import Typography from '@material-ui/core/Typography';
 
 // Generic modules
 import Events from '../../generic/events';
@@ -95,10 +95,10 @@ export default class Unclaimed extends React.Component {
 
 	render() {
 		return (
-			<div>
-				{this.state.rows.map((row, i) => {
-					return <div key={i}>{JSON.stringify(row)}</div>
-				})}
+			<div id="unclaimed">
+				{this.state.rows.map((row, i) =>
+					<div key={i}>{JSON.stringify(row)}</div>
+				)}
 			</div>
 		)
 	}

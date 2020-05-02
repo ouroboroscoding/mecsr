@@ -10,7 +10,6 @@
 
 // NPM modules
 import React from 'react';
-import { BrowserRouter, Link, Route, Switch } from 'react-router-dom';
 import { withSnackbar } from 'notistack';
 
 // Generic modules

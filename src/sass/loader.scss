@@ -6,7 +6,7 @@
   margin: 0;
   height: 100%;
   width: 100%;
-  z-index: $zi_loader;
+  z-index: 10000;
 
   div {
     height: 100%;

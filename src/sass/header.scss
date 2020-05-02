@@ -1,21 +1,25 @@
 #header {
-	flex-grow: 1;
 
 	.MuiAppBar-root {
-		margin-left: 200px;
-		width: calc(100% - 200px);
+		margin-left: $menu-width;
+		width: calc(100% - #{$menu-width});
 
 		.title {
 			flex-grow: 1
 		}
 	}
+}
 
-	.MuiDrawer-root {
-		.MuiPaper-root {
-			width: 200px;
-		}
+#menu {
+	.close {
+		min-width: 25px;
 	}
+}
 
+.MuiDrawer-root {
+	.MuiPaper-root {
+		width: $menu-width;
+	}
 }
 
 @media (max-width: 600px) {

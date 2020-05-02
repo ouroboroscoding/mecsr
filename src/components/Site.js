@@ -13,18 +13,19 @@ import React from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
 
-// Material UI
-import Container from '@material-ui/core/Container';
-
 // Generic modules
 import Events from '../generic/events';
 import Hash from '../generic/hash';
 import Rest from '../generic/rest';
+import Tools from '../generic/tools';
 
-// Component modules
+// Composite component modules
 import Alerts from './composites/Alerts';
 import Header from './composites/Header';
 import Signin from './composites/Signin';
+// Page component modules
+import Customer from './pages/Customer';
+import Search from './pages/Search';
 import Unclaimed from './pages/Unclaimed';
 
 // Local modules
@@ -86,6 +87,8 @@ class Site extends React.Component {
 		};
 
 		// Binds methods to this instance
+		this.claimedAdd = this.claimedAdd.bind(this);
+		this.claimedRemove = this.claimedRemove.bind(this);
 		this.signedIn = this.signedIn.bind(this);
 		this.signedOut = this.signedOut.bind(this);
 	}
@@ -95,6 +98,8 @@ class Site extends React.Component {
 		// Track any signedIn/signedOut events
 		Events.add('signedIn', this.signedIn);
 		Events.add('signedOut', this.signedOut);
+		Events.add('claimedAdd', this.claimedAdd);
+		Events.add('claimedRemove', this.claimedRemove);
 	}
 
 	componentWillUnmount() {
@@ -102,9 +107,15 @@ class Site extends React.Component {
 		// Stop tracking any signedIn/signedOut events
 		Events.remove('signedIn', this.signedIn);
 		Events.remove('signedOut', this.signedOut);
+		Events.remove('claimedAdd', this.claimedAdd);
+		Events.remove('claimedRemove', this.claimedRemove);
 	}
 
-	fetchClaimed() {
+	claimedAdd(claimed) {
+		console.log(claimed);
+	}
+
+	claimedFetch() {
 
 		// Fetch the claimed
 		Rest.read('memo', 'msgs/claimed', {}).done(res => {
@@ -133,20 +144,68 @@ class Site extends React.Component {
 		});
 	}
 
+	claimedRemove(claimed) {
+
+		// Send the removal to the server
+		Rest.delete('memo', 'claimed', {
+			phoneNumber: claimed
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				// Clone the claimed state
+				let lClaimed = Tools.clone(this.state.claimed);
+
+				// Find the index of the remove customer
+				let iIndex = Tools.afindi(lClaimed, 'customerPhone', claimed);
+
+				// If we found one
+				if(iIndex > -1) {
+
+					// Remove the element
+					lClaimed.splice(iIndex, 1);
+
+					// Set the new state
+					this.setState({
+						claimed: lClaimed
+					});
+				}
+			}
+		});
+	}
+
 	render() {
 		return (
 			<SnackbarProvider maxSnack={3}>
 				<Alerts />
 				<BrowserRouter>
-					<div className="site">
+					<div id="site">
 						{this.state.user === false &&
 							<Signin />
 						}
-						<Header user={this.state.user} />
+						<Header user={this.state.user} claimed={this.state.claimed} />
 						<div id="content">
 							<Switch>
 								<Route path="/unclaimed">
 									<Unclaimed user={this.state.user} />
+								</Route>
+								<Route path="/search">
+									<Search user={this.state.user} />
+								</Route>
+								<Route path="/customer/:phoneNumber" component={({match: {params:{phoneNumber}}}) => (
+									<Customer phoneNumber={phoneNumber} user={this.state.user} />
+								)}>
 								</Route>
 							</Switch>
 						</div>
@@ -160,7 +219,7 @@ class Site extends React.Component {
 
 		// Set the user
 		this.setState({"user": user}, () => {
-			this.fetchClaimed();
+			this.claimedFetch();
 		});
 	}
 

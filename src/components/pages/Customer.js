@@ -66,6 +66,7 @@ export default class Customer extends React.Component {
 
 		// Bind methods
 		this.newMessage = this.newMessage.bind(this);
+		this.scrollToBottom = this.scrollToBottom.bind(this);
 		this.signedIn = this.signedIn.bind(this);
 		this.signedOut = this.signedOut.bind(this);
 		this.tabChange = this.tabChange.bind(this);

@@ -86,6 +86,9 @@ class Site extends React.Component {
 			"user": false
 		};
 
+		// Refs
+		this.header = null;
+
 		// Binds methods to this instance
 		this.claimedAdd = this.claimedAdd.bind(this);
 		this.claimedRemove = this.claimedRemove.bind(this);
@@ -111,8 +114,43 @@ class Site extends React.Component {
 		Events.remove('claimedRemove', this.claimedRemove);
 	}
 
-	claimedAdd(claimed) {
-		console.log(claimed);
+	claimedAdd(number, name, callback) {
+
+		// Send the claim  to the server
+		Rest.create('memo', 'customer/claim', {
+			phoneNumber: number
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				// Clone the claimed state
+				let lClaimed = Tools.clone(this.state.claimed);
+
+				// Add the record to the end
+				lClaimed.push({
+					customerName: name,
+					customerPhone: number
+				});
+
+				// Set the new state
+				this.setState({
+					claimed: lClaimed
+				}, () => {
+					this.header.path = '/customer/' + number;
+				});
+			}
+		});
 	}
 
 	claimedFetch() {
@@ -133,9 +171,6 @@ class Site extends React.Component {
 			// If there's data
 			if(res.data) {
 
-				console.log('Claimed:');
-				console.log(res.data);
-
 				// Set the state
 				this.setState({
 					claimed: res.data
@@ -147,7 +182,7 @@ class Site extends React.Component {
 	claimedRemove(claimed) {
 
 		// Send the removal to the server
-		Rest.delete('memo', 'claimed', {
+		Rest.delete('memo', 'customer/claim', {
 			phoneNumber: claimed
 		}).done(res => {
 
@@ -194,19 +229,31 @@ class Site extends React.Component {
 						{this.state.user === false &&
 							<Signin />
 						}
-						<Header user={this.state.user} claimed={this.state.claimed} />
+						<Header
+							claimed={this.state.claimed}
+							path={window.location.pathname}
+							ref={el => this.header = el}
+							user={this.state.user}
+						/>
 						<div id="content">
 							<Switch>
 								<Route path="/unclaimed">
-									<Unclaimed user={this.state.user} />
+									<Unclaimed
+										onClaim={this.claimedAdd}
+										user={this.state.user}
+									/>
 								</Route>
 								<Route path="/search">
-									<Search user={this.state.user} />
+									<Search
+										user={this.state.user}
+									/>
 								</Route>
-								<Route path="/customer/:phoneNumber" component={({match: {params:{phoneNumber}}}) => (
-									<Customer phoneNumber={phoneNumber} user={this.state.user} />
-								)}>
-								</Route>
+								<Route
+									path="/customer/:phoneNumber"
+									component={({match: {params:{phoneNumber}}}) => (
+										<Customer key={phoneNumber} phoneNumber={phoneNumber} user={this.state.user} />
+									)}
+								/>
 							</Switch>
 						</div>
 					</div>

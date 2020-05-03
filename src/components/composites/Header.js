@@ -43,7 +43,7 @@ import Tools from '../../generic/tools';
 import Loader from '../../loader';
 import Utils from '../../utils';
 
-// app
+// Header component
 class Header extends React.Component {
 
 	constructor(props) {
@@ -54,13 +54,14 @@ class Header extends React.Component {
 		// Initialise the state
 		this.state = {
 			"mobile": document.documentElement.clientWidth < 600,
-			"menu": true,
+			"menu": false,
 			"path": window.location.pathname,
 			"user": props.user || false
 		}
 
 		// Bind methods to this instance
 		this.claimedRemove = this.claimedRemove.bind(this);
+		this.menuClose = this.menuClose.bind(this);
 		this.menuItem = this.menuItem.bind(this);
 		this.menuToggle = this.menuToggle.bind(this);
 		this.resize = this.resize.bind(this);
@@ -99,6 +100,10 @@ class Header extends React.Component {
 		Events.trigger('claimedRemove', event.currentTarget.dataset.number);
 	}
 
+	menuClose() {
+		this.setState({menu: false});
+	}
+
 	menuItem(event) {
 
 		// New state
@@ -119,14 +124,14 @@ class Header extends React.Component {
 
 		// Toggle the state of the menu
 		this.setState({
-			"menu": !this.state.menu
+			menu: !this.state.menu
 		});
 	}
 
 	render() {
 
 		let drawer = (
-			<List>
+			<List style={{padding: 0}}>
 				<Link to="/unclaimed" onClick={this.menuItem}>
 					<ListItem button selected={this.state.path === "/unclaimed"}>
 						<ListItemIcon><AllInboxIcon /></ListItemIcon>
@@ -269,6 +274,12 @@ class Header extends React.Component {
 		// Hide and modals and set the user to false
 		this.setState({
 			"user": false
+		});
+	}
+
+	set path(path) {
+		this.setState({
+			path: path
 		});
 	}
 }

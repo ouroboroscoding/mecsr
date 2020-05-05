@@ -13,8 +13,10 @@ import React from 'react';
 
 // Material UI
 import AppBar from '@material-ui/core/AppBar';
+import Button from '@material-ui/core/Button';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import TextField from '@material-ui/core/TextField';
 
 // Generic modules
 import Events from '../../generic/events';
@@ -63,13 +65,16 @@ export default class Customer extends React.Component {
 
 		// Refs
 		this.messagesBottom = null;
+		this.text = null;
 
 		// Bind methods
 		this.newMessage = this.newMessage.bind(this);
 		this.scrollToBottom = this.scrollToBottom.bind(this);
+		this.send = this.send.bind(this);
 		this.signedIn = this.signedIn.bind(this);
 		this.signedOut = this.signedOut.bind(this);
 		this.tabChange = this.tabChange.bind(this);
+		this.textPress = this.textPress.bind(this);
 	}
 
 	componentDidMount() {
@@ -96,7 +101,7 @@ export default class Customer extends React.Component {
 	fetchMessages() {
 
 		// Get the messages from the REST service
-		Rest.read('memo', 'msgs/customer', {
+		Rest.read('monolith', 'msgs/customer', {
 			phoneNumber: this.props.phoneNumber
 		}).done(res => {
 
@@ -120,7 +125,7 @@ export default class Customer extends React.Component {
 				this.setState({
 					messages: res.data
 				}, () => {
-					this.scrollToBottom();
+					this.scrollToBottom("auto");
 				});
 			}
 		});
@@ -141,7 +146,7 @@ export default class Customer extends React.Component {
 			this.setState({
 				messages: lMsgs
 			}, () => {
-				this.scrollToBottom();
+				this.scrollToBottom("smooth");
 			});
 		}
 	}
@@ -172,9 +177,26 @@ export default class Customer extends React.Component {
 								date={msg.createdAt}
 							/>
 						)}
+						<div className="scroll" ref={el => this.messagesBottom = el} />
 					</div>
-					<div className="scroll" ref={el => this.messagesBottom = el} />
-					<textarea />
+					<div className="send">
+						<TextField
+							className="text"
+							inputRef={el => this.text = el}
+							multiline
+							onKeyPress={this.textPress}
+							rows={2}
+							variant="outlined"
+						/>
+						<Button
+							color="primary"
+							size="large"
+							onClick={this.send}
+							variant="contained"
+						>
+							Send
+						</Button>
+					</div>
 				</div>
 				<div className="orders" style={{display: this.state.tab === 1 ? 'block' : 'none'}}>
 					Orders
@@ -189,13 +211,69 @@ export default class Customer extends React.Component {
 		);
 	}
 
-	scrollToBottom() {
-		this.messagesBottom.scrollIntoView({ behavior: "smooth" });
+	scrollToBottom(type) {
+		this.messagesBottom.scrollIntoView({ behavior: type });
+	}
+
+	send() {
+
+		// Store the message content
+		let content = this.text.value;
+
+		console.log(content);
+
+		// Send the message to the server
+		Rest.create('monolith', 'message', {
+			content: content,
+			customerPhone: this.props.phoneNumber,
+			type: "support",
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+
+				// If the customer requested a stop
+				if(res.error.code === 1500) {
+					Events.trigger('error', 'Customer has requested a STOP to SMS messages');
+				}
+				else {
+					Events.trigger('error', JSON.stringify(res.error));
+				}
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If we're ok
+			if(res.data) {
+
+				// Clear the message
+				this.text.value = '';
+
+				// Clone the current messsages
+				let messages = Tools.clone(this.state.messages);
+
+				// Add the new one to the end
+				messages.push({
+					type: 'Outgoing',
+					notes: content,
+					fromName: this.state.user.firstName + ' ' + this.state.user.lastName,
+					createdAt: String(new Date())
+				});
+
+				// Set the new state
+				this.setState({
+					messages: messages
+				});
+			}
+		});
 	}
 
 	signedIn(user) {
 		this.setState({
-			user: true
+			user: user
 		}, () => {
 			this.fetchMessages();
 		})
@@ -203,7 +281,7 @@ export default class Customer extends React.Component {
 
 	signedOut() {
 		this.setState({
-			fetchMessages: [],
+			messages: [],
 			mip: null,
 			orders: null,
 			prescriptions: null,
@@ -215,5 +293,11 @@ export default class Customer extends React.Component {
 	tabChange(event, tab) {
 		console.log(tab);
 		this.setState({"tab": tab});
+	}
+
+	textPress(event) {
+		if(event.key === 'Enter') {
+			this.send();
+		}
 	}
 }

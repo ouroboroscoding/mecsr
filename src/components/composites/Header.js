@@ -37,7 +37,6 @@ import SearchIcon from '@material-ui/icons/Search';
 // Generic modules
 import Events from '../../generic/events';
 import Rest from '../../generic/rest';
-import Tools from '../../generic/tools';
 
 // Local modules
 import Loader from '../../loader';

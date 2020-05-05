@@ -26,8 +26,8 @@ import Tools from '../../generic/tools';
 import Utils from '../../utils';
 
 // Regex
-const reReceived = /^Received at (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\n([^]+)$/
-const reSent = /^Sent by (.+) at (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\n([^]+)$/
+const reReceived = /^Received at (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})(?: [AP]M)?\n([^]+)$/
+const reSent = /^Sent by (.+) at (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})(?: [AP]M)?\n([^]+)$/
 
 // Customer component
 function Customer(props) {
@@ -151,7 +151,7 @@ export default class Unclaimed extends React.Component {
 	hide(number) {
 
 		// Mark the conversation as hidden on the server side
-		Rest.update('memo', 'customer/hide', {
+		Rest.update('monolith', 'customer/hide', {
 			customerPhone: number
 		}).done(res => {
 
@@ -192,7 +192,7 @@ export default class Unclaimed extends React.Component {
 	fetch() {
 
 		// Fetch the unclaimed
-		Rest.read('memo', 'msgs/unclaimed', {}).done(res => {
+		Rest.read('monolith', 'msgs/unclaimed', {}).done(res => {
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {

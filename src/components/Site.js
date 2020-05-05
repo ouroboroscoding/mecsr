@@ -56,8 +56,8 @@ Rest.init(process.env.REACT_APP_MEMS_DOMAIN, xhr => {
 
 // If we have a session, fetch the user
 if(Rest.session()) {
-	Rest.read('memo', 'session', {}).done(res => {
-		Rest.read('memo', 'user', {}).done(res => {
+	Rest.read('monolith', 'session', {}).done(res => {
+		Rest.read('monolith', 'user', {}).done(res => {
 			Events.trigger('signedIn', res.data);
 		});
 	});
@@ -117,7 +117,7 @@ class Site extends React.Component {
 	claimedAdd(number, name, callback) {
 
 		// Send the claim  to the server
-		Rest.create('memo', 'customer/claim', {
+		Rest.create('monolith', 'customer/claim', {
 			phoneNumber: number
 		}).done(res => {
 
@@ -156,7 +156,7 @@ class Site extends React.Component {
 	claimedFetch() {
 
 		// Fetch the claimed
-		Rest.read('memo', 'msgs/claimed', {}).done(res => {
+		Rest.read('monolith', 'msgs/claimed', {}).done(res => {
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
@@ -182,7 +182,7 @@ class Site extends React.Component {
 	claimedRemove(claimed) {
 
 		// Send the removal to the server
-		Rest.delete('memo', 'customer/claim', {
+		Rest.delete('monolith', 'customer/claim', {
 			phoneNumber: claimed
 		}).done(res => {
 

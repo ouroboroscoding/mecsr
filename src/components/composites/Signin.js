@@ -55,7 +55,7 @@ class Signin extends React.Component {
 	fetchUser() {
 
 		// Fetch the user data
-		Rest.read('memo', 'user', {}).done(res => {
+		Rest.read('monolith', 'user', {}).done(res => {
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
@@ -124,7 +124,7 @@ class Signin extends React.Component {
 	signin(ev) {
 
 		// Call the signin
-		Rest.create('memo', 'signin', {
+		Rest.create('monolith', 'signin', {
 			"userName": this.fields.userName.value,
 			"passwd": this.fields.passwd.value
 		}).done(res => {

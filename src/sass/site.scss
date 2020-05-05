@@ -15,7 +15,7 @@ $menu-width: 250px;
 @import 'customer';
 @import 'unclaimed';
 
-html, body, #root, #site {
+html, body, #root, #site, #content {
 	height: 100%;
 }
 
@@ -37,20 +37,17 @@ p {
 	margin-bottom: 10px;
 }
 
+// Site
 #site {
 	display: flex;
 	flex-direction: column;
 }
 
-header {
-	flex-grow: 0;
-}
-
-// Site
 #content {
-	margin-left: $menu-width;
-	width: calc(100% - $menu-width);
 	flex-grow: 1;
+	flex-shrink: 1;
+	margin-left: $menu-width;
+	width: calc(100% - #{$menu-width});
 }
 
 @media (max-width: 600px) {

@@ -4,6 +4,7 @@
 	padding: 10px;
 
 	.record {
+		margin-bottom: 5px;
 		padding: 10px;
 
 		button {
@@ -93,5 +94,9 @@
 				font-size: 80%;
 			}
 		}
+	}
+
+	.record.sales {
+		background-color: #cecece;
 	}
 }

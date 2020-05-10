@@ -6,8 +6,9 @@
 		margin-left: $menu-width;
 		width: calc(100% - #{$menu-width});
 
-		.title {
-			flex-grow: 1
+		#loaderWrapper {
+			flex-grow: 1;
+			text-align: center;
 		}
 	}
 }

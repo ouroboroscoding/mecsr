@@ -29,7 +29,7 @@ import Search from './pages/Search';
 import Unclaimed from './pages/Unclaimed';
 
 // Local modules
-import Loader from '../loader';
+import { LoaderHide, LoaderShow } from './composites/Loader';
 import Utils from '../utils';
 
 // css
@@ -49,9 +49,9 @@ Rest.init(process.env.REACT_APP_MEMS_DOMAIN, xhr => {
 			' (' + xhr.status + ')');
 	}
 }, (method, url, data) => {
-	Loader.show();
+	LoaderShow();
 }, (method, url, data) => {
-	Loader.hide();
+	LoaderHide();
 });
 
 // If we have a session, fetch the user
@@ -63,11 +63,11 @@ if(Rest.session()) {
 	});
 }
 
-// Hide the loader
-Loader.hide();
-
 // Make Events available from console
 window.Events = Events;
+
+// Hide the loader
+LoaderHide();
 
 // Site
 class Site extends React.Component {
@@ -86,6 +86,9 @@ class Site extends React.Component {
 			"user": false
 		};
 
+		// Class vars
+		this.iNewMessages = 0;
+
 		// Refs
 		this.header = null;
 
@@ -103,6 +106,9 @@ class Site extends React.Component {
 		Events.add('signedOut', this.signedOut);
 		Events.add('claimedAdd', this.claimedAdd);
 		Events.add('claimedRemove', this.claimedRemove);
+
+		// Start checking for new messages
+		//this.iNewMessages = setInterval(this.newMessages.bind(this), 30000);
 	}
 
 	componentWillUnmount() {
@@ -112,6 +118,9 @@ class Site extends React.Component {
 		Events.remove('signedOut', this.signedOut);
 		Events.remove('claimedAdd', this.claimedAdd);
 		Events.remove('claimedRemove', this.claimedRemove);
+
+		// Stop checking for new messages
+		//clearInterval(this.iNewMessages);
 	}
 
 	claimedAdd(number, name, callback) {
@@ -139,6 +148,7 @@ class Site extends React.Component {
 
 				// Add the record to the end
 				lClaimed.push({
+					newMsgs: false,
 					customerName: name,
 					customerPhone: number
 				});
@@ -170,6 +180,11 @@ class Site extends React.Component {
 
 			// If there's data
 			if(res.data) {
+
+				// Add the newMsg flag to each item
+				for(let i in res.data) {
+					res.data[i].newMsgs = false;
+				}
 
 				// Set the state
 				this.setState({
@@ -216,6 +231,30 @@ class Site extends React.Component {
 						claimed: lClaimed
 					});
 				}
+			}
+		});
+	}
+
+	newMessages() {
+
+		// Send the removal to the server
+		Rest.read('monolith', 'msgs/claimed/new', {
+			numbers: this.state.claimed.map(o => o.customerPhone)
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+				console.log('New Messages: ', res.data);
 			}
 		});
 	}

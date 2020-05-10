@@ -41,7 +41,7 @@ function Customer(props) {
 	}
 
 	return (
-		<Paper className="record">
+		<Paper className={props.record.numberOfOrders > 0 ? "record" : "record sales"}>
 			<Grid container spacing={3}>
 				<Grid item xs={6} sm={2}>
 					<p><strong>Actions:</strong></p>
@@ -54,6 +54,8 @@ function Customer(props) {
 					<p><strong>Customer:</strong></p>
 					<p>{props.record.customerName}</p>
 					<p>{props.record.customerPhone}</p>
+					<p>&nbsp;</p>
+					<p><strong>Orders:</strong> <span>{props.record.numberOfOrders === null ? '0' : props.record.numberOfOrders}</span></p>
 				</Grid>
 				<Grid item xs={12} sm={8} className="messages">
 					<p><strong>Last 3 messages:</strong></p>
@@ -206,6 +208,8 @@ export default class Unclaimed extends React.Component {
 
 			// If there's data
 			if(res.data) {
+
+				console.log(res.data);
 
 				// Set the state
 				this.setState({

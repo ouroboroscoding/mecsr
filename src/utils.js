@@ -17,23 +17,27 @@ import Events from './generic/events';
 export default {
 
 	date: function(ts) {
-		var d = new Date(ts*1000);
-		var Y = '' + d.getFullYear();
-		var M = '' + (d.getMonth() + 1);
+		if(typeof ts === 'number') {
+			ts = new Date(ts*1000);
+		}
+		var Y = '' + ts.getFullYear();
+		var M = '' + (ts.getMonth() + 1);
 		if(M.length === 1) M = '0' + M;
-		var D = '' + d.getDate();
+		var D = '' + ts.getDate();
 		if(D.length === 1) D = '0' + D;
 		return Y + '/' + M + '/' + D;
 	},
 
 	datetime: function(ts) {
-		var d = new Date(ts*1000);
+		if(typeof ts === 'number') {
+			ts = new Date(ts*1000);
+		}
 		var t = ['', '', ''];
-		t[0] += d.getHours();
+		t[0] += ts.getHours();
 		if(t[0].length === 1) t[0] = '0' + t[0];
-		t[1] += d.getMinutes();
+		t[1] += ts.getMinutes();
 		if(t[1].length === 1) t[1] = '0' + t[1];
-		t[2] += d.getSeconds();
+		t[2] += ts.getSeconds();
 		if(t[2].length === 1) t[2] = '0' + t[2];
 		return this.date(ts) + ' ' + t.join(':')
 	},

@@ -31,15 +31,18 @@ import Typography from '@material-ui/core/Typography';
 import AllInboxIcon from '@material-ui/icons/AllInbox';
 import CancelIcon from '@material-ui/icons/Cancel';
 import MenuIcon from '@material-ui/icons/Menu';
+import NewReleasesIcon from '@material-ui/icons/NewReleases';
 import PhoneIcon from '@material-ui/icons/Phone';
 import SearchIcon from '@material-ui/icons/Search';
+
+// Local components
+import Loader from './Loader';
 
 // Generic modules
 import Events from '../../generic/events';
 import Rest from '../../generic/rest';
 
 // Local modules
-import Loader from '../../loader';
 import Utils from '../../utils';
 
 // Header component
@@ -148,9 +151,10 @@ class Header extends React.Component {
 					<Link key={o.customerPhone} to={"/customer/" + o.customerPhone} onClick={this.menuItem}>
 						<ListItem button selected={this.state.path === "/customer/" + o.customerPhone}>
 							<ListItemAvatar>
-								<Avatar>
-									<PhoneIcon />
-								</Avatar>
+								{o.newMsgs ?
+									<Avatar style={{backgroundColor: 'red'}}><NewReleasesIcon /></Avatar> :
+									<Avatar><PhoneIcon /></Avatar>
+								}
 							</ListItemAvatar>
 							<ListItemText
 								primary={o.customerName}
@@ -185,11 +189,11 @@ class Header extends React.Component {
 								MeCSR
 							</Link>
 						</Typography>
+						<div id="loaderWrapper">
+							<Loader />
+						</div>
 						{this.state.user &&
-							<React.Fragment>
-								<Button color="inherit" onClick={this.account}>My Account</Button>
-								<Button color="inherit" onClick={this.signout}>Sign Out</Button>
-							</React.Fragment>
+							<Button color="inherit" onClick={this.signout}>Sign Out</Button>
 						}
 					</Toolbar>
 				</AppBar>
@@ -237,9 +241,6 @@ class Header extends React.Component {
 
 	signout(ev) {
 
-		// Show loader
-		Loader.show();
-
 		// Call the signout
 		Rest.create('auth', 'signout', {}).done(res => {
 
@@ -262,9 +263,6 @@ class Header extends React.Component {
 				// Trigger the signedOut event
 				Events.trigger('signedOut');
 			}
-		}).always(() => {
-			// Hide loader
-			Loader.hide();
 		});
 	}
 

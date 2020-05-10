@@ -15,9 +15,7 @@ import { SnackbarProvider } from 'notistack';
 
 // Generic modules
 import Events from '../generic/events';
-import Hash from '../generic/hash';
 import Rest from '../generic/rest';
-import Tools from '../generic/tools';
 
 // Composite component modules
 import Alerts from './composites/Alerts';
@@ -30,7 +28,6 @@ import Unclaimed from './pages/Unclaimed';
 
 // Local modules
 import { LoaderHide, LoaderShow } from './composites/Loader';
-import Utils from '../utils';
 
 // css
 import '../sass/site.scss';
@@ -77,12 +74,8 @@ class Site extends React.Component {
 		// Call the parent constructor
 		super(props);
 
-		// Init the hash module
-		Hash.init();
-
 		// Initialise the state
 		this.state = {
-			"claimed": [],
 			"user": false
 		};
 
@@ -93,8 +86,6 @@ class Site extends React.Component {
 		this.header = null;
 
 		// Binds methods to this instance
-		this.claimedAdd = this.claimedAdd.bind(this);
-		this.claimedRemove = this.claimedRemove.bind(this);
 		this.signedIn = this.signedIn.bind(this);
 		this.signedOut = this.signedOut.bind(this);
 	}
@@ -104,11 +95,6 @@ class Site extends React.Component {
 		// Track any signedIn/signedOut events
 		Events.add('signedIn', this.signedIn);
 		Events.add('signedOut', this.signedOut);
-		Events.add('claimedAdd', this.claimedAdd);
-		Events.add('claimedRemove', this.claimedRemove);
-
-		// Start checking for new messages
-		//this.iNewMessages = setInterval(this.newMessages.bind(this), 30000);
 	}
 
 	componentWillUnmount() {
@@ -116,147 +102,6 @@ class Site extends React.Component {
 		// Stop tracking any signedIn/signedOut events
 		Events.remove('signedIn', this.signedIn);
 		Events.remove('signedOut', this.signedOut);
-		Events.remove('claimedAdd', this.claimedAdd);
-		Events.remove('claimedRemove', this.claimedRemove);
-
-		// Stop checking for new messages
-		//clearInterval(this.iNewMessages);
-	}
-
-	claimedAdd(number, name, callback) {
-
-		// Send the claim  to the server
-		Rest.create('monolith', 'customer/claim', {
-			phoneNumber: number
-		}).done(res => {
-
-			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-
-			// If there's a warning
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if(res.data) {
-
-				// Clone the claimed state
-				let lClaimed = Tools.clone(this.state.claimed);
-
-				// Add the record to the end
-				lClaimed.push({
-					newMsgs: false,
-					customerName: name,
-					customerPhone: number
-				});
-
-				// Set the new state
-				this.setState({
-					claimed: lClaimed
-				}, () => {
-					this.header.path = '/customer/' + number;
-				});
-			}
-		});
-	}
-
-	claimedFetch() {
-
-		// Fetch the claimed
-		Rest.read('monolith', 'msgs/claimed', {}).done(res => {
-
-			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-
-			// If there's a warning
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if(res.data) {
-
-				// Add the newMsg flag to each item
-				for(let i in res.data) {
-					res.data[i].newMsgs = false;
-				}
-
-				// Set the state
-				this.setState({
-					claimed: res.data
-				});
-			}
-		});
-	}
-
-	claimedRemove(claimed) {
-
-		// Send the removal to the server
-		Rest.delete('monolith', 'customer/claim', {
-			phoneNumber: claimed
-		}).done(res => {
-
-			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-
-			// If there's a warning
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if(res.data) {
-
-				// Clone the claimed state
-				let lClaimed = Tools.clone(this.state.claimed);
-
-				// Find the index of the remove customer
-				let iIndex = Tools.afindi(lClaimed, 'customerPhone', claimed);
-
-				// If we found one
-				if(iIndex > -1) {
-
-					// Remove the element
-					lClaimed.splice(iIndex, 1);
-
-					// Set the new state
-					this.setState({
-						claimed: lClaimed
-					});
-				}
-			}
-		});
-	}
-
-	newMessages() {
-
-		// Send the removal to the server
-		Rest.read('monolith', 'msgs/claimed/new', {
-			numbers: this.state.claimed.map(o => o.customerPhone)
-		}).done(res => {
-
-			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-
-			// If there's a warning
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if('data' in res) {
-				console.log('New Messages: ', res.data);
-			}
-		});
 	}
 
 	render() {
@@ -269,7 +114,6 @@ class Site extends React.Component {
 							<Signin />
 						}
 						<Header
-							claimed={this.state.claimed}
 							path={window.location.pathname}
 							ref={el => this.header = el}
 							user={this.state.user}
@@ -278,7 +122,6 @@ class Site extends React.Component {
 							<Switch>
 								<Route path="/unclaimed">
 									<Unclaimed
-										onClaim={this.claimedAdd}
 										user={this.state.user}
 									/>
 								</Route>
@@ -304,18 +147,13 @@ class Site extends React.Component {
 	signedIn(user) {
 
 		// Set the user
-		this.setState({"user": user}, () => {
-			this.claimedFetch();
-		});
+		this.setState({"user": user});
 	}
 
 	signedOut() {
 
 		// Remove the user
-		this.setState({
-			"claimed": [],
-			"user": false
-		});
+		this.setState({"user": false});
 	}
 }
 

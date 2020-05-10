@@ -189,12 +189,12 @@ function init(domain, error=null, before=null, after=null) {
 	if(typeof before === 'function') {
 		_before = before;
 	} else {
-		console.log('Rest.init before must be a function');
+		console.error('Rest.init before param must be a function');
 	}
 	if(typeof after === 'function') {
 		_after = after;
 	} else {
-		console.log('Rest.init after must be a function');
+		console.error('Rest.init after param must be a function');
 	}
 }
 

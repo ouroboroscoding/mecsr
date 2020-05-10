@@ -15,6 +15,10 @@
 		overflow: auto;
 	}
 
+	.konnektive, .mip, .prescriptions {
+		padding: 10px;
+	}
+
 	.messaging {
 		display: flex;
 		flex-direction: column;
@@ -133,10 +137,6 @@
 		}
 	}
 
-	.konnektive, .mip, .prescriptions {
-		padding: 10px;
-	}
-
 	.konnektive {
 
 		a {
@@ -188,21 +188,11 @@
 			}
 		}
 	}
-}
 
+	.prescriptions {
 
-.message-orange:after {
-    border-bottom: 15px solid #f8e896;
-    border-left: 15px solid transparent;
-    border-right: 15px solid transparent;
-    bottom: 0;
-    right: -15px;
-}
-
-.message-orange:before {
-    border-bottom: 17px solid #dfd087;
-    border-left: 16px solid transparent;
-    border-right: 16px solid transparent;
-    bottom: -1px;
-    right: -17px;
+		.rx {
+			padding: 10px;
+		}
+	}
 }

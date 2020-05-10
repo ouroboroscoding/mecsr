@@ -474,8 +474,6 @@ export default class ResultsComponent extends React.Component {
 
 	recordChanged(record) {
 
-		console.log(record);
-
 		// Clone the state data
 		let data = Tools.clone(this.state.data);
 
@@ -485,8 +483,6 @@ export default class ResultsComponent extends React.Component {
 			this.info.primary,
 			record[this.info.primary]
 		);
-
-		console.log(iIndex);
 
 		// If found
 		if(iIndex > -1) {

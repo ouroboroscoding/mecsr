@@ -41,6 +41,7 @@ import Loader from './Loader';
 // Generic modules
 import Events from '../../generic/events';
 import Rest from '../../generic/rest';
+import Tools from '../../generic/tools';
 
 // Local modules
 import Utils from '../../utils';
@@ -55,6 +56,7 @@ class Header extends React.Component {
 
 		// Initialise the state
 		this.state = {
+			"claimed": [],
 			"mobile": document.documentElement.clientWidth < 600,
 			"menu": false,
 			"path": window.location.pathname,
@@ -62,6 +64,7 @@ class Header extends React.Component {
 		}
 
 		// Bind methods to this instance
+		this.claimedAdd = this.claimedAdd.bind(this);
 		this.claimedRemove = this.claimedRemove.bind(this);
 		this.menuClose = this.menuClose.bind(this);
 		this.menuItem = this.menuItem.bind(this);
@@ -77,9 +80,13 @@ class Header extends React.Component {
 		// Track any signedIn/signedOut events
 		Events.add('signedIn', this.signedIn);
 		Events.add('signedOut', this.signedOut);
+		Events.add('claimedAdd', this.claimedAdd);
 
 		// Capture resizes
 		window.addEventListener("resize", this.resize);
+
+		// Start checking for new messages
+		this.iNewMessages = setInterval(this.newMessages.bind(this), 30000);
 	}
 
 	componentWillUnmount() {
@@ -87,9 +94,83 @@ class Header extends React.Component {
 		// Stop tracking any signedIn/signedOut events
 		Events.remove('signedIn', this.signedIn);
 		Events.remove('signedOut', this.signedOut);
+		Events.remove('claimedAdd', this.claimedAdd);
 
 		// Stop capturing resizes
 		window.removeEventListener("resize", this.resize);
+
+		// Stop checking for new messages
+		clearInterval(this.iNewMessages);
+	}
+
+	claimedAdd(number, name) {
+
+		// Send the claim  to the server
+		Rest.create('monolith', 'customer/claim', {
+			phoneNumber: number
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				// Clone the claimed state
+				let lClaimed = Tools.clone(this.state.claimed);
+
+				// Add the record to the end
+				lClaimed.push({
+					newMsgs: false,
+					customerName: name,
+					customerPhone: number
+				});
+
+				// Set the new state
+				this.setState({
+					claimed: lClaimed,
+					path: '/customer/' + number
+				});
+			}
+		});
+	}
+
+	claimedFetch() {
+
+		// Fetch the claimed
+		Rest.read('monolith', 'msgs/claimed', {}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				// Add the newMsg flag to each item
+				for(let i in res.data) {
+					res.data[i].newMsgs = false;
+				}
+
+				// Set the state
+				this.setState({
+					claimed: res.data
+				});
+			}
+		});
 	}
 
 	claimedRemove(event) {
@@ -98,8 +179,46 @@ class Header extends React.Component {
 		event.stopPropagation();
 		event.preventDefault();
 
-		// Trigger the claimed remove event
-		Events.trigger('claimedRemove', event.currentTarget.dataset.number);
+		// Store the number
+		let sNumber = event.currentTarget.dataset.number;
+
+		// Send the removal to the server
+		Rest.delete('monolith', 'customer/claim', {
+			phoneNumber: sNumber
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				// Clone the claimed state
+				let lClaimed = Tools.clone(this.state.claimed);
+
+				// Find the index of the remove customer
+				let iIndex = Tools.afindi(lClaimed, 'customerPhone', sNumber);
+
+				// If we found one
+				if(iIndex > -1) {
+
+					// Remove the element
+					lClaimed.splice(iIndex, 1);
+
+					// Set the new state
+					this.setState({
+						claimed: lClaimed
+					});
+				}
+			}
+		});
 	}
 
 	menuClose() {
@@ -113,9 +232,25 @@ class Header extends React.Component {
 			path: event.currentTarget.pathname
 		};
 
-		// If we're in mobile
+		// If we're in mobile, hide the menu
 		if(this.state.mobile) {
 			state.menu = false;
+		}
+
+		// If we clicked on a phone number
+		if(event.currentTarget.dataset.number) {
+
+			// Clone the claimed state
+			let lClaimed = Tools.clone(this.state.claimed);
+
+			// Find the index of the clear customer
+			let iIndex = Tools.afindi(lClaimed, 'customerPhone', event.currentTarget.dataset.number);
+
+			// Reset the flag
+			lClaimed[iIndex].newMsgs = false;
+
+			// Updated the claimed state
+			state.claimed = lClaimed;
 		}
 
 		// Set the new state
@@ -127,6 +262,72 @@ class Header extends React.Component {
 		// Toggle the state of the menu
 		this.setState({
 			menu: !this.state.menu
+		});
+	}
+
+	newMessages() {
+
+		// Send the removal to the server
+		Rest.read('monolith', 'msgs/claimed/new', {
+			numbers: this.state.claimed.map(o => o.customerPhone)
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+				console.log('New Messages: ', res.data);
+
+				// If there's any
+				if(!Tools.empty(res.data)) {
+
+					// Do we set the state?
+					let bSetState = false;
+
+					// Clone the current claimed
+					let lClaimed = Tools.clone(this.state.claimed);
+
+					// Go through each one
+					for(let i in lClaimed) {
+
+						// If it's the result
+						if(lClaimed[i].customerPhone in res.data) {
+
+							// If this is the number we're on, pass along the
+							//	message
+							if(this.state.path === '/customer/' + lClaimed[i].customerPhone) {
+								Events.trigger('newMessage');
+							}
+
+							// Else, mark the menu item as having new messages
+							else {
+								bSetState = true;
+								lClaimed[i].newMsgs = true;
+							}
+						}
+					}
+
+					// If something changed
+					if(bSetState) {
+
+						// Set the new state
+						this.setState({
+							claimed: lClaimed
+						});
+
+						// Notify
+						Events.trigger('success', 'New messages!');
+					}
+				}
+			}
 		});
 	}
 
@@ -147,8 +348,8 @@ class Header extends React.Component {
 					</ListItem>
 				</Link>
 				<Divider />
-				{this.props.claimed.map(o =>
-					<Link key={o.customerPhone} to={"/customer/" + o.customerPhone} onClick={this.menuItem}>
+				{this.state.claimed.map(o =>
+					<Link key={o.customerPhone} data-number={o.customerPhone} to={"/customer/" + o.customerPhone} onClick={this.menuItem}>
 						<ListItem button selected={this.state.path === "/customer/" + o.customerPhone}>
 							<ListItemAvatar>
 								{o.newMsgs ?
@@ -236,6 +437,8 @@ class Header extends React.Component {
 		// Hide any modals and set the user
 		this.setState({
 			"user": user,
+		}, () => {
+			this.claimedFetch()
 		});
 	}
 
@@ -270,6 +473,7 @@ class Header extends React.Component {
 
 		// Hide and modals and set the user to false
 		this.setState({
+			"claimed": [],
 			"user": false
 		});
 	}

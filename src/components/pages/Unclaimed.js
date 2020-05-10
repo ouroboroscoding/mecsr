@@ -33,7 +33,7 @@ const reSent = /^Sent by (.+) at (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})(?: [AP]M)
 function Customer(props) {
 
 	function claim() {
-		props.onClaim(props.record.customerPhone, props.record.customerName);
+		Events.trigger('claimedAdd', props.record.customerPhone, props.record.customerName);
 	}
 
 	function hide() {
@@ -208,8 +208,6 @@ export default class Unclaimed extends React.Component {
 
 			// If there's data
 			if(res.data) {
-
-				console.log(res.data);
 
 				// Set the state
 				this.setState({

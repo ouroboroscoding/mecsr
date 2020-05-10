@@ -60,7 +60,6 @@ export default class Messages extends React.Component {
 		this.text = null;
 
 		// Bind methods
-		this.newMessage = this.newMessage.bind(this);
 		this.scrollToBottom = this.scrollToBottom.bind(this);
 		this.send = this.send.bind(this);
 		this.textPress = this.textPress.bind(this);
@@ -72,18 +71,9 @@ export default class Messages extends React.Component {
 		if(this.props.user) {
 			this.fetchMessages();
 		}
-
-		// Track events
-		Events.add('NewMessage', this.newMessage);
 	}
 
-	componentWillUnmount() {
-
-		// Stop tracking events
-		Events.remove('NewMessage', this.newMessage);
-	}
-
-	fetchMessages() {
+	fetchMessages(type) {
 
 		// Get the messages from the REST service
 		Rest.read('monolith', 'customer/messages', {
@@ -107,30 +97,10 @@ export default class Messages extends React.Component {
 				this.setState({
 					messages: res.data
 				}, () => {
-					this.scrollToBottom("auto");
+					this.scrollToBottom(type);
 				});
 			}
 		});
-	}
-
-	newMessage(msg) {
-
-		// If the message matches this number
-		if(msg.phoneNumber === this.props.phoneNumber) {
-
-			// Clone the current messages
-			let lMsgs = Tools.clone(this.state.messages);
-
-			// Add the new message
-			lMsgs.push(msg);
-
-			// Update the state
-			this.setState({
-				messages: lMsgs
-			}, () => {
-				this.scrollToBottom("smooth");
-			});
-		}
 	}
 
 	render() {

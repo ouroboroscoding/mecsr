@@ -79,15 +79,19 @@ export default class MIP extends React.Component {
 		}
 	}
 
-	componentDidMount() {
-		this.fetchMip();
+	fetch(id) {
+		if(id) {
+			this.fetchMip(id);
+		} else {
+			this.setState({mip: 0});
+		}
 	}
 
-	fetchMip() {
+	fetchMip(id) {
 
 		// Find the MIP using the phone number
 		Rest.read('monolith', 'customer/mip', {
-			customerPhone: this.props.phoneNumber
+			id: id
 		}).done(res => {
 
 			// If there's an error
@@ -102,8 +106,6 @@ export default class MIP extends React.Component {
 
 			// If there's data
 			if('data' in res) {
-
-				console.log('MIP: ', res.data);
 
 				// Set the MIP
 				this.setState({

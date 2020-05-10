@@ -50,15 +50,19 @@ export default class Konnektive extends React.Component {
 		}
 	}
 
-	componentDidMount() {
-		this.fetchCustomer();
+	fetch(id) {
+		if(id) {
+			this.fetchCustomer(id);
+		} else {
+			this.setState({customer: 0});
+		}
 	}
 
-	fetchCustomer() {
+	fetchCustomer(id) {
 
 		// Find the customer ID
-		Rest.read('konnektive', 'customer/byPhone', {
-			phoneNumber: this.props.phoneNumber
+		Rest.read('konnektive', 'customer', {
+			id: id
 		}).done(res => {
 
 			// If there's an error
@@ -78,7 +82,7 @@ export default class Konnektive extends React.Component {
 				this.setState({
 					customer: res.data
 				}, () => {
-					if(res.data) {
+					if(res.data.id) {
 						this.fetchOrders();
 					}
 				});
@@ -105,8 +109,6 @@ export default class Konnektive extends React.Component {
 
 			// If there's data
 			if(res.data) {
-
-				console.log(res.data);
 
 				// Set the state
 				this.setState({
@@ -145,37 +147,39 @@ export default class Konnektive extends React.Component {
 								</TableRow>
 							</TableHead>
 							<TableBody>
-								<TableRow>
-									<TableCell>
-										<p><strong>ID: </strong><a href={"https://crm.konnektive.com/customer/cs/details/?customerId=" + customer.id} target="_bank">{customer.id}</a></p>
-										<p><strong>Campaign: </strong><span>{customer.campaign.name + ' (' + customer.campaign.type + ')'}</span></p>
-										<p><strong>Email: </strong><span>{customer.email}</span></p>
-										<p><strong>Phone: </strong><span>{customer.phone}</span></p>
-										<p><strong>Created: </strong><span>{customer.created}</span></p>
-										<p><strong>Updated: </strong><span>{customer.updated}</span></p>
-									</TableCell>
-									<TableCell>
-										<p><nobr>{customer.billing.name}</nobr></p>
-										<p><nobr>{customer.billing.address1}</nobr></p>
-										<p><nobr>{customer.billing.address2}</nobr></p>
-										<p><nobr>{customer.billing.city}, {customer.billing.state}</nobr></p>
-										<p><nobr>{customer.billing.country}, {customer.billing.postalCode}</nobr></p>
-									</TableCell>
-									<TableCell>
-										<p><nobr>{customer.shipping.name}</nobr></p>
-										<p><nobr>{customer.shipping.address1}</nobr></p>
-										<p><nobr>{customer.shipping.address2}</nobr></p>
-										<p><nobr>{customer.shipping.city}, {customer.shipping.state}</nobr></p>
-										<p><nobr>{customer.shipping.country}, {customer.shipping.postalCode}</nobr></p>
-									</TableCell>
-									<TableCell className="notes">
-										<div>
-											{customer.notes.map((o, i) =>
-												<p key={i}><strong>{o.agentName}</strong> ({o.dateCreated}): {o.message}</p>
-											)}
-										</div>
-									</TableCell>
-								</TableRow>
+								{this.state.customer &&
+									<TableRow>
+										<TableCell>
+											<p><strong>ID: </strong><a href={"https://crm.konnektive.com/customer/cs/details/?customerId=" + customer.id} target="_bank">{customer.id}</a></p>
+											<p><strong>Campaign: </strong><span>{customer.campaign.name + ' (' + customer.campaign.type + ')'}</span></p>
+											<p><strong>Email: </strong><span>{customer.email}</span></p>
+											<p><strong>Phone: </strong><span>{customer.phone}</span></p>
+											<p><strong>Created: </strong><span>{customer.created}</span></p>
+											<p><strong>Updated: </strong><span>{customer.updated}</span></p>
+										</TableCell>
+										<TableCell>
+											<p><nobr>{customer.billing.name}</nobr></p>
+											<p><nobr>{customer.billing.address1}</nobr></p>
+											<p><nobr>{customer.billing.address2}</nobr></p>
+											<p><nobr>{customer.billing.city}, {customer.billing.state}</nobr></p>
+											<p><nobr>{customer.billing.country}, {customer.billing.postalCode}</nobr></p>
+										</TableCell>
+										<TableCell>
+											<p><nobr>{customer.shipping.name}</nobr></p>
+											<p><nobr>{customer.shipping.address1}</nobr></p>
+											<p><nobr>{customer.shipping.address2}</nobr></p>
+											<p><nobr>{customer.shipping.city}, {customer.shipping.state}</nobr></p>
+											<p><nobr>{customer.shipping.country}, {customer.shipping.postalCode}</nobr></p>
+										</TableCell>
+										<TableCell className="notes">
+											<div>
+												{customer.notes.map((o, i) =>
+													<p key={i}><strong>{o.agentName}</strong> ({o.dateCreated}): {o.message}</p>
+												)}
+											</div>
+										</TableCell>
+									</TableRow>
+								}
 							</TableBody>
 						</Table>
 					</TableContainer>

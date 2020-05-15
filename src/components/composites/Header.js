@@ -84,9 +84,6 @@ class Header extends React.Component {
 
 		// Capture resizes
 		window.addEventListener("resize", this.resize);
-
-		// Start checking for new messages
-		this.iNewMessages = setInterval(this.newMessages.bind(this), 30000);
 	}
 
 	componentWillUnmount() {
@@ -438,7 +435,12 @@ class Header extends React.Component {
 		this.setState({
 			"user": user,
 		}, () => {
-			this.claimedFetch()
+
+			// Fetch the claimed conversations
+			this.claimedFetch();
+
+			// Start checking for new messages
+			this.iNewMessages = setInterval(this.newMessages.bind(this), 30000);
 		});
 	}
 
@@ -476,6 +478,9 @@ class Header extends React.Component {
 			"claimed": [],
 			"user": false
 		});
+
+		// Stop checking for new messages
+		clearInterval(this.iNewMessages);
 	}
 
 	set path(path) {

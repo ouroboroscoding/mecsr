@@ -97,7 +97,7 @@ function Message(props) {
 			</div>
 			<div className="footer">
 				{msg.direction === 'Outgoing' &&
-					<span className="name">{msg.name} at </span>
+					<span className="name">{msg.from} at </span>
 				}
 				<span className="date">{msg.date}</span>
 			</div>
@@ -224,13 +224,15 @@ export default class Unclaimed extends React.Component {
 	render() {
 		return (
 			<div id="unclaimed">
-				{this.state.records.map((record, i) =>
-					<Customer
-						key={i}
-						onClaim={this.claim}
-						onHide={this.hide}
-						record={record} />
-				)}
+				<div className="wrapper">
+					{this.state.records.map((record, i) =>
+						<Customer
+							key={i}
+							onClaim={this.claim}
+							onHide={this.hide}
+							record={record} />
+					)}
+				</div>
 			</div>
 		)
 	}

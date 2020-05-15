@@ -150,7 +150,7 @@ export default class Messages extends React.Component {
 		let content = this.text.value;
 
 		// Send the message to the server
-		Rest.create('monolith', 'message', {
+		Rest.create('monolith', 'message/outgoing', {
 			content: content,
 			customerPhone: this.props.phoneNumber,
 			type: "support",
@@ -186,7 +186,7 @@ export default class Messages extends React.Component {
 				messages.push({
 					type: 'Outgoing',
 					notes: content,
-					fromName: this.state.user.firstName + ' ' + this.state.user.lastName,
+					fromName: this.props.user.firstName + ' ' + this.props.user.lastName,
 					createdAt: Utils.datetime(new Date())
 				});
 

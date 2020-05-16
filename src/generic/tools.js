@@ -237,7 +237,7 @@ export function isObject(m) {
  * @access public
  * @param Object o				The object to map
  * @param Function callback		The function to call each iteration
- * @return array
+ * @return Array
  */
 export function omap(o, callback) {
 	let ret = [];
@@ -245,6 +245,23 @@ export function omap(o, callback) {
 		ret.push(callback(o[k], k));
 	}
 	return ret;
+}
+
+/**
+ * UCFirst
+ *
+ * Makes the first character of each word in the text upper case
+ *
+ * @name ucfirst
+ * @access public
+ * @param String text			The text to convert
+ * @return String
+ */
+export function ucfirst(text) {
+	let lParts = text.split(' ');
+	return lParts.map(s =>
+		s.charAt(0).toUpperCase() + s.slice(1)
+	).join(' ');
 }
 
 /**
@@ -273,5 +290,6 @@ export default {
 	isInteger: isInteger,
 	isObject: isObject,
 	omap: omap,
+	ucfirst: ucfirst,
 	uuidv4: uuidv4
 }

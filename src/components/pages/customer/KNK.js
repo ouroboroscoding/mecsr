@@ -1,7 +1,7 @@
 /**
- * Konnektive
+ * KNK
  *
- * Shows a specific customer and their orders from Konnektive
+ * Shows a specific customer and their orders from KNK
  *
  * @author Chris Nasr <bast@maleexcel.com>
  * @copyright MaleExcelMedical
@@ -35,8 +35,8 @@ const EnToTxt = {
 	"": "N/A"
 }
 
-// Konnektive component
-export default class Konnektive extends React.Component {
+// KNK component
+export default class KNK extends React.Component {
 
 	constructor(props) {
 

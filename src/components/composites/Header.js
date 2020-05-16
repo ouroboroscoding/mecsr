@@ -359,13 +359,11 @@ class Header extends React.Component {
 								secondary={o.customerPhone}
 							/>
 							{(this.state.path !== "/customer/" + o.customerPhone) &&
-								<ListItemIcon
+								<CancelIcon
 									className="close"
 									data-number={o.customerPhone}
 									onClick={this.claimedRemove}
-								>
-									<CancelIcon />
-								</ListItemIcon>
+								/>
 							}
 						</ListItem>
 					</Link>

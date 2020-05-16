@@ -34,6 +34,14 @@ p {
 	margin-bottom: 10px;
 }
 
+span.title {
+	display: inline-block;
+	font-weight: bold;
+	font-size: 110%;
+	margin: 10px 20px 10px 0;
+	vertical-align: middle;
+}
+
 // Site
 #site {
 	display: flex;
@@ -80,6 +88,24 @@ a, a:active, a:hover, a:link, a:visited {
 	}
 }
 
+.MuiPaper-root.padded {
+	margin-bottom: 20px;
+	padding: 10px;
+}
+
+.MuiTableContainer-root.results {
+	.MuiTableCell-root.actions {
+		.MuiSvgIcon-root {
+			margin-left: 10px;
+		}
+	}
+}
+
+.MuiTypography-h1, .MuiTypography-h2, .MuiTypography-h3,
+.MuiTypography-h4, .MuiTypography-h5, .MuiTypography-h6 {
+	margin-bottom: 5px;
+}
+
 .permissions {
 
 	.title {
@@ -89,16 +115,6 @@ a, a:active, a:hover, a:link, a:visited {
 	.name {
 		padding-top: 22px !important;
 	}
-}
-
-.MuiPaper-root.padded {
-	margin-bottom: 20px;
-	padding: 10px;
-}
-
-.MuiTypography-h1, .MuiTypography-h2, .MuiTypography-h3,
-.MuiTypography-h4, .MuiTypography-h5, .MuiTypography-h6 {
-	margin-bottom: 5px;
 }
 
 .pageHeader {
@@ -113,10 +129,6 @@ a, a:active, a:hover, a:link, a:visited {
 	}
 }
 
-.MuiTableContainer-root.results {
-	.MuiTableCell-root.actions {
-		.MuiSvgIcon-root {
-			margin-left: 10px;
-		}
-	}
+.right20 {
+	margin: 10px 20px 10px 0;
 }

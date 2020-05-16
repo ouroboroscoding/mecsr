@@ -1,5 +1,5 @@
 /**
- * Messages
+ * SMS
  *
  * Shows a specific customer's conversation
  *
@@ -13,9 +13,16 @@ import React from 'react';
 
 // Material UI
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
+import Tooltip from '@material-ui/core/Tooltip';
+
+// Material UI Icons
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import PhoneIcon from '@material-ui/icons/Phone';
 
 // Generic modules
+import Clipboard from '../../../generic/clipboard';
 import Events from '../../../generic/events';
 import Rest from '../../../generic/rest';
 import Tools from '../../../generic/tools';
@@ -42,8 +49,8 @@ function Message(props) {
 	);
 }
 
-// Messages component
-export default class Messages extends React.Component {
+// SMS component
+export default class SMS extends React.Component {
 
 	constructor(props) {
 
@@ -52,14 +59,19 @@ export default class Messages extends React.Component {
 
 		// Initial state
 		this.state = {
-			messages: []
+			messages: [],
+			stop: false,
+			type: ''
 		}
 
 		// Refs
 		this.messagesBottom = null;
+		this.sendEl = null;
 		this.text = null;
 
 		// Bind methods
+		this.callPhone = this.callPhone.bind(this);
+		this.copyPhone = this.copyPhone.bind(this);
 		this.scrollToBottom = this.scrollToBottom.bind(this);
 		this.send = this.send.bind(this);
 		this.textPress = this.textPress.bind(this);
@@ -69,11 +81,22 @@ export default class Messages extends React.Component {
 
 		// Fetch existing messages
 		if(this.props.user) {
-			this.fetchMessages();
+			this.fetch();
 		}
 	}
 
-	fetchMessages(type) {
+	callPhone(event) {
+		alert('not implemented yet');
+	}
+
+	copyPhone(event) {
+		// Copy the primary key to the clipboard then notify the user
+		Clipboard.copy(this.props.phoneNumber).then(b => {
+			Events.trigger('success', 'Phone number copied to clipboard');
+		});
+	}
+
+	fetch(type) {
 
 		// Get the messages from the REST service
 		Rest.read('monolith', 'customer/messages', {
@@ -95,7 +118,9 @@ export default class Messages extends React.Component {
 
 				// Set the state
 				this.setState({
-					messages: res.data
+					messages: res.data.messages,
+					stop: res.data.stop,
+					type: res.data.type
 				}, () => {
 					this.scrollToBottom(type);
 				});
@@ -106,6 +131,27 @@ export default class Messages extends React.Component {
 	render() {
 		return (
 			<React.Fragment>
+				<div className="info">
+					<span className="title">Phone Number: </span>
+					<span className="right20">
+						{Utils.nicePhone(this.props.phoneNumber)}
+						<Tooltip title="Copy Phone Number">
+							<IconButton onClick={this.copyPhone}>
+								<FileCopyIcon />
+							</IconButton>
+						</Tooltip>
+						<Tooltip title="Call Customer">
+							<IconButton onClick={this.callPhone}>
+								<PhoneIcon />
+							</IconButton>
+						</Tooltip>
+					</span>
+					<span className="title">Type: </span>
+					<span className="right20">{Tools.ucfirst(this.state.type)}</span>
+					{this.state.stop &&
+						<span className="title" style={{color: 'red'}}>STOP</span>
+					}
+				</div>
 				<div className="messages">
 					{this.state.messages.map((msg, i) =>
 						<Message
@@ -121,6 +167,7 @@ export default class Messages extends React.Component {
 				<div className="send">
 					<TextField
 						className="text"
+						disabled={this.state.stop}
 						inputRef={el => this.text = el}
 						multiline
 						onKeyPress={this.textPress}
@@ -129,6 +176,7 @@ export default class Messages extends React.Component {
 					/>
 					<Button
 						color="primary"
+						disabled={this.state.stop}
 						size="large"
 						onClick={this.send}
 						variant="contained"
@@ -153,7 +201,7 @@ export default class Messages extends React.Component {
 		Rest.create('monolith', 'message/outgoing', {
 			content: content,
 			customerPhone: this.props.phoneNumber,
-			type: "support",
+			type: this.state.type,
 		}).done(res => {
 
 			// If there's an error

@@ -11,6 +11,9 @@
 // Generic modules
 import Events from './generic/events';
 
+// Regex
+const rePhone = /^1?(\d{3})(\d{3})(\d{4})$/
+
 /**
  * Utils
  */
@@ -86,6 +89,14 @@ export default {
 		return oRet;
 	},
 
+	nicePhone: function(val) {
+		let lMatch = rePhone.exec(val);
+		if(!lMatch) {
+			return val;
+		}
+		return '(' + lMatch[1] + ') ' + lMatch[2] + '-' + lMatch[3];
+	},
+
 	restError: function(err) {
 
 		// What error is it?
@@ -123,5 +134,10 @@ export default {
 
 		// Failed to process error
 		return false;
+	},
+
+	safeLocalStorage(name, default_) {
+		let value = localStorage.getItem(name);
+		return value === null ? default_ : value;
 	}
 }

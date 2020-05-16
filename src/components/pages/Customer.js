@@ -18,8 +18,8 @@ import Tab from '@material-ui/core/Tab';
 
 // Customer components
 import DoseSpot from './customer/DoseSpot';
-import Konnektive from './customer/Konnektive';
-import Messages from './customer/Messages';
+import KNK from './customer/KNK';
+import SMS from './customer/SMS';
 import MIP from './customer/MIP';
 
 // Generic modules
@@ -44,7 +44,7 @@ export default class Customer extends React.Component {
 		}
 
 		// Refs
-		this.msgRef = null;
+		this.smsRef = null;
 		this.knkRef = null;
 		this.mipRef = null;
 		this.dsRef = null;
@@ -104,7 +104,7 @@ export default class Customer extends React.Component {
 	}
 
 	newMessage() {
-		this.msgRef.fetchMessages("smooth");
+		this.smsRef.fetch("smooth");
 	}
 
 	render() {
@@ -116,21 +116,21 @@ export default class Customer extends React.Component {
 						value={this.state.tab}
 						variant="fullWidth"
 					>
-						<Tab label="Messaging" />
-						<Tab label="Konnektive" />
+						<Tab label="SMS" />
+						<Tab label="KNK" />
 						<Tab label="MIP" />
 						<Tab label="Rx" />
 					</Tabs>
 				</AppBar>
 				<div className="messaging" style={{display: this.state.tab === 0 ? 'flex' : 'none'}}>
-					<Messages
-						ref={el => this.msgRef = el}
+					<SMS
+						ref={el => this.smsRef = el}
 						phoneNumber={this.props.phoneNumber}
 						user={this.props.user}
 					/>
 				</div>
 				<div className="konnektive" style={{display: this.state.tab === 1 ? 'block' : 'none'}}>
-					<Konnektive
+					<KNK
 						ref={el => this.knkRef = el}
 					/>
 				</div>

@@ -3,7 +3,13 @@
 	flex-direction: column;
 	height: 100%;
 
-	.wrapper {
+	.filters {
+		flex-grow: 0;
+		flex-shrink: 0;
+		padding: 10px;
+	}
+
+	.customers {
 		flex-basis: 0;
 		flex-grow: 1;
 		flex-shrink: 1;
@@ -104,7 +110,7 @@
 		}
 
 		.record.sales {
-			background-color: #cecece;
+			background-color: #e0e0e0;
 		}
 	}
 }

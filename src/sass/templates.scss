@@ -1,0 +1,15 @@
+#templates {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+
+	header {
+		flex-grow: 0;
+		flex-shrink: 0;
+	}
+
+	.templates {
+		padding: 10px;
+		width: 100%;
+	}
+}

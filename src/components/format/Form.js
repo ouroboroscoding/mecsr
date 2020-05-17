@@ -49,7 +49,7 @@ export default class FormComponent extends React.Component {
 			"key": ('value' in props && oReact.primary in props.value) ?
 						props.value[oReact.primary] : null,
 			"primary": oReact.primary,
-			"name": props.tree._name,
+			"name": props.name || props.tree._name,
 			"type": props['type']
 		}
 
@@ -203,6 +203,7 @@ export default class FormComponent extends React.Component {
 FormComponent.propTypes = {
 	"cancel": PropTypes.func,
 	"errors": PropTypes.object,
+	"name": PropTypes.string,
 	"noun": PropTypes.string.isRequired,
 	"service": PropTypes.string.isRequired,
 	"success": PropTypes.func,

@@ -39,15 +39,17 @@ export default class Customer extends React.Component {
 
 		// Initial state
 		this.state = {
-			id: null,
+			customer: null,
+			customer_id: null,
+			mip: null,
+			orders: [],
+			patient_id: null,
+			prescriptions: null,
 			tab: 0
 		}
 
 		// Refs
 		this.smsRef = null;
-		this.knkRef = null;
-		this.mipRef = null;
-		this.dsRef = null;
 
 		// Bind methods
 		this.newMessage = this.newMessage.bind(this);
@@ -60,7 +62,7 @@ export default class Customer extends React.Component {
 		Events.add('newMessage', this.newMessage);
 
 		// If we have don't have an id, but do have a user
-		if(this.state.id === null && this.props.user) {
+		if(this.state.customer_id === null && this.props.user) {
 			this.fetchCustomerId();
 		}
 	}
@@ -93,11 +95,166 @@ export default class Customer extends React.Component {
 
 				// Set the customer ID
 				this.setState({
-					id: res.data
+					customer_id: res.data
 				}, () => {
-					this.knkRef.fetch(res.data);
-					this.mipRef.fetch(res.data);
-					this.dsRef.fetch(res.data, this.props.user.dsClinicianId);
+					if(res.data === 0) {
+						this.setState({
+							customer: 0,
+							mip: 0,
+							prescriptions: 0
+						});
+					} else {
+						this.fetchKnkCustomer();
+						this.fetchMip();
+						this.fetchPatientId();
+					}
+				});
+			}
+		});
+	}
+
+	fetchKnkCustomer(id) {
+
+		// Find the customer ID
+		Rest.read('konnektive', 'customer', {
+			id: this.state.customer_id
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+
+				// Set the customer ID
+				this.setState({
+					customer: res.data
+				}, () => {
+					if(res.data.id) {
+						this.fetchOrders();
+					}
+				});
+			}
+		});
+	}
+
+	fetchMip() {
+
+		// Find the MIP using the phone number
+		Rest.read('monolith', 'customer/mip', {
+			id: this.state.customer_id
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+
+				// Set the MIP
+				this.setState({
+					mip: res.data
+				});
+			}
+		});
+	}
+
+	fetchOrders() {
+
+		// Get the orders from the REST service
+		Rest.read('konnektive', 'customer/orders', {
+			id: this.state.customer.id
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				// Set the state
+				this.setState({
+					orders: res.data
+				});
+			}
+		});
+	}
+
+	fetchPatientId() {
+
+		// Find the MIP using the phone number
+		Rest.read('monolith', 'customer/dsid', {
+			customerId: this.state.customer_id
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+
+				// If there's an id
+				if(res.data) {
+					this.fetchPrescriptions(res.data, this.props.user.dsClinicianId);
+				} else {
+					this.setState({patient_id: 0});
+				}
+			}
+		});
+	}
+
+	fetchPrescriptions(id, clinician) {
+
+		// Find the MIP using the phone number
+		Rest.read('dosespot', 'patient/prescriptions', {
+			patient_id: parseInt(id, 10),
+			clinician_id: parseInt(clinician, 10)
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+
+				// Set the state
+				this.setState({
+					prescriptions: res.data
 				});
 			}
 		});
@@ -131,17 +288,18 @@ export default class Customer extends React.Component {
 				</div>
 				<div className="konnektive" style={{display: this.state.tab === 1 ? 'block' : 'none'}}>
 					<KNK
-						ref={el => this.knkRef = el}
+						customer={this.state.customer}
+						orders={this.state.orders}
 					/>
 				</div>
 				<div className="mip" style={{display: this.state.tab === 2 ? 'block' : 'none'}}>
 					<MIP
-						ref={el => this.mipRef = el}
+						mip={this.state.mip}
 					/>
 				</div>
 				<div className="prescriptions" style={{display: this.state.tab === 3 ? 'block' : 'none'}}>
 					<DoseSpot
-						ref={el => this.dsRef = el}
+						prescriptions={this.state.prescriptions}
 					/>
 				</div>
 			</div>

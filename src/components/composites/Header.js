@@ -30,10 +30,11 @@ import Typography from '@material-ui/core/Typography';
 // Material UI Icons
 import AllInboxIcon from '@material-ui/icons/AllInbox';
 import CancelIcon from '@material-ui/icons/Cancel';
+import CommentIcon from '@material-ui/icons/Comment';
 import MenuIcon from '@material-ui/icons/Menu';
 import NewReleasesIcon from '@material-ui/icons/NewReleases';
 import PhoneIcon from '@material-ui/icons/Phone';
-import SearchIcon from '@material-ui/icons/Search';
+//import SearchIcon from '@material-ui/icons/Search';
 
 // Local components
 import Loader from './Loader';
@@ -338,12 +339,18 @@ class Header extends React.Component {
 						<ListItemText primary="Unclaimed" />
 					</ListItem>
 				</Link>
-				<Link to="/search" onClick={this.menuItem}>
+				<Link to="/templates" onClick={this.menuItem}>
+					<ListItem button selected={this.state.path === "/templates"}>
+						<ListItemIcon><CommentIcon /></ListItemIcon>
+						<ListItemText primary="Templates" />
+					</ListItem>
+				</Link>
+				{/*<Link to="/search" onClick={this.menuItem}>
 					<ListItem button selected={this.state.path === "/search"}>
 						<ListItemIcon><SearchIcon /></ListItemIcon>
 						<ListItemText primary="Search" />
 					</ListItem>
-				</Link>
+				</Link>*/}
 				<Divider />
 				{this.state.claimed.map(o =>
 					<Link key={o.customerPhone} data-number={o.customerPhone} to={"/customer/" + o.customerPhone} onClick={this.menuItem}>

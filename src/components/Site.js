@@ -24,6 +24,7 @@ import Signin from './composites/Signin';
 // Page component modules
 import Customer from './pages/Customer';
 import Search from './pages/Search';
+import Templates from './pages/Templates';
 import Unclaimed from './pages/Unclaimed';
 
 // Local modules
@@ -127,6 +128,11 @@ class Site extends React.Component {
 								</Route>
 								<Route path="/search">
 									<Search
+										user={this.state.user}
+									/>
+								</Route>
+								<Route path="/templates">
+									<Templates
 										user={this.state.user}
 									/>
 								</Route>

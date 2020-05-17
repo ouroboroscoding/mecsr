@@ -16,11 +16,11 @@ import Box from '@material-ui/core/Box';
 import Paper from '@material-ui/core/Paper';
 
 // Generic modules
-import Events from '../../../generic/events';
-import Rest from '../../../generic/rest';
+//import Events from '../../../generic/events';
+//import Rest from '../../../generic/rest';
 
 // Local modules
-import Utils from '../../../utils';
+//import Utils from '../../../utils';
 
 // Question component
 class Question extends React.Component {
@@ -66,80 +66,30 @@ class Question extends React.Component {
 }
 
 // MIP component
-export default class MIP extends React.Component {
+export default function MIP(props) {
 
-	constructor(props) {
-
-		// Call the parent constructor
-		super(props);
-
-		// Initial state
-		this.state = {
-			mip: null
-		}
+	// If we're still loading
+	if(props.mip === null) {
+		return <p>Loading...</p>
 	}
 
-	fetch(id) {
-		if(id) {
-			this.fetchMip(id);
-		} else {
-			this.setState({mip: 0});
-		}
+	// If there's no mip associated
+	else if(props.mip === 0) {
+		return <p>No MIP found for this customer</p>
 	}
 
-	fetchMip(id) {
-
-		// Find the MIP using the phone number
-		Rest.read('monolith', 'customer/mip', {
-			id: id
-		}).done(res => {
-
-			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-
-			// If there's a warning
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if('data' in res) {
-
-				// Set the MIP
-				this.setState({
-					mip: res.data
-				});
-			}
-		});
-	}
-
-	render() {
-
-		// If there's no mip associated
-		if(this.state.mip === 0) {
-			return <p>No MIP found for this phone number</p>
-		}
-
-		// If we're still loading
-		else if(this.state.mip === null) {
-			return <p>Loading...</p>
-		}
-
-		// Else, show the mip
-		else {
-			return (
-				<React.Fragment>
-					{this.state.mip.questions.map((o, i) =>
-						<Question
-							key={i}
-							title={o.title}
-							answer={o.answer}
-						/>
-					)}
-				</React.Fragment>
-			);
-		}
+	// Else, show the mip
+	else {
+		return (
+			<React.Fragment>
+				{props.mip.questions.map((o, i) =>
+					<Question
+						key={i}
+						title={o.title}
+						answer={o.answer}
+					/>
+				)}
+			</React.Fragment>
+		);
 	}
 }

@@ -12,7 +12,7 @@
 import FormatOC from 'format-oc';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { createArrayCsvStringifier } from 'csv-writer';
+import { createObjectCsvStringifier } from 'csv-writer';
 
 // Material UI
 import Table from '@material-ui/core/Table';
@@ -568,7 +568,7 @@ ResultsComponent.propTypes = {
 	"errors": PropTypes.object,
 	"noun": PropTypes.string.isRequired,
 	"orderBy": PropTypes.string.isRequired,
-	"remove": PropTypes.bool,
+	"remove": PropTypes.func,
 	"service": PropTypes.string.isRequired,
 	"tree": PropTypes.instanceOf(FormatOC.Tree).isRequired,
 }

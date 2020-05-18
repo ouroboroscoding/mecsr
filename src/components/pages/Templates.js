@@ -73,7 +73,11 @@ function GenericTemplates(props) {
 
 	function createSuccess(template) {
 		console.log(template);
-		templatesSet([template]);
+		templatesSet(templates => {
+			let ret = Tools.clone(templates);
+			ret.unshift(template);
+			return ret;
+		});
 		createSet(false);
 	}
 
@@ -113,16 +117,19 @@ function GenericTemplates(props) {
 		// Use the current templates to set the new templates
 		templatesSet(templates => {
 
+			// Clone the templates
+			let ret = Tools.clone(templates);
+
 			// Find the index
-			let iIndex = Tools.afindi(templates, '_id', _id);
+			let iIndex = Tools.afindi(ret, '_id', _id);
 
 			// If one is found, remove it
 			if(iIndex > -1) {
-				templates.splice(iIndex, 1);
+				ret.splice(iIndex, 1);
 			}
 
 			// Return the new templates
-			return templates;
+			return ret;
 		});
 	}
 

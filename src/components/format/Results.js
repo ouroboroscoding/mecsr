@@ -11,7 +11,7 @@
 // NPM modules
 import FormatOC from 'format-oc';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useState } from 'react';
 import { createObjectCsvStringifier } from 'csv-writer';
 
 // Material UI
@@ -50,210 +50,165 @@ import Tools from '../../generic/tools';
 import Utils from '../../utils';
 
 // PaginationActionsComponent
-class PaginationActionsComponent extends React.Component {
+function PaginationActionsComponent(props) {
 
-	constructor(props) {
-
-		// Call parent
-		super(props);
-
-		// Initial state
-		this.state = {}
-
-		// Bind methods
-		this.first = this.first.bind(this);
-		this.last = this.last.bind(this);
-		this.next = this.next.bind(this);
-		this.prev = this.prev.bind(this);
+	function first(event) {
+		props.onChangePage(event, 0);
 	}
 
-	first(event) {
-		this.props.onChangePage(event, 0);
+	function last(event) {
+		props.onChangePage(event, Math.max(0, Math.ceil(props.count / props.rowsPerPage) - 1));
 	}
 
-	last(event) {
-		this.props.onChangePage(event, Math.max(0, Math.ceil(this.props.count / this.props.rowsPerPage) - 1));
+	function next(event) {
+		props.onChangePage(event, props.page + 1);
 	}
 
-	next(event) {
-		this.props.onChangePage(event, this.props.page + 1);
+	function prev(event) {
+		props.onChangePage(event, props.page - 1);
 	}
 
-	prev(event) {
-		this.props.onChangePage(event, this.props.page - 1);
-	}
-
-	render() {
-		return (
-			<div style={{flexShrink: 0}}>
-				<IconButton
-					onClick={this.first}
-					disabled={this.props.page === 0}
-					aria-label="First Page"
-				>
-					<FirstPageIcon />
-				</IconButton>
-				<IconButton
-					onClick={this.prev}
-					disabled={this.props.page === 0}
-					aria-label="Previous Page"
-				>
-					<KeyboardArrowLeft />
-				</IconButton>
-				<IconButton
-					onClick={this.next}
-					disabled={this.props.page >= Math.max(0, Math.ceil(this.props.count / this.props.rowsPerPage) - 1)}
-					aria-label="Next Page"
-				>
-					<KeyboardArrowRight />
-				</IconButton>
-				<IconButton
-					onClick={this.last}
-					disabled={this.props.page >= Math.max(0, Math.ceil(this.props.count / this.props.rowsPerPage) - 1)}
-					aria-label="Last Page"
-				>
-					<LastPageIcon />
-				</IconButton>
-			</div>
-		);
-	}
+	return (
+		<div style={{flexShrink: 0}}>
+			<IconButton
+				onClick={first}
+				disabled={props.page === 0}
+				aria-label="First Page"
+			>
+				<FirstPageIcon />
+			</IconButton>
+			<IconButton
+				onClick={prev}
+				disabled={props.page === 0}
+				aria-label="Previous Page"
+			>
+				<KeyboardArrowLeft />
+			</IconButton>
+			<IconButton
+				onClick={next}
+				disabled={props.page >= Math.max(0, Math.ceil(props.count / props.rowsPerPage) - 1)}
+				aria-label="Next Page"
+			>
+				<KeyboardArrowRight />
+			</IconButton>
+			<IconButton
+				onClick={last}
+				disabled={props.page >= Math.max(0, Math.ceil(props.count / props.rowsPerPage) - 1)}
+				aria-label="Last Page"
+			>
+				<LastPageIcon />
+			</IconButton>
+		</div>
+	);
 }
 
 // ResultsRowComponent
-class ResultsRowComponent extends React.Component {
+function ResultsRowComponent(props) {
 
-	constructor(props) {
+	// State
+	let [edit, editSet] = useState(false);
 
-		// Call parent
-		super(props);
-
-		// Store the field order
-		this.fields = props.fields;
-
-		// Store rest info
-		this.info = props.info;
-
-		// Initial state
-		this.state = {
-			"data": props.data,
-			"edit": false
-		}
-
-		// Bind methods
-		this.action = this.action.bind(this);
-		this.copyKey = this.copyKey.bind(this);
-		this.editSuccess = this.editSuccess.bind(this);
-		this.editToggle = this.editToggle.bind(this);
-		this.remove = this.remove.bind(this);
-	}
-
-	action(event) {
+	function action(event) {
 
 		// Get the index
 		let iIndex = event.currentTarget.dataset.index;
 
 		// Call the appropriate callback
-		this.props.actions[iIndex].callback(
-			this.state.data[this.info.primary]
+		props.actions[iIndex].callback(
+			props.data[props.info.primary]
 		);
 	}
 
-	copyKey() {
+	function copyKey() {
 
 		// Copy the primary key to the clipboard then notify the user
-		Clipboard.copy(this.state.data[this.info.primary]).then(b => {
+		Clipboard.copy(props.data[props.info.primary]).then(b => {
 			Events.trigger('success', 'Record key copied to clipboard');
 		});
 	}
 
-	editSuccess(values) {
+	function editSuccess(values) {
 
-		// Init new state
-		let data = Tools.clone(this.state.data);
+		// Clone the data
+		let ret = Tools.clone(props.data);
 
 		// For each changed value
 		for(let k in values) {
-			data[k] = values[k];
+			ret[k] = values[k];
 		}
 
-		// Set the new state
-		this.setState({
-			"data": data,
-			"edit": false
-		}, () => {
-			// Let the parent know
-			this.props.onEdit(data);
-		});
+		// Let the parent know
+		props.onEdit(ret);
+
+		// Turn off edit mode
+		editSet(false);
 	}
 
-	editToggle() {
-		this.setState({"edit": !this.state.edit});
+	function editToggle() {
+		editSet(!edit);
 	}
 
-	remove() {
-		this.props.remove(this.state.data[this.info.primary]);
+	function remove() {
+		props.remove(props.data[props.info.primary]);
 	}
 
-	render() {
-
-		let lCells = [];
-		for(let i in this.fields) {
-			lCells.push(
-				<TableCell key={i}>
-					{this.fields[i] === this.info.primary ? (
-						<Tooltip title="Copy Record Key">
-							<VpnKeyIcon className="fakeAnchor" onClick={this.copyKey} />
-						</Tooltip>
-					):
-						this.state.data[this.fields[i]]
-					}
-				</TableCell>
-			);
-		}
-
-		// Add the actions
+	let lCells = [];
+	for(let i in props.fields) {
 		lCells.push(
-			<TableCell key={-1} className="actions" align="right">
-				<Tooltip title="Edit the record">
-					<EditIcon className="fakeAnchor" onClick={this.editToggle} />
-				</Tooltip>
-				{this.props.remove &&
-					<Tooltip title="Delete the record">
-						<DeleteIcon className="fakeAnchor" onClick={this.remove} />
+			<TableCell key={i}>
+				{props.fields[i] === props.info.primary ? (
+					<Tooltip title="Copy Record Key">
+						<VpnKeyIcon className="fakeAnchor" onClick={copyKey} />
 					</Tooltip>
+				):
+					props.data[props.fields[i]]
 				}
-				{this.props.actions.map((action, i) =>
-					<Tooltip key={i} title={action.tooltip}>
-						<action.icon className="fakeAnchor" data-index={i} onClick={this.action} />
-					</Tooltip>
-				)}
 			</TableCell>
 		);
-
-		return (
-			<React.Fragment>
-				<TableRow>
-					{lCells}
-				</TableRow>
-				{this.state.edit &&
-					<TableRow>
-						<TableCell colSpan={this.fields.length + 1}>
-							<FormComponent
-								cancel={this.editToggle}
-								errors={this.props.errors}
-								noun={this.info.noun}
-								service={this.info.service}
-								success={this.editSuccess}
-								tree={this.info.tree}
-								type="update"
-								value={this.state.data}
-							/>
-						</TableCell>
-					</TableRow>
-				}
-			</React.Fragment>
-		);
 	}
+
+	// Add the actions
+	lCells.push(
+		<TableCell key={-1} className="actions" align="right">
+			<Tooltip title="Edit the record">
+				<EditIcon className="fakeAnchor" onClick={editToggle} />
+			</Tooltip>
+			{props.remove &&
+				<Tooltip title="Delete the record">
+					<DeleteIcon className="fakeAnchor" onClick={remove} />
+				</Tooltip>
+			}
+			{props.actions.map((a, i) =>
+				<Tooltip key={i} title={a.tooltip}>
+					<a.icon className="fakeAnchor" data-index={i} onClick={action} />
+				</Tooltip>
+			)}
+		</TableCell>
+	);
+
+	return (
+		<React.Fragment>
+			<TableRow>
+				{lCells}
+			</TableRow>
+			{edit &&
+				<TableRow>
+					<TableCell colSpan={props.fields.length + 1}>
+						<FormComponent
+							cancel={editToggle}
+							errors={props.errors}
+							noun={props.info.noun}
+							service={props.info.service}
+							success={editSuccess}
+							tree={props.info.tree}
+							type="update"
+							value={props.data}
+						/>
+					</TableCell>
+				</TableRow>
+			}
+		</React.Fragment>
+	);
 }
 
 // Valid props
@@ -317,7 +272,7 @@ export default class ResultsComponent extends React.Component {
 
 		// Initial state
 		this.state = {
-			"data": [],
+			"data": props.data,
 			"order": "desc",
 			"orderBy": props.orderBy,
 			"page": 0,
@@ -331,6 +286,12 @@ export default class ResultsComponent extends React.Component {
 		this.perPageChange = this.perPageChange.bind(this);
 		this.recordChanged = this.recordChanged.bind(this);
 		this.recordRemoved = this.recordRemoved.bind(this);
+	}
+
+	componentDidUpdate(prevProps) {
+		if(prevProps.data !== this.props.data) {
+			this.setState({data: this.props.data});
+		}
 	}
 
 	exportCsv() {
@@ -445,7 +406,7 @@ export default class ResultsComponent extends React.Component {
 								info={this.info}
 								key={row[this.info.primary]}
 								onEdit={this.recordChanged}
-								remove={this.props.remove ? this.remove : false}
+								remove={this.props.remove ? this.recordRemoved : false}
 							/>
 						)}
 					</TableBody>
@@ -497,6 +458,8 @@ export default class ResultsComponent extends React.Component {
 
 	recordRemoved(key) {
 
+		console.log('recordRemoved', key);
+
 		// Send the key to the service via rest
 		Rest.delete(this.props.service, this.props.noun, {
 			[this.info.primary]: key
@@ -519,16 +482,8 @@ export default class ResultsComponent extends React.Component {
 			// If there's data
 			if(res.data) {
 
-				// Clone the data
-				let lData = Tools.clone(this.state.data);
-
-				// Remove the index found by key
-				lData.splice(
-					Tools.afindi(this.state.data, this.info.primary, key), 1
-				);
-
-				// Save the new state
-				this.setState({"data": lData});
+				// Let the parent know
+				this.props.remove(key);
 			}
 		});
 	}
@@ -552,13 +507,6 @@ export default class ResultsComponent extends React.Component {
 
 		// Return the sorted data
 		return data;
-	}
-
-	set data(data) {
-		this.setState({
-			"data": this.sortData(data, this.state.order, this.state.orderBy),
-			"page": 0
-		});
 	}
 }
 

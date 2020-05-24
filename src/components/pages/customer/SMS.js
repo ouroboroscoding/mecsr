@@ -14,6 +14,7 @@ import React from 'react';
 // Material UI
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
+import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 
@@ -29,6 +30,9 @@ import Tools from '../../../generic/tools';
 
 // Local modules
 import Utils from '../../../utils';
+
+// Regex
+const regTplVar = /{([^]+?)}/g
 
 // Message component
 function Message(props) {
@@ -75,6 +79,7 @@ export default class SMS extends React.Component {
 		this.scrollToBottom = this.scrollToBottom.bind(this);
 		this.send = this.send.bind(this);
 		this.textPress = this.textPress.bind(this);
+		this.useTemplate = this.useTemplate.bind(this);
 	}
 
 	componentDidMount() {
@@ -164,6 +169,21 @@ export default class SMS extends React.Component {
 					)}
 					<div className="scroll" ref={el => this.messagesBottom = el} />
 				</div>
+				<div className="templates">
+					<Select
+						className='select'
+						disabled={this.state.stop}
+						native
+						onChange={this.useTemplate}
+						value={this.state.value}
+						variant="outlined"
+					>
+						<option key={-1} value={-1}>Use template...</option>
+						{this.props.templates.map((o,i) =>
+							<option key={i} value={i}>{o.title}</option>
+						)}
+					</Select>
+				</div>
 				<div className="send">
 					<TextField
 						className="text"
@@ -171,7 +191,7 @@ export default class SMS extends React.Component {
 						inputRef={el => this.text = el}
 						multiline
 						onKeyPress={this.textPress}
-						rows={2}
+						rows={3}
 						variant="outlined"
 					/>
 					<Button
@@ -252,5 +272,97 @@ export default class SMS extends React.Component {
 		if(event.key === 'Enter') {
 			this.send();
 		}
+	}
+
+	useTemplate(event) {
+
+		// Get the option value
+		let opt = parseInt(event.target.value);
+
+		// If it's the first one, do nothing
+		if(opt === -1) {
+			return;
+		}
+
+		// Get the template
+		let sContent = this.props.templates[opt].content;
+
+		// Go through any template variables found
+		for(let lMatch of sContent.matchAll(regTplVar)) {
+			let sReplacement = null;
+			switch(lMatch[1]) {
+				case 'billing':
+					if(!this.props.customer) {
+						Event.trigger('error', 'Can not use template without customer data');
+						return;
+					}
+					sReplacement = this.props.customer.billing.firstName + ' ' + this.props.customer.billing.lastName + '\n' +
+									this.props.customer.billing.address1 + '\n';
+					if(this.props.customer.billing.address2 !== null && this.props.customer.billing.address2.trim() !== '') {
+						sReplacement += this.props.customer.billing.address2 + '\n';
+					}
+					sReplacement += this.props.customer.billing.city + ', ' + this.props.customer.billing.state + '\n' +
+									this.props.customer.billing.country + ', ' + this.props.customer.billing.postalCode;
+					break;
+				case 'billing_first':
+					if(!this.props.customer) {
+						Event.trigger('error', 'Can not use template without customer data');
+						return;
+					}
+					sReplacement = this.props.customer.billing.firstName;
+					break;
+				case 'billing_last':
+					if(!this.props.customer) {
+						Event.trigger('error', 'Can not use template without customer data');
+						return;
+					}
+					sReplacement = this.props.customer.billing.lastName;
+					break;
+				case 'email':
+					if(!this.props.customer) {
+						Event.trigger('error', 'Can not use template without customer data');
+						return;
+					}
+					sReplacement = this.props.customer.email;
+					break;
+				case 'shipping':
+					if(!this.props.customer) {
+						Event.trigger('error', 'Can not use template without customer data');
+						return;
+					}
+					sReplacement = this.props.customer.shipping.firstName + ' ' + this.props.customer.shipping.lastName + '\n' +
+									this.props.customer.shipping.address1 + '\n';
+					if(this.props.customer.shipping.address2 !== null && this.props.customer.shipping.address2.trim() !== '') {
+						sReplacement += this.props.customer.shipping.address2 + '\n';
+					}
+					sReplacement += this.props.customer.shipping.city + ', ' + this.props.customer.shipping.state + '\n' +
+									this.props.customer.shipping.country + ', ' + this.props.customer.shipping.postalCode;
+					break;
+				case 'shipping_first':
+					if(!this.props.customer) {
+						Event.trigger('error', 'Can not use template without customer data');
+						return;
+					}
+					sReplacement = this.props.customer.shipping.firstName;
+					break;
+				case 'shipping_last':
+					if(!this.props.customer) {
+						Event.trigger('error', 'Can not use template without customer data');
+						return;
+					}
+					sReplacement = this.props.customer.shipping.lastName;
+					break;
+				default:
+					sReplacement = 'UNKNOWN VARIABLE "' + lMatch[1] + '"';
+			}
+
+			// If we found something, replace it
+			if(sReplacement !== null) {
+				sContent = sContent.replace(lMatch[0], sReplacement);
+			}
+		}
+
+		// Fill the text field
+		this.text.value = sContent;
 	}
 }

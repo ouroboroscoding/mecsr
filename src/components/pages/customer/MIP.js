@@ -9,60 +9,257 @@
  */
 
 // NPM modules
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // Material UI
 import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormGroup from '@material-ui/core/FormGroup';
+import Select from '@material-ui/core/Select';
 import Paper from '@material-ui/core/Paper';
+import TextField from '@material-ui/core/TextField';
+import Tooltip from '@material-ui/core/Tooltip';
+
+// Material UI icons
+import EditIcon from '@material-ui/icons/Edit';
 
 // Generic modules
-//import Events from '../../../generic/events';
-//import Rest from '../../../generic/rest';
+import Events from '../../../generic/events';
+import Rest from '../../../generic/rest';
+import Tools from '../../../generic/tools';
 
 // Local modules
-//import Utils from '../../../utils';
+import Utils from '../../../utils';
 
-// Question component
-class Question extends React.Component {
-
+// QuestionMultiple
+class QuestionMultiple extends React.Component {
 	constructor(props) {
-
-		// Call the parent constructor
 		super(props);
-
-		// Initial state
 		this.state = {
-			answer: props.answer || null,
-			edit: false
+			value: props.answer.split('|')
 		}
-
-		// Bind methods
-		this.edit = this.edit.bind(this);
-		this.save = this.save.bind(this);
+		this.clicked = this.clicked.bind(this);
 	}
-
-	edit() {
-
+	clicked(event) {
+		let index = parseInt(event.target.dataset.index);
+		console.log('index: ', index);
+		let option = this.props.options[index];
+		console.log('option: ', option);
+		let value = Tools.clone(this.state.value);
+		console.log('pre value: ', value);
+		if(event.target.checked) {
+			value.push(option);
+		} else {
+			value.splice(value.indexOf(option), 1);
+		}
+		this.setState({value: value})
+		console.log('post value: ', value);
 	}
-
 	render() {
 		return (
-			<Paper className="question">
-				<Box className="title">
-					<span>{this.props.title}</span>
+			<FormGroup>
+				{this.props.options.map((v,i) =>
+					<FormControlLabel
+						control={<Checkbox
+							color="primary"
+							checked={this.state.value.includes(v)}
+							inputProps={{
+								"data-index": i
+							}}
+							onChange={this.clicked}
+						/>}
+						key={i}
+						label={v}
+					/>
+				)}
+			</FormGroup>
+		);
+	}
+	get value() {
+		return this.state.value.join('|');
+	}
+}
+
+// QuestionOption component
+function QuestionOptions(props) {
+
+	// Refs
+	const refField = useRef(null);
+
+	// Save the value
+	function save(event) {
+		props.onSave(refField.current.value);
+	}
+
+	// Render based on the question type
+	let field = null;
+	switch(props.type) {
+
+		// Text Field
+		case 'short_text':
+		case 'email':
+			field = <TextField
+				defaultValue={props.answer || ''}
+				inputRef={refField}
+				type="text"
+				variant="outlined"
+			/>
+			break;
+
+		case 'number':
+			field = <TextField
+				defaultValue={props.answer}
+				inputRef={refField}
+				type="number"
+				variant="outlined"
+			/>
+			break;
+
+		case 'dropdown':
+			field = <Select
+				defaultValue={props.answer}
+				inputProps={{
+					inputRef: refField
+				}}
+				native
+				variant="outlined"
+			>
+				{props.options.map((v,i) =>
+					<option key={i}>{v}</option>
+				)}
+			</Select>
+			break;
+
+		case 'date':
+			field = <TextField
+				defaultValue={props.answer}
+				inputRef={refField}
+				type="date"
+				variant="outlined"
+			/>
+			break;
+
+		case 'yes_no':
+			field = <Select
+				defaultValue={props.answer}
+				inputProps={{
+					inputRef: refField
+				}}
+				native
+				variant="outlined"
+			>
+				<option value="Yes">Yes</option>
+				<option value="No">No</option>
+				<option value="">No Selection</option>
+			</Select>
+			break;
+
+		case 'multiple_choice':
+			field = <QuestionMultiple
+				answer={props.answer}
+				options={props.options}
+				ref={refField}
+			/>
+			break;
+
+		case 'long_text':
+		case 'long text':
+			field = <TextField
+				defaultValue={props.answer || ''}
+				inputRef={refField}
+				multiline
+				rows={5}
+				type="text"
+				variant="outlined"
+			/>
+			break;
+
+		default:
+			return <span className="noanswer">No Answer</span>
+	}
+
+	// Return the options plus the submit/cancel buttons
+	return (
+		<Box className="options form">
+			{field}
+			<Box className="actions">
+				<Button variant="contained" color="secondary" onClick={props.onCancel}>Cancel</Button>
+				<Button variant="contained" color="primary" onClick={save}>Save</Button>
+			</Box>
+		</Box>
+	)
+}
+
+// Question component
+function Question(props) {
+
+	// State
+	let [edit, editSet] = useState(false);
+	let [answer, answerSet] = useState('');
+
+	// Effect
+	useEffect(() => {
+		answerSet(props.question.answer);
+	}, []);
+
+	function editToggle() {
+		editSet(!edit);
+	}
+
+	function save(answer) {
+
+		// Sent the value to the server
+		Rest.update('monolith', 'customer/mip', {
+			landing_id: props.landing,
+			ref: props.question.ref,
+			value: answer
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+
+				// Set the new answer and hide the edit
+				editSet(false);
+				answerSet(answer);
+			}
+		});
+	}
+
+	return (
+		<Paper className="question">
+			<Box className="title">
+				<span>{props.question.title}</span>
+				<Tooltip title="Edit the answer">
+					<EditIcon className="fakeAnchor" onClick={editToggle} />
+				</Tooltip>
+			</Box>
+			{edit ?
+				<QuestionOptions
+					answer={answer}
+					onCancel={editToggle}
+					onSave={save}
+					options={props.options}
+					type={props.question.type}
+				/>
+			:
+				<Box className="answer">
+					{answer ? answer.split('|').join(', ') : <span className="noanswer">No Answer</span>}
 				</Box>
-				{this.state.edit ?
-					<Box />
-				:
-					<Box className="answer">{this.state.answer ? this.state.answer : <span className="noanswer">No Answer</span>}</Box>
-				}
-			</Paper>
-		)
-	}
-
-	save() {
-
-	}
+			}
+		</Paper>
+	);
 }
 
 // MIP component
@@ -85,8 +282,9 @@ export default function MIP(props) {
 				{props.mip.questions.map((o, i) =>
 					<Question
 						key={i}
-						title={o.title}
-						answer={o.answer}
+						options={props.mip.options[o.ref] || null}
+						question={o}
+						landing={props.mip.landing_id}
 					/>
 				)}
 			</React.Fragment>

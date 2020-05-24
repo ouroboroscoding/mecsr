@@ -13,12 +13,17 @@ import Tree from 'format-oc/Tree'
 import React, { useState, useEffect } from 'react';
 
 // Material UI
-import AppBar from '@material-ui/core/AppBar';
+//import AppBar from '@material-ui/core/AppBar';
 import Box from '@material-ui/core/Box';
 import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
+//import Tab from '@material-ui/core/Tab';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+//import Tabs from '@material-ui/core/Tabs';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 
@@ -38,11 +43,11 @@ import Tools from '../../generic/tools';
 import Utils from '../../utils';
 
 // Definitions
-import TemplateEmailDef from '../../definitions/csr/template_email';
-import TemplateSMSDef from '../../definitions/csr/template_sms';
+//import TemplateEmailDef from '../../definitions/csr/tpl_email';
+import TemplateSMSDef from '../../definitions/csr/tpl_sms';
 
 // Generate the template Trees
-const TemplateEmailTree = new Tree(TemplateEmailDef);
+//const TemplateEmailTree = new Tree(TemplateEmailDef);
 const TemplateSMSTree = new Tree(TemplateSMSDef);
 
 /**
@@ -153,7 +158,7 @@ function GenericTemplates(props) {
 						service="csr"
 						success={createSuccess}
 						tree={props.tree}
-						type="insert"
+						type="create"
 					/>
 				</Paper>
 			}
@@ -186,17 +191,17 @@ function GenericTemplates(props) {
 export default function Templates(props) {
 
 	// State
-	let [tab, tabSet] = useState(0);
+	//let [tab, tabSet] = useState(0);
 
 	// When selected tab changes
-	function tabChange(event, tab) {
-		tabSet(tab);
-	}
+	//function tabChange(event, tab) {
+	//	tabSet(tab);
+	//}
 
 	// Return the rendered component
 	return (
 		<div id="templates">
-			<AppBar position="static" color="default">
+			{/*<AppBar position="static" color="default">
 				<Tabs
 					onChange={tabChange}
 					value={tab}
@@ -205,8 +210,8 @@ export default function Templates(props) {
 					<Tab label="SMS" />
 					<Tab label="Email" />
 				</Tabs>
-			</AppBar>
-			<div className="sms" style={{display: tab === 0 ? 'flex' : 'none'}}>
+			</AppBar>*/}
+			<div className="sms" style={{display: 'flex'}}>
 				<GenericTemplates
 					createTitle="SMS Template"
 					noun="template/sms"
@@ -215,7 +220,7 @@ export default function Templates(props) {
 					user={props.user}
 				/>
 			</div>
-			<div className="email" style={{display: tab === 1 ? 'block' : 'none'}}>
+			{/*<div className="email" style={{display: tab === 1 ? 'block' : 'none'}}>
 				<GenericTemplates
 					createTitle="Email Template"
 					noun="template/email"
@@ -223,6 +228,58 @@ export default function Templates(props) {
 					tree={TemplateEmailTree}
 					user={props.user}
 				/>
+			</div>*/}
+			<div className="legend">
+				<Typography variant="h4">Legend</Typography>
+				<Table>
+					<TableHead>
+						<TableRow>
+							<TableCell>Variable</TableCell>
+							<TableCell>Replacement</TableCell>
+						</TableRow>
+					</TableHead>
+					<TableBody>
+						<TableRow>
+							<TableCell>{"{billing}"}</TableCell>
+							<TableCell>
+								John Smith<br />
+								123 Main Street<br />
+								Apt #4<br />
+								Boonville, NC<br />
+								US, 27011
+							</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell>{"{billing_first}"}</TableCell>
+							<TableCell>John</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell>{"{billing_last}"}</TableCell>
+							<TableCell>Smith</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell>{"{email}"}</TableCell>
+							<TableCell>jsmith@gmail.com</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell>{"{shipping}"}</TableCell>
+							<TableCell>
+								Clark Kent<br />
+								123 Main Street<br />
+								Metropolis, NY<br />
+								US, 10001
+							</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell>{"{shipping_first}"}</TableCell>
+							<TableCell>Clark</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell>{"{shipping_last}"}</TableCell>
+							<TableCell>Kent</TableCell>
+						</TableRow>
+					</TableBody>
+				</Table>
 			</div>
 		</div>
 	);

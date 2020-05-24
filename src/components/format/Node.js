@@ -135,6 +135,7 @@ class NodeDate extends NodeBase {
 				onChange={this.change}
 				type="date"
 				value={this.state.value}
+				variant="outlined"
 				InputLabelProps={{
 					shrink: true,
 				}}
@@ -188,6 +189,7 @@ class NodeDatetime extends NodeBase {
 				onChange={this.change}
 				type="datetime-local"
 				value={this.state.value}
+				variant="outlined"
 				InputLabelProps={{
 					shrink: true,
 				}}
@@ -272,6 +274,7 @@ class NodeNumber extends NodeBase {
 				onChange={this.change}
 				type="number"
 				value={this.state.value}
+				variant="outlined"
 				InputLabelProps={{
 					shrink: true,
 				}}
@@ -326,6 +329,7 @@ class NodePassword extends NodeBase {
 				onChange={this.change}
 				type="password"
 				value={this.state.value}
+				variant="outlined"
 				InputLabelProps={{
 					shrink: true,
 				}}
@@ -388,6 +392,7 @@ class NodeSelect extends NodeBase {
 				<NativeSelect
 					onChange={this.change}
 					value={this.state.value}
+					variant="outlined"
 				>
 					{lOpts}
 				</NativeSelect>
@@ -451,12 +456,94 @@ class NodeText extends NodeBase {
 				onChange={this.change}
 				type="text"
 				value={this.state.value === null ? '' : this.state.value}
+				variant="outlined"
 				InputLabelProps={{
 					shrink: true,
 				}}
 				{...props}
 			/>
 		);
+	}
+}
+
+/**
+ * Node TextArea
+ *
+ * Handles values that are strings or string-like over multiple lines
+ *
+ * @extends NodeBase
+ */
+class NodeTextArea extends React.Component {
+
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			"error": false,
+			"value": props.value
+		}
+
+		// If there's a regex, override the node
+		if('regex' in props.display) {
+			props.node.regex(props.display.regex);
+		}
+
+		this.change = this.change.bind(this);
+	}
+
+	change(event) {
+
+		// Check the new value is valid
+		let error = false;
+		if(this.props.validation &&
+			!this.props.node.valid(event.target.value === '' ? null : event.target.value)) {
+			error = 'Invalid Value';
+		}
+
+		// Update the state
+		this.setState({
+			"error": error,
+			"value": event.target.value
+		});
+	}
+
+	render() {
+		let props = {}
+		let minmax = this.props.node.minmax();
+		if(minmax.maximum) {
+			props.max = minmax.maximum;
+		}
+
+		return (
+			<TextField
+				error={this.state.error !== false}
+				helperText={this.state.error}
+				onKeyPress={this.keyPressed}
+				label={this.props.display.title}
+				multiline
+				onChange={this.change}
+				rows={3}
+				type="text"
+				value={this.state.value === null ? '' : this.state.value}
+				variant="outlined"
+				InputLabelProps={{
+					shrink: true,
+				}}
+				{...props}
+			/>
+		);
+	}
+
+	error(msg) {
+		this.setState({"error": msg});
+	}
+
+	get value() {
+		return this.state.value === '' ? null : this.state.value;
+	}
+
+	set value(val) {
+		this.setState({"value": val});
 	}
 }
 
@@ -601,6 +688,7 @@ export default class NodeComponent extends React.Component {
 			case 'password': ElName = NodePassword; break;
 			case 'select': ElName = NodeSelect; break;
 			case 'text': ElName = NodeText; break;
+			case 'textarea': ElName = NodeTextArea; break;
 			case 'time': ElName = NodeTime; break;
 			default:
 				throw new Error('invalid type in format/Node');

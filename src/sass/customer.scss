@@ -135,6 +135,16 @@
 			}
 		}
 
+		.templates {
+			flex-grow: 0;
+			flex-shrink: 0;
+			width: 100%;
+
+			.select {
+				width: 100%;
+			}
+		}
+
 		.send {
 			flex-grow: 0;
 			flex-shrink: 0;
@@ -163,11 +173,15 @@
 			margin-bottom: 10px;
 		}
 
+		th.MuiTableCell-stickyHeader {
+			background-color: #a0dcf9;
+		}
+
 		td {
 			vertical-align: top;
 		}
 
-		td.notes div {
+		td.notes div, td.tracking div {
 			max-height: 200px;
 			overflow: auto;
 		}
@@ -185,17 +199,30 @@
 		.question {
 			margin-bottom: 10px;
 
-			.title, .answer {
+			.title, .answer, .options {
 				padding: 10px;
 			}
 
 			.title {
-				background-color: #cecece;
-				font-weight: bold;
+				background-color: #a0dcf9;
+				display: flex;
+				flex-direction: row;
+				width: 100%;
 
 				span {
-					display: inline-block;
-					width: calc(100% - 20px);
+					flex-grow: 1;
+					display: block;
+				}
+
+				svg {
+					flex-grow: 0;
+				}
+			}
+
+			.options {
+
+				.MuiFormControl-root, .MuiInputBase-root {
+					width: 100%;
 				}
 			}
 

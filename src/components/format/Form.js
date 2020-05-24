@@ -57,11 +57,11 @@ export default class FormComponent extends React.Component {
 		this.parent = null;
 
 		// Bind methods
-		this.insert = this.insert.bind(this);
+		this.create = this.create.bind(this);
 		this.update = this.update.bind(this);
 	}
 
-	insert() {
+	create() {
 
 		// Make sure each child of the parent is valid
 		if(!this.parent.valid()) {
@@ -116,10 +116,10 @@ export default class FormComponent extends React.Component {
 
 	render() {
 		let title, submit, callback;
-		if(this.state.type === 'insert') {
+		if(this.state.type === 'create') {
 			title = 'Create ' + this.state.name;
 			submit = 'Create';
-			callback = this.insert;
+			callback = this.create;
 		} else {
 			title = 'Update ' + this.state.name;
 			submit = 'Save';
@@ -208,7 +208,7 @@ FormComponent.propTypes = {
 	"service": PropTypes.string.isRequired,
 	"success": PropTypes.func,
 	"tree": PropTypes.instanceOf(FormatOC.Tree).isRequired,
-	"type": PropTypes.oneOf(['insert', 'update']).isRequired,
+	"type": PropTypes.oneOf(['create', 'update']).isRequired,
 	"value": PropTypes.object
 }
 

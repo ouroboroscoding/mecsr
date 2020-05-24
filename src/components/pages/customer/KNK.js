@@ -54,6 +54,7 @@ export default function KNK(props) {
 								<TableCell>Billing</TableCell>
 								<TableCell>Shipping</TableCell>
 								<TableCell>Notes</TableCell>
+								<TableCell>Tracking</TableCell>
 							</TableRow>
 						</TableHead>
 						<TableBody>
@@ -68,14 +69,14 @@ export default function KNK(props) {
 										<p><strong>Updated: </strong><span>{customer.updated}</span></p>
 									</TableCell>
 									<TableCell>
-										<p><nobr>{customer.billing.name}</nobr></p>
+										<p><nobr>{customer.billing.firstName + ' ' + customer.billing.lastName}</nobr></p>
 										<p><nobr>{customer.billing.address1}</nobr></p>
 										<p><nobr>{customer.billing.address2}</nobr></p>
 										<p><nobr>{customer.billing.city}, {customer.billing.state}</nobr></p>
 										<p><nobr>{customer.billing.country}, {customer.billing.postalCode}</nobr></p>
 									</TableCell>
 									<TableCell>
-										<p><nobr>{customer.shipping.name}</nobr></p>
+										<p><nobr>{customer.shipping.firstName + ' ' + customer.shipping.lastName}</nobr></p>
 										<p><nobr>{customer.shipping.address1}</nobr></p>
 										<p><nobr>{customer.shipping.address2}</nobr></p>
 										<p><nobr>{customer.shipping.city}, {customer.shipping.state}</nobr></p>
@@ -85,6 +86,16 @@ export default function KNK(props) {
 										<div>
 											{customer.notes.map((o, i) =>
 												<p key={i}><strong>{o.agentName}</strong> ({o.dateCreated}): {o.message}</p>
+											)}
+										</div>
+									</TableCell>
+									<TableCell className="notes">
+										<div>
+											{props.tracking.map((o,i) =>
+												<p>{o.link ?
+														<a href={o.link} target="_blank">{o.code}</a> :
+														o.code
+													} {o.type} {o.date}</p>
 											)}
 										</div>
 									</TableCell>
@@ -132,14 +143,14 @@ export default function KNK(props) {
 										)}
 									</TableCell>
 									<TableCell>
-										<p><nobr>{o.billing.name}</nobr></p>
+										<p><nobr>{o.billing.firstName + ' ' + o.billing.lastName}</nobr></p>
 										<p><nobr>{o.billing.address1}</nobr></p>
 										<p><nobr>{o.billing.address2}</nobr></p>
 										<p><nobr>{o.billing.city}, {o.billing.state}</nobr></p>
 										<p><nobr>{o.billing.country}, {o.billing.postalCode}</nobr></p>
 									</TableCell>
 									<TableCell>
-										<p><nobr>{o.shipping.name}</nobr></p>
+										<p><nobr>{o.shipping.firstName + ' ' + o.shipping.lastName}</nobr></p>
 										<p><nobr>{o.shipping.address1}</nobr></p>
 										<p><nobr>{o.shipping.address2}</nobr></p>
 										<p><nobr>{o.shipping.city}, {o.shipping.state}</nobr></p>

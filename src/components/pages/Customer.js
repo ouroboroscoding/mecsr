@@ -45,6 +45,8 @@ export default class Customer extends React.Component {
 			orders: [],
 			patient_id: null,
 			prescriptions: null,
+			shipping: [],
+			sms_tpls: [],
 			tab: 0
 		}
 
@@ -61,9 +63,16 @@ export default class Customer extends React.Component {
 		// Track any new message
 		Events.add('newMessage', this.newMessage);
 
-		// If we have don't have an id, but do have a user
-		if(this.state.customer_id === null && this.props.user) {
-			this.fetchCustomerId();
+		// If we have a user logged in
+		if(this.props.user) {
+
+			// If we have don't have a customer id
+			if(this.state.customer_id === null) {
+				this.fetchCustomerId();
+			}
+
+			// Fetch templates
+			this.fetchSMSTemplates();
 		}
 	}
 
@@ -107,6 +116,7 @@ export default class Customer extends React.Component {
 						this.fetchKnkCustomer();
 						this.fetchMip();
 						this.fetchPatientId();
+						this.fetchShipping();
 					}
 				});
 			}
@@ -260,6 +270,60 @@ export default class Customer extends React.Component {
 		});
 	}
 
+	fetchShipping() {
+
+		// Fetch them from the server
+		Rest.read('monolith', 'customer/shipping', {
+			customerId: this.state.customer_id
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				// Set the state
+				this.setState({
+					shipping: res.data
+				});
+			}
+		})
+	}
+
+	fetchSMSTemplates() {
+
+		// Fetch them from the server
+		Rest.read('csr', 'template/smss', {}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				// Set the state
+				this.setState({
+					sms_tpls: res.data
+				});
+			}
+		});
+	}
+
 	newMessage() {
 		this.smsRef.fetch("smooth");
 	}
@@ -282,7 +346,9 @@ export default class Customer extends React.Component {
 				<div className="messaging" style={{display: this.state.tab === 0 ? 'flex' : 'none'}}>
 					<SMS
 						ref={el => this.smsRef = el}
+						customer={this.state.customer}
 						phoneNumber={this.props.phoneNumber}
+						templates={this.state.sms_tpls}
 						user={this.props.user}
 					/>
 				</div>
@@ -290,6 +356,7 @@ export default class Customer extends React.Component {
 					<KNK
 						customer={this.state.customer}
 						orders={this.state.orders}
+						tracking={this.state.shipping}
 					/>
 				</div>
 				<div className="mip" style={{display: this.state.tab === 2 ? 'block' : 'none'}}>

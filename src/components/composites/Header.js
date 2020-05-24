@@ -333,16 +333,17 @@ class Header extends React.Component {
 
 		let drawer = (
 			<List style={{padding: 0}}>
-				<Link to="/unclaimed" onClick={this.menuItem}>
-					<ListItem button selected={this.state.path === "/unclaimed"}>
-						<ListItemIcon><AllInboxIcon /></ListItemIcon>
-						<ListItemText primary="Unclaimed" />
-					</ListItem>
-				</Link>
 				<Link to="/templates" onClick={this.menuItem}>
 					<ListItem button selected={this.state.path === "/templates"}>
 						<ListItemIcon><CommentIcon /></ListItemIcon>
 						<ListItemText primary="Templates" />
+					</ListItem>
+				</Link>
+				<Divider />
+				<Link to="/unclaimed" onClick={this.menuItem}>
+					<ListItem button selected={this.state.path === "/unclaimed"}>
+						<ListItemIcon><AllInboxIcon /></ListItemIcon>
+						<ListItemText primary="Unclaimed" />
 					</ListItem>
 				</Link>
 				{/*<Link to="/search" onClick={this.menuItem}>

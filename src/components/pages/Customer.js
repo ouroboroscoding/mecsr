@@ -19,8 +19,9 @@ import Tab from '@material-ui/core/Tab';
 // Customer components
 import DoseSpot from './customer/DoseSpot';
 import KNK from './customer/KNK';
-import SMS from './customer/SMS';
 import MIP from './customer/MIP';
+import Notes from './customer/Notes';
+import SMS from './customer/SMS';
 
 // Generic modules
 import Events from '../../generic/events';
@@ -42,6 +43,7 @@ export default class Customer extends React.Component {
 			customer: null,
 			customer_id: null,
 			mip: null,
+			notes: null,
 			orders: [],
 			patient_id: null,
 			prescriptions: null,
@@ -115,6 +117,7 @@ export default class Customer extends React.Component {
 					} else {
 						this.fetchKnkCustomer();
 						this.fetchMip();
+						this.fetchNotes();
 						this.fetchPatientId();
 						this.fetchShipping();
 					}
@@ -159,7 +162,7 @@ export default class Customer extends React.Component {
 
 		// Find the MIP using the phone number
 		Rest.read('monolith', 'customer/mip', {
-			id: this.state.customer_id
+			customerId: this.state.customer_id
 		}).done(res => {
 
 			// If there's an error
@@ -183,11 +186,40 @@ export default class Customer extends React.Component {
 		});
 	}
 
+	fetchNotes() {
+
+		// Find the MIP using the phone number
+		Rest.read('monolith', 'customer/notes', {
+			customerId: this.state.customer_id
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+
+				// Set the MIP
+				this.setState({
+					notes: res.data
+				});
+			}
+		});
+	}
+
 	fetchOrders() {
 
 		// Get the orders from the REST service
 		Rest.read('konnektive', 'customer/orders', {
-			id: this.state.customer.id
+			id: this.state.customer.id,
+			transactions: true
 		}).done(res => {
 
 			// If there's an error
@@ -340,6 +372,7 @@ export default class Customer extends React.Component {
 						<Tab label="SMS" />
 						<Tab label="KNK" />
 						<Tab label="MIP" />
+						<Tab label="Notes" />
 						<Tab label="Rx" />
 					</Tabs>
 				</AppBar>
@@ -364,7 +397,12 @@ export default class Customer extends React.Component {
 						mip={this.state.mip}
 					/>
 				</div>
-				<div className="prescriptions" style={{display: this.state.tab === 3 ? 'block' : 'none'}}>
+				<div className="notes" style={{display: this.state.tab === 3 ? 'block' : 'none'}}>
+					<Notes
+						notes={this.state.notes}
+					/>
+				</div>
+				<div className="prescriptions" style={{display: this.state.tab === 4 ? 'block' : 'none'}}>
 					<DoseSpot
 						prescriptions={this.state.prescriptions}
 					/>

@@ -1,15 +1,15 @@
-#unclaimed {
+#search {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
 
-	.header {
+	.form {
 		flex-grow: 0;
 		flex-shrink: 0;
-		padding: 10px;
+		padding: 20px 10px 10px;
 
-		label.MuiFormControlLabel-root {
-			margin-right: 5px;
+		.MuiFormControl-root {
+			width: 95%;
 		}
 	}
 

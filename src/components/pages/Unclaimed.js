@@ -10,15 +10,15 @@
 
 // NPM modules
 import React from 'react';
-import { Link } from 'react-router-dom';
 
 // Material UI
 import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
+
+// Components
+import MsgSummary from '../composites/MsgSummary';
 
 // Generic modules
 import Events from '../../generic/events';
@@ -27,89 +27,6 @@ import Tools from '../../generic/tools';
 
 // Local modules
 import Utils from '../../utils';
-
-// Regex
-const reReceived = /^Received at (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})(?: [AP]M)?\n([^]+)$/
-const reSent = /^Sent by (.+) at (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})(?: [AP]M)?\n([^]+)$/
-
-// Customer component
-function Customer(props) {
-
-	function claim() {
-		Events.trigger('claimedAdd', props.customerPhone, props.customerName);
-	}
-
-	function hide() {
-		props.onHide(props.customerPhone);
-	}
-
-	return (
-		<Paper className={props.numberOfOrders > 0 ? "record" : "record sales"}>
-			<Grid container spacing={3}>
-				<Grid item xs={6} sm={2}>
-					<p><strong>Actions:</strong></p>
-					<p><Button variant="contained" color="primary" size="large" onClick={hide}>Hide</Button></p>
-					<p><Link to={"/customer/" + props.customerPhone} onClick={claim}>
-						<Button variant="contained" color="primary" size="large">Claim</Button>
-					</Link></p>
-				</Grid>
-				<Grid item xs={6} sm={2}>
-					<p><strong>Customer:</strong></p>
-					<p>{props.customerName}</p>
-					<p>{props.customerPhone}</p>
-					<p>&nbsp;</p>
-					<p><strong>SMS Received:</strong> <span>{props.totalIncoming}</span></p>
-					<p><strong>SMS Sent:</strong> <span>{props.totalOutGoing === null ? '0' : props.totalOutGoing}</span></p>
-					<p>&nbsp;</p>
-					<p><strong>Orders:</strong> <span>{props.numberOfOrders === null ? '0' : props.numberOfOrders}</span></p>
-				</Grid>
-				<Grid item xs={12} sm={8} className="messages">
-					<p><strong>Last 3 messages:</strong></p>
-					{props.lastMsg.split('--------\n').slice(1,4).reverse().map((s,i) =>
-						<Message key={i} content={s} />
-					)}
-				</Grid>
-			</Grid>
-		</Paper>
-	);
-}
-
-// Message component
-function Message(props) {
-
-	// Init the message
-	let msg = {}
-
-	// Split the data based on type
-	if(props.content.slice(0,8) === 'Received') {
-		let lMatch = reReceived.exec(props.content);
-		msg.direction = 'Incoming';
-		msg.content = lMatch[2];
-		msg.date = lMatch[1];
-	} else {
-		let lMatch = reSent.exec(props.content);
-		msg.direction = 'Outgoing';
-		msg.content = lMatch[3];
-		msg.date = lMatch[2];
-		msg.from = lMatch[1];
-	}
-
-	return (
-		<div className={"message " + msg.direction}>
-			<div className="content">
-				{msg.content.split('\n').map((s,i) =>
-					<p key={i}>{s}</p>
-				)}
-			</div>
-			<div className="footer">
-				{msg.direction === 'Outgoing' &&
-					<span className="name">{msg.from} at </span>
-				}
-				<span className="date">{msg.date}</span>
-			</div>
-		</div>
-	);
-}
 
 // Unclaimed component
 export default class Unclaimed extends React.Component {
@@ -121,6 +38,7 @@ export default class Unclaimed extends React.Component {
 
 		// Initial state
 		this.state = {
+			filtered: [],
 			records: [],
 			sales: Utils.safeLocalStorage('unclaimed_sales', 'Y') === 'Y',
 			salesNoSent: Utils.safeLocalStorage('unclaimed_sales_no_sent', 'Y') === 'Y',
@@ -129,7 +47,6 @@ export default class Unclaimed extends React.Component {
 		}
 
 		// Bind methods
-		this.claim = this.claim.bind(this);
 		this.filter = this.filter.bind(this);
 		this.hide = this.hide.bind(this);
 		this.refresh = this.refresh.bind(this);
@@ -154,6 +71,7 @@ export default class Unclaimed extends React.Component {
 		// Track any signedIn/signedOut events
 		Events.add('signedIn', this.signedIn);
 		Events.add('signedOut', this.signedOut);
+		Events.add('Unclaimed', this.refresh);
 
 		// If we have a user
 		if(this.state.user) {
@@ -166,10 +84,7 @@ export default class Unclaimed extends React.Component {
 		// Stop tracking any signedIn/signedOut events
 		Events.remove('signedIn', this.signedIn);
 		Events.remove('signedOut', this.signedOut);
-	}
-
-	claim(number, name, callback) {
-		this.props.onClaim(number, name);
+		Events.remove('Unclaimed', this.refresh);
 	}
 
 	hide(number) {
@@ -233,46 +148,42 @@ export default class Unclaimed extends React.Component {
 
 				// Set the state
 				this.setState({
-					records: res.data
+					records: res.data,
+					filtered: this.filter(res.data, this.state)
 				});
 			}
 		});
 	}
 
-	filter(record, i) {
+	filter(records, state) {
 
-		// Do we return this record?
-		let bReturn = false;
+		// New filtered
+		let filtered = [];
 
-		// If the record has orders
-		if(record.numberOfOrders > 0) {
+		// Go through each record
+		for(let o of records) {
 
-			// If we have the support state
-			if(this.state.support) {
-				bReturn = true;
+			// If the record has orders
+			if(o.numberOfOrders > 0) {
+
+				// If we have the support state
+				if(state.support) {
+					filtered.push(o);
+				}
+			}
+
+			// Record has no orders and we have the sales state
+			else if(state.sales) {
+
+				// If it has sent messages
+				if(o.totalOutGoing > 0 || state.salesNoSent) {
+					filtered.push(o);
+				}
 			}
 		}
 
-		// Record has no orders and we have the sales state
-		else if(this.state.sales) {
-
-			// If it has sent messages
-			if(record.totalOutGoing > 0 || this.state.salesNoSent) {
-				bReturn = true;
-			}
-		}
-
-		// If we can return
-		if(bReturn) {
-			return (
-				<Customer
-					key={i}
-					onClaim={this.claim}
-					onHide={this.hide}
-					{...record}
-				/>
-			);
-		}
+		// Return the list
+		return filtered;
 	}
 
 	refresh() {
@@ -282,26 +193,37 @@ export default class Unclaimed extends React.Component {
 	render() {
 		return (
 			<Box id="unclaimed">
-				<Box className="filters">
-					<span className="title">Filters: </span>
-					<FormControlLabel
-						control={<Checkbox color="primary" checked={this.state.support} onChange={this.supportChanged} name="supportFilter" />}
-						label="Support"
-					/>
-					<span style={{marginRight: '16px'}}>/ </span>
-					<FormControlLabel
-						control={<Checkbox color="primary" checked={this.state.sales} onChange={this.salesChanged} name="salesFilter" />}
-						label="Sales"
-					/>
-					<span style={{marginRight: '16px'}}>( </span>
-					<FormControlLabel
-						control={<Checkbox color="primary" checked={this.state.salesNoSent} onChange={this.salesNoSentChanged} name="supportFilter" />}
-						label="No Sent"
-					/>
-					<span>)</span>
-				</Box>
-				<Box className="customers">
-					{this.state.records.map(this.filter)}
+				<Grid container spacing={0} className="header">
+					<Grid item xs={12} sm={6} md={4} className="filters">
+						<span className="title">Filters: </span>
+						<FormControlLabel
+							control={<Checkbox color="primary" checked={this.state.support} onChange={this.supportChanged} name="supportFilter" />}
+							label="Support"
+						/>
+						<span style={{marginRight: '5px'}}>/ </span>
+						<FormControlLabel
+							control={<Checkbox color="primary" checked={this.state.sales} onChange={this.salesChanged} name="salesFilter" />}
+							label="Sales"
+						/>
+						<span style={{marginRight: '5px'}}>( </span>
+						<FormControlLabel
+							control={<Checkbox color="primary" checked={this.state.salesNoSent} onChange={this.salesNoSentChanged} name="supportFilter" />}
+							label="No Sent"
+						/>
+						<span>)</span>
+					</Grid>
+					<Grid item xs={12} sm={6} md={4} className="count">
+						<span className="title">Count: </span><span>{this.state.filtered.length}</span>
+					</Grid>
+				</Grid>
+				<Box className="summaries">
+					{this.state.filtered.map((o,i) =>
+						<MsgSummary
+							key={i}
+							onHide={this.hide}
+							{...o}
+						/>
+					)}
 				</Box>
 			</Box>
 		)
@@ -313,12 +235,16 @@ export default class Unclaimed extends React.Component {
 		let bChecked = event.target.checked;
 
 		// Init the new state
-		let oState = {sales: bChecked}
+		let oState = Tools.clone(this.state);
+		oState.sales = bChecked;
 
 		// If it's not checked
 		if(!bChecked) {
 			oState.salesNoSent = false;
 		}
+
+		// Generate the new filter messages
+		oState.filtered = this.filter(this.state.records, oState);
 
 		// Set the new state
 		this.setState(oState, () => {
@@ -335,12 +261,16 @@ export default class Unclaimed extends React.Component {
 		let bChecked = event.target.checked;
 
 		// Init the new state
-		let oState = {salesNoSent: bChecked}
+		let oState = Tools.clone(this.state);
+		oState.salesNoSent = bChecked;
 
 		// If it's not checked
 		if(bChecked) {
 			oState.sales = true;
 		}
+
+		// Generate the new filter messages
+		oState.filtered = this.filter(this.state.records, oState);
 
 		this.setState(oState, () => {
 			localStorage.setItem('unclaimed_sales_no_sent', this.state.salesNoSent ? 'Y' : 'N')
@@ -366,9 +296,18 @@ export default class Unclaimed extends React.Component {
 	}
 
 	supportChanged(event) {
-		this.setState({
-			support: event.target.checked
-		}, () => {
+
+		// Get the new value
+		let bChecked = event.target.checked;
+
+		// Init the new state
+		let oState = Tools.clone(this.state);
+		oState.support = bChecked;
+
+		// Generate the new filter messages
+		oState.filtered = this.filter(this.state.records, oState);
+
+		this.setState(oState, () => {
 			localStorage.setItem('unclaimed_support', this.state.support ? 'Y' : 'N')
 		});
 	}

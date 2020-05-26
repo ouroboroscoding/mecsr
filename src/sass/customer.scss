@@ -8,14 +8,14 @@
 		flex-shrink: 0;
 	}
 
-	.messaging, .konnektive, .mip, .prescriptions {
+	.messaging, .konnektive, .mip, .notes, .prescriptions {
 		flex-basis: 0;
 		flex-grow: 1;
 		flex-shrink: 1;
 		overflow: auto;
 	}
 
-	.konnektive, .mip, .prescriptions {
+	.konnektive, .mip, .notes, .prescriptions {
 		padding: 10px;
 	}
 

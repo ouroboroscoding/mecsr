@@ -145,11 +145,11 @@ export default class SMS extends React.Component {
 								<FileCopyIcon />
 							</IconButton>
 						</Tooltip>
-						<Tooltip title="Call Customer">
+						{/*<Tooltip title="Call Customer">
 							<IconButton onClick={this.callPhone}>
 								<PhoneIcon />
 							</IconButton>
-						</Tooltip>
+						</Tooltip>*/}
 					</span>
 					<span className="title">Type: </span>
 					<span className="right20">{Tools.ucfirst(this.state.type)}</span>

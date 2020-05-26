@@ -161,7 +161,11 @@ function ResultsRowComponent(props) {
 						<VpnKeyIcon className="fakeAnchor" onClick={copyKey} />
 					</Tooltip>
 				):
-					props.data[props.fields[i]]
+					props.data[props.fields[i]].includes('\n') ?
+						props.data[props.fields[i]].split('\n').map((s,i) =>
+							<p key={i}>{s}</p>
+						) :
+						props.data[props.fields[i]]
 				}
 			</TableCell>
 		);

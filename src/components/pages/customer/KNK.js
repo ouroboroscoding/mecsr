@@ -89,7 +89,7 @@ export default function KNK(props) {
 											)}
 										</div>
 									</TableCell>
-									<TableCell className="notes">
+									<TableCell className="tracking">
 										<div>
 											{props.tracking.map((o,i) =>
 												<p>{o.link ?

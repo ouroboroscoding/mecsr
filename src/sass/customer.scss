@@ -1,0 +1,241 @@
+#customer {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+
+	header {
+		flex-grow: 0;
+		flex-shrink: 0;
+	}
+
+	.messaging, .konnektive, .mip, .notes, .prescriptions {
+		flex-basis: 0;
+		flex-grow: 1;
+		flex-shrink: 1;
+		overflow: auto;
+	}
+
+	.konnektive, .mip, .notes, .prescriptions {
+		padding: 10px;
+	}
+
+	.messaging {
+		display: flex;
+		flex-direction: column;
+
+		.info {
+			border-bottom: 1px solid grey;
+			flex-grow: 0;
+			flex-shrink: 0;
+			padding: 10px;
+
+			.MuiIconButton-root {
+				margin-top: -5px;
+				padding: 9px;
+			}
+
+			.MuiSvgIcon-root {
+				font-size: 70%;
+			}
+		}
+
+		.messages {
+			flex-basis: 0;
+			flex-grow: 1;
+			flex-shrink: 1;
+			overflow: auto;
+			padding: 10px;
+
+			.message:before {
+				content: '';
+				position: absolute;
+				width: 0;
+				height: 0;
+			}
+
+			.message {
+				border-radius: 10px;
+				margin-bottom: 10px;
+				padding: 10px;
+				position: relative;
+				width: 80%;
+
+				.content {
+					p {
+						font-size: 125%;
+					}
+				}
+			}
+
+			.message:after {
+				content: '';
+				position: absolute;
+				width: 0;
+				height: 0;
+			}
+
+			.Incoming:before {
+				border-top: 17px solid #97c6e3;
+				border-left: 16px solid transparent;
+				border-right: 16px solid transparent;
+				left: -17px;
+				top: -1px;
+			}
+
+			.Incoming {
+				background-color: #a8ddfd;
+				border: 1px solid #97c6e3;
+				margin-left: 20px;
+			}
+
+			.Incoming:after {
+				border-top: 15px solid #a8ddfd;
+				border-left: 15px solid transparent;
+				border-right: 15px solid transparent;
+				left: -15px;
+				top: 0;
+			}
+
+			.Outgoing:before {
+				border-bottom: 17px solid #dfd087;
+				border-left: 16px solid transparent;
+				border-right: 16px solid transparent;
+				bottom: -1px;
+				right: -17px;
+			}
+
+			.Outgoing {
+				background-color: #f8e896;
+				border: 1px solid #dfd087;
+				margin-left: calc(20% - 17px);
+
+				.footer {
+					text-align: right;
+				}
+			}
+
+			.Outgoing:after {
+				border-bottom: 15px solid #f8e896;
+				border-left: 15px solid transparent;
+				border-right: 15px solid transparent;
+				bottom: 0;
+				right: -15px;
+			}
+
+			.footer {
+				font-size: 80%;
+			}
+
+			.scroll {
+				flex-grow: 0;
+				flex-shrink: 0;
+				height: 0;
+				margin: 0;
+				padding: 0;
+			}
+		}
+
+		.templates {
+			flex-grow: 0;
+			flex-shrink: 0;
+			width: 100%;
+
+			.select {
+				width: 100%;
+			}
+		}
+
+		.send {
+			flex-grow: 0;
+			flex-shrink: 0;
+			display: flex;
+			flex-direction: row;
+			width: 100%;
+
+			.text {
+				flex-grow: 1;
+			}
+
+			button {
+				flex-grow: 0;
+				width: 150px;
+			}
+		}
+	}
+
+	.konnektive {
+
+		a {
+			color: #0077cc;
+		}
+
+		.customer {
+			margin-bottom: 10px;
+		}
+
+		th.MuiTableCell-stickyHeader {
+			background-color: #a0dcf9;
+		}
+
+		td {
+			vertical-align: top;
+		}
+
+		td.notes div, td.tracking div {
+			max-height: 200px;
+			overflow: auto;
+		}
+
+		.orders {
+
+			.product {
+				padding: 10px;
+			}
+		}
+	}
+
+	.mip {
+
+		.question {
+			margin-bottom: 10px;
+
+			.title, .answer, .options {
+				padding: 10px;
+			}
+
+			.title {
+				background-color: #a0dcf9;
+				display: flex;
+				flex-direction: row;
+				width: 100%;
+
+				span {
+					flex-grow: 1;
+					display: block;
+				}
+
+				svg {
+					flex-grow: 0;
+				}
+			}
+
+			.options {
+
+				.MuiFormControl-root, .MuiInputBase-root {
+					width: 100%;
+				}
+			}
+
+			.noanswer {
+				color: red;
+			}
+		}
+	}
+
+	.prescriptions {
+
+		.rx {
+			padding: 10px;
+		}
+	}
+}

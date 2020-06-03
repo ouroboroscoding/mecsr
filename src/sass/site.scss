@@ -1,0 +1,141 @@
+/* html5doctor reset */
+@import '3rd/reset';
+
+/* variables */
+$menu-width: 250px;
+
+/* components */
+@import 'format';
+@import 'header';
+@import 'msg_summary';
+
+/* pages */
+@import 'customer';
+@import 'search';
+@import 'templates';
+@import 'unclaimed';
+
+html, body, #root, #site, #content {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+		'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+		'Helvetica Neue', sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+a, a:active, a:hover, a:link, a:visited {
+	color: inherit;
+	text-decoration: none;
+}
+
+code {
+	font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+		monospace;
+}
+
+p {
+	margin-bottom: 10px;
+}
+
+span.title {
+	display: inline-block;
+	font-weight: bold;
+	font-size: 110%;
+	margin: 10px 20px 10px 0;
+	vertical-align: middle;
+}
+
+td {
+	vertical-align: top !important;
+}
+
+// Site
+#site {
+	display: flex;
+	flex-direction: column;
+}
+
+#content {
+	flex-grow: 1;
+	flex-basis: 0;
+	flex-shrink: 1;
+	margin-left: $menu-width;
+	width: calc(100% - #{$menu-width});
+}
+
+@media (max-width: 600px) {
+
+	#content {
+		width: 100%;
+		margin-left: 0;
+	}
+}
+
+.fakeAnchor {
+	cursor: pointer;
+}
+
+.form, .search {
+
+	.actions {
+		flex: 0 0 auto;
+		display: flex;
+		padding: 8px;
+		align-items: center;
+		justify-content: flex-end;
+
+		.MuiButtonBase-root {
+			margin-left: 10px;
+		}
+	}
+}
+
+.MuiPaper-root.padded {
+	margin-bottom: 20px;
+	padding: 10px;
+}
+
+.MuiTableContainer-root.results {
+	.MuiTableCell-root.actions {
+		.MuiSvgIcon-root {
+			margin-left: 10px;
+		}
+	}
+}
+
+.MuiTypography-h1, .MuiTypography-h2, .MuiTypography-h3,
+.MuiTypography-h4, .MuiTypography-h5, .MuiTypography-h6 {
+	margin-bottom: 5px;
+}
+
+.permissions {
+
+	.title {
+		font-weight: bold;
+	}
+
+	.name {
+		padding-top: 22px !important;
+	}
+}
+
+.pageHeader {
+	display: flex;
+
+	.title {
+		flex-grow: 1
+	}
+
+	.icon {
+		font-size: 3.5rem;
+	}
+}
+
+.right20 {
+	margin: 10px 20px 10px 0;
+}

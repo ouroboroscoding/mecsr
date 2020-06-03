@@ -1,0 +1,36 @@
+#header {
+	flex-grow: 0;
+	flex-shrink: 0;
+
+	.MuiAppBar-root {
+		margin-left: $menu-width;
+		width: calc(100% - #{$menu-width});
+
+		#loaderWrapper {
+			flex-grow: 1;
+			text-align: center;
+		}
+	}
+}
+
+#menu {
+	.close {
+		min-width: 25px;
+	}
+}
+
+.MuiDrawer-root {
+	.MuiPaper-root {
+		width: $menu-width;
+	}
+}
+
+@media (max-width: 600px) {
+
+	#header {
+		.MuiAppBar-root {
+			width: 100%;
+			margin-left: 0;
+		}
+	}
+}

@@ -23,7 +23,7 @@
   "scripts": {
     "start": "react-scripts start",
     "prod": "react-scripts build",
-    "uat": "env-cmd -f .env.staging react-scripts build",
+    "uat": "env-cmd -f .env.uat react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

@@ -17,10 +17,10 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
 // Customer components
-import DoseSpot from './customer/DoseSpot';
 import KNK from './customer/KNK';
 import MIP from './customer/MIP';
 import Notes from './customer/Notes';
+import RX from './customer/RX';
 import SMS from './customer/SMS';
 
 // Generic modules
@@ -277,8 +277,7 @@ export default class Customer extends React.Component {
 
 		// Find the MIP using the phone number
 		Rest.read('prescriptions', 'patient/prescriptions', {
-			patient_id: parseInt(id, 10),
-			clinician_id: parseInt(clinician, 10)
+			patient_id: parseInt(id, 10)
 		}).done(res => {
 
 			// If there's an error
@@ -403,7 +402,7 @@ export default class Customer extends React.Component {
 					/>
 				</div>
 				<div className="prescriptions" style={{display: this.state.tab === 4 ? 'block' : 'none'}}>
-					<DoseSpot
+					<RX
 						prescriptions={this.state.prescriptions}
 					/>
 				</div>

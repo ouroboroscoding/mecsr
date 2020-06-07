@@ -1,7 +1,7 @@
 /**
- * DoseSpot
+ * RX
  *
- * Shows a specific customer's prescriptions from DoseSpot
+ * Shows a specific customer's prescriptions
  *
  * @author Chris Nasr <bast@maleexcel.com>
  * @copyright MaleExcelMedical
@@ -14,8 +14,8 @@ import React from 'react';
 // Material UI
 import Paper from '@material-ui/core/Paper';
 
-// DoseSpot component
-export default function DoseSpot(props) {
+// RX component
+export default function RX(props) {
 
 	// If we're still loading
 	if(props.prescriptions === null) {

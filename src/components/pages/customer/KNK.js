@@ -61,12 +61,10 @@ export default function KNK(props) {
 							{props.customer &&
 								<TableRow>
 									<TableCell>
-										<p><strong>ID: </strong><a href={"https://crm.konnektive.com/customer/cs/details/?customerId=" + customer.id} target="_bank">{customer.id}</a></p>
+										<p><strong>ID: </strong><a href={"https://crm.konnektive.com/customer/cs/details/?customerId=" + customer.id} target="_blank" rel="noopener noreferrer">{customer.id}</a></p>
 										<p><strong>Campaign: </strong><span>{customer.campaign.name + ' (' + customer.campaign.type + ')'}</span></p>
 										<p><strong>Email: </strong><span>{customer.email}</span></p>
 										<p><strong>Phone: </strong><span>{customer.phone}</span></p>
-										<p><strong>Created: </strong><span>{customer.created}</span></p>
-										<p><strong>Updated: </strong><span>{customer.updated}</span></p>
 									</TableCell>
 									<TableCell>
 										<p><nobr>{customer.billing.firstName + ' ' + customer.billing.lastName}</nobr></p>

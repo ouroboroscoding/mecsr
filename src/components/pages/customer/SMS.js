@@ -20,7 +20,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 // Material UI Icons
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import PhoneIcon from '@material-ui/icons/Phone';
+//import PhoneIcon from '@material-ui/icons/Phone';
 
 // Generic modules
 import Clipboard from '../../../generic/clipboard';

@@ -42,7 +42,7 @@ export default class Customer extends React.Component {
 		this.state = {
 			customer: null,
 			customer_id: null,
-			mip: null,
+			mips: null,
 			notes: null,
 			orders: [],
 			patient_id: null,
@@ -111,12 +111,12 @@ export default class Customer extends React.Component {
 					if(res.data === 0) {
 						this.setState({
 							customer: 0,
-							mip: 0,
+							mips: 0,
 							prescriptions: 0
 						});
 					} else {
 						this.fetchKnkCustomer();
-						this.fetchMip();
+						this.fetchMips();
 						this.fetchNotes();
 						this.fetchPatientId();
 						this.fetchShipping();
@@ -158,10 +158,10 @@ export default class Customer extends React.Component {
 		});
 	}
 
-	fetchMip() {
+	fetchMips() {
 
 		// Find the MIP using the phone number
-		Rest.read('monolith', 'customer/mip', {
+		Rest.read('monolith', 'customer/mips', {
 			customerId: this.state.customer_id
 		}).done(res => {
 
@@ -180,7 +180,7 @@ export default class Customer extends React.Component {
 
 				// Set the MIP
 				this.setState({
-					mip: res.data
+					mips: res.data
 				});
 			}
 		});
@@ -393,7 +393,8 @@ export default class Customer extends React.Component {
 				</div>
 				<div className="mip" style={{display: this.state.tab === 2 ? 'block' : 'none'}}>
 					<MIP
-						mip={this.state.mip}
+						customer={this.state.customer}
+						mips={this.state.mips}
 					/>
 				</div>
 				<div className="notes" style={{display: this.state.tab === 3 ? 'block' : 'none'}}>

@@ -23,7 +23,6 @@ import MsgSummary from '../composites/MsgSummary';
 // Generic modules
 import Events from '../../generic/events';
 import Rest from '../../generic/rest';
-import Tools from '../../generic/tools';
 
 // Local modules
 import Utils from '../../utils';

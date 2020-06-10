@@ -196,6 +196,19 @@
 
 	.mip {
 
+		.MuiExpansionPanelSummary-root {
+			background-color: #6b90d4;
+			color: #ffffff;
+		}
+
+		.MuiExpansionPanelDetails-root {
+			display: block;
+		}
+
+		.MuiGrid-item {
+			text-align: center;
+		}
+
 		.question {
 			margin-bottom: 10px;
 

@@ -73,7 +73,7 @@ function GenericTemplates(props) {
 		} else {
 			templatesSet(null);
 		}
-
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [props.user]); // React to user changes
 
 	function createSuccess(template) {

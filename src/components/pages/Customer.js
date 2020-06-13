@@ -395,6 +395,7 @@ export default class Customer extends React.Component {
 					<MIP
 						customer={this.state.customer}
 						mips={this.state.mips}
+						user={this.props.user}
 					/>
 				</div>
 				<div className="notes" style={{display: this.state.tab === 3 ? 'block' : 'none'}}>

@@ -284,7 +284,12 @@ export default function MIP(props) {
 	}
 
 	// Generate base MIP link
-	let sMipUrl = 'https://' + process.env.REACT_APP_MIP_DOMAIN + '/mip/form/callcenter?';
+	let sMipUrl = 'https://' + process.env.REACT_APP_MIP_DOMAIN + '/mip/form/callcenter?affId=memo&';
+
+	// If we have a user
+	if(props.user) {
+		sMipUrl += 'agentId=' + encodeURIComponent(props.user.userName) + '&';
+	}
 
 	// If we have customer info
 	if(props.customer) {

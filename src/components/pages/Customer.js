@@ -117,7 +117,6 @@ export default class Customer extends React.Component {
 					} else {
 						this.fetchKnkCustomer();
 						this.fetchMips();
-						this.fetchNotes();
 						this.fetchPatientId();
 						this.fetchShipping();
 					}
@@ -181,34 +180,6 @@ export default class Customer extends React.Component {
 				// Set the MIP
 				this.setState({
 					mips: res.data
-				});
-			}
-		});
-	}
-
-	fetchNotes() {
-
-		// Find the MIP using the phone number
-		Rest.read('monolith', 'customer/notes', {
-			customerId: this.state.customer_id
-		}).done(res => {
-
-			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-
-			// If there's a warning
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if('data' in res) {
-
-				// Set the MIP
-				this.setState({
-					notes: res.data
 				});
 			}
 		});
@@ -398,9 +369,11 @@ export default class Customer extends React.Component {
 						user={this.props.user}
 					/>
 				</div>
-				<div className="notes" style={{display: this.state.tab === 3 ? 'block' : 'none'}}>
+				<div className="notes" style={{display: this.state.tab === 3 ? 'flex' : 'none'}}>
 					<Notes
-						notes={this.state.notes}
+						customerId={this.state.customer_id}
+						user={this.props.user}
+						visible={this.state.tab === 3}
 					/>
 				</div>
 				<div className="prescriptions" style={{display: this.state.tab === 4 ? 'block' : 'none'}}>

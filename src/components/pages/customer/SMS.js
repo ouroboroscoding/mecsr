@@ -86,7 +86,7 @@ export default class SMS extends React.Component {
 
 		// Fetch existing messages
 		if(this.props.user) {
-			this.fetch();
+			this.fetch('auto');
 		}
 	}
 

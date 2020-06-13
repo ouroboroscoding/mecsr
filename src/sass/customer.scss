@@ -15,11 +15,11 @@
 		overflow: auto;
 	}
 
-	.konnektive, .mip, .notes, .prescriptions {
+	.konnektive, .mip, .prescriptions {
 		padding: 10px;
 	}
 
-	.messaging {
+	.messaging, .notes {
 		display: flex;
 		flex-direction: column;
 
@@ -121,6 +121,34 @@
 				bottom: 0;
 				right: -15px;
 			}
+
+			.Outgoing.Doctor:before {
+				border-bottom-color: #8ce087;
+			}
+
+			.Outgoing.Doctor {
+				background-color: #a5f896;
+				border-color: #8ce087;
+			}
+
+			.Outgoing.Doctor:after {
+				border-bottom-color: #a5f896;
+			}
+
+			.Outgoing.System:before {
+				border-bottom-color: #9a9ba4;
+			}
+
+			.Outgoing.System {
+				background-color: #b3b3b3;
+				border-color: #9a9ba4;
+			}
+
+			.Outgoing.System:after {
+				border-bottom-color: #b3b3b3;
+			}
+
+			/* 19180F subtract this from primary color (background-color) */
 
 			.footer {
 				font-size: 80%;

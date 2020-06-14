@@ -15,7 +15,6 @@ import { Link } from 'react-router-dom';
 // Material UI
 import AppBar from '@material-ui/core/AppBar';
 import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
 import Drawer from '@material-ui/core/Drawer';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
@@ -25,18 +24,22 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Toolbar from '@material-ui/core/Toolbar';
+import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
 import AllInboxIcon from '@material-ui/icons/AllInbox';
 import CancelIcon from '@material-ui/icons/Cancel';
 import CommentIcon from '@material-ui/icons/Comment';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import MenuIcon from '@material-ui/icons/Menu';
 import NewReleasesIcon from '@material-ui/icons/NewReleases';
+import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import PhoneIcon from '@material-ui/icons/Phone';
 import SearchIcon from '@material-ui/icons/Search';
 
 // Local components
+import Account from './Account';
 import Loader from './Loader';
 
 // Generic modules
@@ -57,6 +60,7 @@ class Header extends React.Component {
 
 		// Initialise the state
 		this.state = {
+			"account": false,
 			"claimed": [],
 			"mobile": document.documentElement.clientWidth < 600,
 			"menu": false,
@@ -65,6 +69,7 @@ class Header extends React.Component {
 		}
 
 		// Bind methods to this instance
+		this.accountToggle = this.accountToggle.bind(this);
 		this.claimedAdd = this.claimedAdd.bind(this);
 		this.claimedRemove = this.claimedRemove.bind(this);
 		this.menuClose = this.menuClose.bind(this);
@@ -99,6 +104,10 @@ class Header extends React.Component {
 
 		// Stop checking for new messages
 		clearInterval(this.iNewMessages);
+	}
+
+	accountToggle() {
+		this.setState({"account": !this.state.account});
 	}
 
 	claimedAdd(number, name) {
@@ -384,6 +393,12 @@ class Header extends React.Component {
 
 		return (
 			<div id="header">
+				{this.state.account &&
+					<Account
+						onCancel={this.accountToggle}
+						user={this.state.user}
+					/>
+				}
 				<AppBar position="relative">
 					<Toolbar>
 						{this.state.mobile &&
@@ -400,7 +415,18 @@ class Header extends React.Component {
 							<Loader />
 						</div>
 						{this.state.user &&
-							<Button color="inherit" onClick={this.signout}>Sign Out</Button>
+							<React.Fragment>
+								<Tooltip title="Edit User">
+									<IconButton onClick={this.accountToggle}>
+										<PermIdentityIcon />
+									</IconButton>
+								</Tooltip>
+								<Tooltip title="Sign Out">
+									<IconButton onClick={this.signout}>
+										<ExitToAppIcon />
+									</IconButton>
+								</Tooltip>
+							</React.Fragment>
 						}
 					</Toolbar>
 				</AppBar>

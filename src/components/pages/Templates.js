@@ -152,11 +152,10 @@ function GenericTemplates(props) {
 				<Paper className="padded">
 					<FormComponent
 						cancel={createToggle}
-						errors={{1200: "Email already in use", 1204: "Password not strong enough"}}
-						name={props.createTitle}
 						noun={props.noun}
 						service="csr"
 						success={createSuccess}
+						title="Create New"
 						tree={props.tree}
 						type="create"
 					/>

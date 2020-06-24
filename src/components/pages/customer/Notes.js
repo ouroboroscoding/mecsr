@@ -144,12 +144,12 @@ export default class Notes extends React.Component {
 
 		// If we're still loading
 		if(this.state.notes === null) {
-			notes = <p style={{padding: '10px'}}>Loading...</p>
+			notes = <p>Loading...</p>
 		}
 
 		// If there's no notes associated
 		else if(this.state.notes === 0 || this.state.notes.length === 0) {
-			notes = <p style={{padding: '10px'}}>No notes found for this customer</p>
+			notes = <p>No notes found for this customer</p>
 		}
 
 		// Else, process the notes

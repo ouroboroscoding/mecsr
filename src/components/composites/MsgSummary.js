@@ -10,7 +10,6 @@
 
 // NPM modules
 import React from 'react';
-import { Link } from 'react-router-dom';
 
 // Material UI
 import Button from '@material-ui/core/Button';
@@ -83,9 +82,7 @@ export default function MsgSummary(props) {
 					{props.claimedAt ?
 						<p>Claimed by {props.claimedBy} at {props.claimedAt}</p>
 					:
-						<p><Link to={"/customer/" + props.customerPhone} onClick={claim}>
-							<Button variant="contained" color="primary" size="large">Claim</Button>
-						</Link></p>
+						<p><Button variant="contained" color="primary" size="large" onClick={claim}>Claim</Button></p>
 					}
 				</Grid>
 				<Grid item xs={6} sm={2}>

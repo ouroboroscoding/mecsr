@@ -19,6 +19,10 @@ const rePhone = /^1?(\d{3})(\d{3})(\d{4})$/
  */
 export default {
 
+	customerPath: function(phone, id) {
+		return '/customer/' + phone + '/' + id;
+	},
+
 	date: function(ts) {
 		if(typeof ts === 'number') {
 			ts = new Date(ts*1000);

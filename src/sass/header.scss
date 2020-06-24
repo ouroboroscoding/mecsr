@@ -18,8 +18,35 @@
 }
 
 #menu {
-	.close {
-		min-width: 25px;
+
+	.MuiListItemAvatar-root {
+		height: 100px;
+	}
+
+	.customerActions {
+		display: flex;
+		flex-direction: row;
+
+		.tooltip {
+			display: inline-block;
+			flex-grow: 1
+		}
+
+		button {
+			padding: 5px;
+		}
+
+		.close:hover {
+			color: red;
+		}
+
+		.escalate:hover {
+			color: yellow;
+		}
+
+		.resolve:hover {
+			color: green;
+		}
 	}
 }
 

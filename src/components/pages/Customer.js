@@ -41,7 +41,6 @@ export default class Customer extends React.Component {
 		// Initial state
 		this.state = {
 			customer: null,
-			customer_id: null,
 			mips: null,
 			notes: null,
 			orders: [],
@@ -68,9 +67,18 @@ export default class Customer extends React.Component {
 		// If we have a user logged in
 		if(this.props.user) {
 
-			// If we have don't have a customer id
-			if(this.state.customer_id === null) {
-				this.fetchCustomerId();
+			// If we have a customer ID
+			if(this.props.customerId) {
+				this.fetchKnkCustomer();
+				this.fetchMips();
+				this.fetchPatientId();
+				this.fetchShipping();
+			} else {
+				this.setState({
+					customer: 0,
+					mips: 0,
+					prescriptions: 0
+				});
 			}
 
 			// Fetch templates
@@ -84,52 +92,11 @@ export default class Customer extends React.Component {
 		Events.remove('newMessage', this.newMessage);
 	}
 
-	fetchCustomerId() {
-
-		// Try to get the customer ID by phone number
-		Rest.read('monolith', 'customer/id/byPhone', {
-			"phoneNumber": this.props.phoneNumber
-		}).done(res => {
-
-			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-
-			// If there's a warning
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if('data' in res) {
-
-				// Set the customer ID
-				this.setState({
-					customer_id: res.data
-				}, () => {
-					if(res.data === 0) {
-						this.setState({
-							customer: 0,
-							mips: 0,
-							prescriptions: 0
-						});
-					} else {
-						this.fetchKnkCustomer();
-						this.fetchMips();
-						this.fetchPatientId();
-						this.fetchShipping();
-					}
-				});
-			}
-		});
-	}
-
 	fetchKnkCustomer(id) {
 
 		// Find the customer ID
 		Rest.read('konnektive', 'customer', {
-			id: this.state.customer_id
+			id: this.props.customerId
 		}).done(res => {
 
 			// If there's an error
@@ -161,7 +128,7 @@ export default class Customer extends React.Component {
 
 		// Find the MIP using the phone number
 		Rest.read('monolith', 'customer/mips', {
-			customerId: this.state.customer_id
+			customerId: this.props.customerId
 		}).done(res => {
 
 			// If there's an error
@@ -218,7 +185,7 @@ export default class Customer extends React.Component {
 
 		// Find the MIP using the phone number
 		Rest.read('monolith', 'customer/dsid', {
-			customerId: this.state.customer_id
+			customerId: this.props.customerId
 		}).done(res => {
 
 			// If there's an error
@@ -234,12 +201,20 @@ export default class Customer extends React.Component {
 			// If there's data
 			if('data' in res) {
 
+				// New state
+				let oState = {
+					"patient_id": res.data
+				}
+
 				// If there's an id
 				if(res.data) {
 					this.fetchPrescriptions(res.data, this.props.user.dsClinicianId);
 				} else {
-					this.setState({patient_id: 0});
+					oState.prescriptions = 0;
 				}
+
+				// Set the state
+				this.setState(oState);
 			}
 		});
 	}
@@ -276,7 +251,7 @@ export default class Customer extends React.Component {
 
 		// Fetch them from the server
 		Rest.read('monolith', 'customer/shipping', {
-			customerId: this.state.customer_id
+			customerId: this.props.customerId
 		}).done(res => {
 
 			// If there's an error
@@ -371,7 +346,7 @@ export default class Customer extends React.Component {
 				</div>
 				<div className="notes" style={{display: this.state.tab === 3 ? 'flex' : 'none'}}>
 					<Notes
-						customerId={this.state.customer_id}
+						customerId={this.props.customerId}
 						user={this.props.user}
 						visible={this.state.tab === 3}
 					/>

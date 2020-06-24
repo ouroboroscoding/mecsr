@@ -9,13 +9,16 @@
  */
 
 // NPM modules
-import React from 'react';
-import { BrowserRouter, Switch, Route } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Switch, Route, useHistory } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
 
 // Generic modules
 import Events from '../generic/events';
 import Rest from '../generic/rest';
+
+// Hooks
+import { useSignedIn, useSignedOut } from '../hooks/user';
 
 // Composite component modules
 import Alerts from './composites/Alerts';
@@ -68,99 +71,64 @@ window.Events = Events;
 LoaderHide();
 
 // Site
-class Site extends React.Component {
+function Site(props) {
 
-	constructor(props) {
+	// State
+	let [user, setUser] = useState(false);
 
-		// Call the parent constructor
-		super(props);
+	// Hooks
+	let history = useHistory();
 
-		// Initialise the state
-		this.state = {
-			"user": false
-		};
+	// User hooks
+	useSignedIn(user => setUser(user));
+	useSignedOut(() => setUser(false));
 
-		// Class vars
-		this.iNewMessages = 0;
-
-		// Refs
-		this.header = null;
-
-		// Binds methods to this instance
-		this.signedIn = this.signedIn.bind(this);
-		this.signedOut = this.signedOut.bind(this);
-	}
-
-	componentDidMount() {
-
-		// Track any signedIn/signedOut events
-		Events.add('signedIn', this.signedIn);
-		Events.add('signedOut', this.signedOut);
-	}
-
-	componentWillUnmount() {
-
-		// Stop tracking any signedIn/signedOut events
-		Events.remove('signedIn', this.signedIn);
-		Events.remove('signedOut', this.signedOut);
-	}
-
-	render() {
-		return (
-			<SnackbarProvider maxSnack={3}>
-				<Alerts />
-				<BrowserRouter>
-					<div id="site">
-						{this.state.user === false &&
-							<Signin />
-						}
-						<Header
-							path={window.location.pathname}
-							ref={el => this.header = el}
-							user={this.state.user}
-						/>
-						<div id="content">
-							<Switch>
-								<Route path="/unclaimed">
-									<Unclaimed
-										user={this.state.user}
-									/>
-								</Route>
-								<Route path="/search">
-									<Search
-										user={this.state.user}
-									/>
-								</Route>
-								<Route path="/templates">
-									<Templates
-										user={this.state.user}
-									/>
-								</Route>
-								<Route
-									path="/customer/:phoneNumber"
-									component={({match: {params:{phoneNumber}}}) => (
-										<Customer key={phoneNumber} phoneNumber={phoneNumber} user={this.state.user} />
-									)}
+	// Return the Site
+	return (
+		<SnackbarProvider maxSnack={3}>
+			<Alerts />
+			<div id="site">
+				{user === false &&
+					<Signin />
+				}
+				<Header
+					history={history}
+					path={window.location.pathname}
+					user={user}
+				/>
+				<div id="content">
+					<Switch>
+						<Route path="/unclaimed">
+							<Unclaimed
+								user={user}
+							/>
+						</Route>
+						<Route path="/search">
+							<Search
+								user={user}
+							/>
+						</Route>
+						<Route path="/templates">
+							<Templates
+								user={user}
+							/>
+						</Route>
+						<Route
+							path="/customer/:phoneNumber/:customerId"
+							component={({match: {params:{phoneNumber, customerId}}}) => (
+								<Customer
+									key={phoneNumber}
+									customerId={customerId}
+									phoneNumber={phoneNumber}
+									user={user}
 								/>
-							</Switch>
-						</div>
-					</div>
-				</BrowserRouter>
-			</SnackbarProvider>
-		);
-	}
-
-	signedIn(user) {
-
-		// Set the user
-		this.setState({"user": user});
-	}
-
-	signedOut() {
-
-		// Remove the user
-		this.setState({"user": false});
-	}
+							)}
+						/>
+					</Switch>
+				</div>
+			</div>
+		</SnackbarProvider>
+	);
 }
 
 // Export the app

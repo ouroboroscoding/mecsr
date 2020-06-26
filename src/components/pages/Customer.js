@@ -322,7 +322,7 @@ export default class Customer extends React.Component {
 			}
 
 			// If there's data
-			if(res.data) {
+			if('data' in res) {
 
 				// Set the state
 				this.setState({

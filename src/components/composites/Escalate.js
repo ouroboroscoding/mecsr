@@ -91,7 +91,7 @@ export default function Escalate(props) {
 
 			// Send the message to the server
 			Rest.create('monolith', 'customer/note', {
-				action: 'CSR Note',
+				action: 'CSR Note - Escalated',
 				content: content,
 				customer_id: props.customerId
 			}).done(res => {

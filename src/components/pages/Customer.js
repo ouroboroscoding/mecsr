@@ -48,6 +48,7 @@ export default class Customer extends React.Component {
 			prescriptions: null,
 			shipping: [],
 			sms_tpls: [],
+			trigger: null,
 			tab: 0
 		}
 
@@ -73,11 +74,13 @@ export default class Customer extends React.Component {
 				this.fetchMips();
 				this.fetchPatientId();
 				this.fetchShipping();
+				this.fetchTrigger();
 			} else {
 				this.setState({
 					customer: 0,
 					mips: 0,
-					prescriptions: 0
+					prescriptions: 0,
+					trigger: 0
 				});
 			}
 
@@ -272,7 +275,7 @@ export default class Customer extends React.Component {
 					shipping: res.data
 				});
 			}
-		})
+		});
 	}
 
 	fetchSMSTemplates() {
@@ -296,6 +299,34 @@ export default class Customer extends React.Component {
 				// Set the state
 				this.setState({
 					sms_tpls: res.data
+				});
+			}
+		});
+	}
+
+	fetchTrigger() {
+
+		// Fetch them from the server
+		Rest.read('monolith', 'customer/trigger/info', {
+			customerId: this.props.customerId
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				// Set the state
+				this.setState({
+					trigger: res.data
 				});
 			}
 		});
@@ -354,6 +385,7 @@ export default class Customer extends React.Component {
 				<div className="prescriptions" style={{display: this.state.tab === 4 ? 'block' : 'none'}}>
 					<RX
 						prescriptions={this.state.prescriptions}
+						trigger={this.state.trigger}
 					/>
 				</div>
 			</div>

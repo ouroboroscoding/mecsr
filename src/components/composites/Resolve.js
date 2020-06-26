@@ -43,7 +43,7 @@ export default function Resolve(props) {
 
 			// Send the message to the server
 			Rest.create('monolith', 'customer/note', {
-				action: 'CSR Note',
+				action: 'CSR Note - Resolved',
 				content: content,
 				customer_id: props.customerId
 			}).done(res => {

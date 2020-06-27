@@ -42,7 +42,6 @@ export default class Customer extends React.Component {
 		this.state = {
 			customer: null,
 			mips: null,
-			notes: null,
 			orders: [],
 			patient_id: null,
 			prescriptions: null,

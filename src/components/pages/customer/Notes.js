@@ -13,6 +13,7 @@ import React from 'react';
 
 // Material UI
 import Button from '@material-ui/core/Button';
+import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 
 // Generic modules
@@ -22,6 +23,9 @@ import Tools from '../../../generic/tools';
 
 // Local modules
 import Utils from '../../../utils';
+
+// Data
+import lLabels from '../../../definitions/status_labels.json';
 
 // Note Component
 function Note(props) {
@@ -69,13 +73,15 @@ export default class Notes extends React.Component {
 
 		// Initial state
 		this.state = {
-			notes: []
+			notes: [],
+			status: null
 		}
 
 		// Sometimes I loathe react
 		this.scrolled = false;
 
 		// Refs
+		this.label = null;
 		this.messagesBottom = null;
 		this.sendEl = null;
 		this.text = null;
@@ -110,7 +116,7 @@ export default class Notes extends React.Component {
 
 	fetch(type) {
 
-		// Find the MIP using the phone number
+		// Find the Notes using the customer ID
 		Rest.read('monolith', 'customer/notes', {
 			customerId: this.props.customerId
 		}).done(res => {
@@ -130,7 +136,8 @@ export default class Notes extends React.Component {
 
 				// Set the MIP
 				this.setState({
-					notes: res.data
+					notes: res.data.notes,
+					status: res.data.status
 				}, () => {
 					this.scrollToBottom(type);
 				});
@@ -169,6 +176,21 @@ export default class Notes extends React.Component {
 					{notes}
 					<div className="scroll" ref={el => this.messagesBottom = el} />
 				</div>
+				{this.state.status &&
+					<div className="label">
+						<Select
+							className='select'
+							defaultValue={this.state.status.label || ''}
+							native
+							inputRef={ref => this.label = ref}
+							variant="outlined"
+						>
+							{lLabels.map((s,i) =>
+								<option key={i} value={s}>{s}</option>
+							)}
+						</Select>
+					</div>
+				}
 				<div className="send">
 					<TextField
 						className="text"
@@ -199,13 +221,44 @@ export default class Notes extends React.Component {
 
 		// Get the content of the note
 		let content = this.text.value;
+		let label = null
+
+		// If there's nothing, do nothing
+		if(content.trim() === '') {
+			return;
+		}
+
+		// Init the data
+		let oData = {
+			action: 'CSR Note',
+			content: content
+		}
+
+		// If we have an order
+		if(this.state.status) {
+
+			// Get the label
+			label = this.label.value;
+
+			// If the label changed, send it with the order ID
+			if(this.state.status.label !== label) {
+				oData.label = label;
+				oData.order_id = this.state.status.orderId;
+			}
+
+			// Else, send the customer ID
+			else {
+				oData.customer_id = this.props.customerId
+			}
+		}
+
+		// No status means it's just a customer note
+		else {
+			oData.customer_id = this.props.customerId
+		}
 
 		// Send the message to the server
-		Rest.create('monolith', 'customer/note', {
-			action: 'CSR Note',
-			content: content,
-			customer_id: this.props.customerId
-		}).done(res => {
+		Rest.create('monolith', 'customer/note', oData).done(res => {
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
@@ -220,14 +273,17 @@ export default class Notes extends React.Component {
 			// If we're ok
 			if(res.data) {
 
-				// Clear the message
+				// Clear the note content
 				this.text.value = '';
 
-				// Clone the current notes
-				let notes = Tools.clone(this.state.notes);
+				// Init new state
+				let oState = {
+					notes: Tools.clone(this.state.notes),
+					status: Tools.clone(this.state.status)
+				}
 
 				// Add the new one to the end
-				notes.push({
+				oState.notes.push({
 					action: 'CSR Note',
 					note: content,
 					createdBy: this.props.user.firstName + ' ' + this.props.user.lastName,
@@ -235,10 +291,13 @@ export default class Notes extends React.Component {
 					userRole: 'CSR'
 				});
 
+				// If we have a status
+				if(this.state.status) {
+					oState.status.label = label;
+				}
+
 				// Set the new state
-				this.setState({
-					notes: notes
-				}, () => {
+				this.setState(oState, () => {
 					this.scrollToBottom("smooth");
 				});
 			}

@@ -187,7 +187,7 @@ function QuestionOptions(props) {
 
 	// Return the options plus the submit/cancel buttons
 	return (
-		<Box className="options form">
+		<Box className="qoptions form">
 			{field}
 			<Box className="actions">
 				<Button variant="contained" color="secondary" onClick={props.onCancel}>Cancel</Button>
@@ -245,7 +245,7 @@ function Question(props) {
 
 	return (
 		<Paper className="question">
-			<Box className="title">
+			<Box className="qtitle">
 				<span>{props.question.title}</span>
 				{props.edittable &&
 					<Tooltip title="Edit the answer">
@@ -262,7 +262,7 @@ function Question(props) {
 					type={props.question.type}
 				/>
 			:
-				<Box className="answer">
+				<Box className="qanswer">
 					{answer ? answer.split('|').join(', ') : <span className="noanswer">No Answer</span>}
 				</Box>
 			}

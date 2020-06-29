@@ -240,11 +240,11 @@
 		.question {
 			margin-bottom: 10px;
 
-			.title, .answer, .options {
+			.qtitle, .qanswer, .qoptions {
 				padding: 10px;
 			}
 
-			.title {
+			.qtitle {
 				background-color: #a0dcf9;
 				display: flex;
 				flex-direction: row;
@@ -260,7 +260,7 @@
 				}
 			}
 
-			.options {
+			.qoptions {
 
 				.MuiFormControl-root, .MuiInputBase-root {
 					width: 100%;

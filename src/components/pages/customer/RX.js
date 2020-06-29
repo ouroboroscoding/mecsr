@@ -135,7 +135,7 @@ export default function RX(props) {
 			{trigger}
 			<div className="pageHeader">
 				<div ref={rxTitle} className="title">Prescriptions</div>
-				{props.patientId && props.user.dsClinicianId !== '' &&
+				{(props.patientId && props.user.dsClinicianId !== '') &&
 					<Tooltip title="Toggle DoseSpot SSO">
 						<IconButton onClick={toggleSSO}>
 							{sso ? <CloseIcon /> : <EditIcon />}
@@ -145,8 +145,9 @@ export default function RX(props) {
 			</div>
 			{sso &&
 				<iframe
-					src={sso}
 					height={window.innerHeight - 170}
+					src={sso}
+					title="DoseSpot SSO"
 					width="100%"
 				/>
 			}

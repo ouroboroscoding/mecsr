@@ -129,13 +129,16 @@ export default function RX(props) {
 		);
 	}
 
+	// DoseSpot SSO
+	let bSSO = (props.patientId && props.user.dsClinicianId !== '')
+
 	// Render
 	return (
 		<React.Fragment>
 			{trigger}
 			<div className="pageHeader">
 				<div ref={rxTitle} className="title">Prescriptions</div>
-				{(props.patientId && props.user.dsClinicianId !== '') &&
+				{bSSO &&
 					<Tooltip title="Toggle DoseSpot SSO">
 						<IconButton onClick={toggleSSO}>
 							{sso ? <CloseIcon /> : <EditIcon />}

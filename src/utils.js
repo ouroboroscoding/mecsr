@@ -138,10 +138,5 @@ export default {
 
 		// Failed to process error
 		return false;
-	},
-
-	safeLocalStorage(name, default_) {
-		let value = localStorage.getItem(name);
-		return value === null ? default_ : value;
 	}
 }

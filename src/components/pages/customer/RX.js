@@ -9,13 +9,70 @@
  */
 
 // NPM modules
-import React from 'react';
+import React, { useRef, useState } from 'react';
 
 // Material UI
+import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
+import Tooltip from '@material-ui/core/Tooltip';
+
+// Material UI Icons
+import CloseIcon from '@material-ui/icons/Close';
+import EditIcon from '@material-ui/icons/Edit';
+
+// Generic modules
+import Events from '../../../generic/events';
+import Rest from '../../../generic/rest';
+
+// Local modules
+import Utils from '../../../utils';
 
 // RX component
 export default function RX(props) {
+
+	// State
+	let [sso, ssoSet] = useState(false);
+
+	// Refs
+	let rxTitle = useRef();
+
+	// Toggle the SSO iframe
+	function toggleSSO() {
+
+		// If we have an SSO, hide the iframe
+		if(sso) {
+			ssoSet(false);
+		}
+
+		// Else fetch the SSO from the service
+		else {
+
+			// Request it from the server
+			Rest.read('prescriptions', 'patient/sso', {
+				patient_id: parseInt(props.patientId, 10),
+				clinician_id: parseInt(props.user.dsClinicianId, 10)
+			}).done(res => {
+
+				// If there's an error
+				if(res.error && !Utils.restError(res.error)) {
+					Events.trigger('error', JSON.stringify(res.error));
+				}
+
+				// If there's a warning
+				if(res.warning) {
+					Events.trigger('warning', JSON.stringify(res.warning));
+				}
+
+				// If there's data
+				if(res.data) {
+					ssoSet(res.data);
+					setTimeout(() => {
+						rxTitle.current.scrollIntoView({ behavior: "smooth"});
+					}, 200);
+				}
+			});
+		}
+	}
 
 	// Trigger
 	let trigger = null;
@@ -55,7 +112,6 @@ export default function RX(props) {
 	else {
 		prescriptions = (
 			<React.Fragment>
-				<div className="title">Prescriptions</div>
 				{props.prescriptions.map((o, i) =>
 					<Paper key={i} className="rx">
 						<p><strong>Pharmacy: </strong><span>{o.PharmacyName}</span></p>
@@ -77,6 +133,23 @@ export default function RX(props) {
 	return (
 		<React.Fragment>
 			{trigger}
+			<div className="pageHeader">
+				<div ref={rxTitle} className="title">Prescriptions</div>
+				{props.patientId && props.user.dsClinicianId !== '' &&
+					<Tooltip title="Toggle DoseSpot SSO">
+						<IconButton onClick={toggleSSO}>
+							{sso ? <CloseIcon /> : <EditIcon />}
+						</IconButton>
+					</Tooltip>
+				}
+			</div>
+			{sso &&
+				<iframe
+					src={sso}
+					height={window.innerHeight - 170}
+					width="100%"
+				/>
+			}
 			{prescriptions}
 		</React.Fragment>
 	);

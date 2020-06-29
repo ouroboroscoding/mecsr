@@ -40,9 +40,9 @@ export default class Unclaimed extends React.Component {
 		this.state = {
 			filtered: [],
 			records: [],
-			sales: Utils.safeLocalStorage('unclaimed_sales', 'Y') === 'Y',
-			salesNoSent: Utils.safeLocalStorage('unclaimed_sales_no_sent', 'Y') === 'Y',
-			support: Utils.safeLocalStorage('unclaimed_support', 'Y') === 'Y',
+			sales: Tools.safeLocalStorage('unclaimed_sales', 'Y') === 'Y',
+			salesNoSent: Tools.safeLocalStorage('unclaimed_sales_no_sent', 'Y') === 'Y',
+			support: Tools.safeLocalStorage('unclaimed_support', 'Y') === 'Y',
 			user: props.user ? true : false
 		}
 

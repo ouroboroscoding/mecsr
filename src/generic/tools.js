@@ -248,6 +248,23 @@ export function omap(o, callback) {
 }
 
 /**
+ * Safe Local Storage
+ *
+ * Fetches a value from local storage or returns the default if no value is
+ * found
+ *
+ * safeLocalStorage
+ * @access public
+ * @param String name			The name of the local var to fetch
+ * @param String default_		The value to return if the var is not found
+ * @return String
+ */
+export function safeLocalStorage(name, default_) {
+	let value = localStorage.getItem(name);
+	return value === null ? default_ : value;
+}
+
+/**
  * UCFirst
  *
  * Makes the first character of each word in the text upper case
@@ -290,6 +307,7 @@ export default {
 	isInteger: isInteger,
 	isObject: isObject,
 	omap: omap,
+	safeLocalStorage: safeLocalStorage,
 	ucfirst: ucfirst,
 	uuidv4: uuidv4
 }

@@ -383,8 +383,10 @@ export default class Customer extends React.Component {
 				</div>
 				<div className="prescriptions" style={{display: this.state.tab === 4 ? 'block' : 'none'}}>
 					<RX
+						patientId={this.state.patient_id}
 						prescriptions={this.state.prescriptions}
 						trigger={this.state.trigger}
+						user={this.props.user}
 					/>
 				</div>
 			</div>

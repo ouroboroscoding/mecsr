@@ -210,8 +210,13 @@ class Header extends React.Component {
 			"mobile": document.documentElement.clientWidth < 600,
 			"menu": false,
 			"path": window.location.pathname,
+			"unclaimed": 0,
 			"user": props.user || false
 		}
+
+		// Timers
+		this.iNewMessages = null;
+		this.iUnclaimed = null;
 
 		// Bind methods to this instance
 		this.accountToggle = this.accountToggle.bind(this);
@@ -225,6 +230,7 @@ class Header extends React.Component {
 		this.signedIn = this.signedIn.bind(this);
 		this.signedOut = this.signedOut.bind(this);
 		this.signout = this.signout.bind(this);
+		this.unclaimedCount = this.unclaimedCount.bind(this);
 	}
 
 	componentDidMount() {
@@ -250,8 +256,9 @@ class Header extends React.Component {
 		// Stop capturing resizes
 		window.removeEventListener("resize", this.resize);
 
-		// Stop checking for new messages
-		clearInterval(this.iNewMessages);
+		// Stop checking for new messages and unclaimed counts
+		if(this.iNewMessages) clearInterval(this.iNewMessages);
+		if(this.iUnclaimed) clearInterval(this.iUnclaimed);
 	}
 
 	accountToggle() {
@@ -535,7 +542,7 @@ class Header extends React.Component {
 				<Link to="/unclaimed" onClick={this.menuItem}>
 					<ListItem button selected={this.state.path === "/unclaimed"}>
 						<ListItemIcon><AllInboxIcon /></ListItemIcon>
-						<ListItemText primary="Unclaimed" />
+						<ListItemText primary={'Unclaimed (' + this.state.unclaimed + ')'} />
 					</ListItem>
 				</Link>
 				<Link to="/search" onClick={this.menuItem}>
@@ -642,8 +649,14 @@ class Header extends React.Component {
 			// Fetch the claimed conversations
 			this.claimedFetch();
 
+			// Fetch the unclaimed count
+			this.unclaimedCount();
+
 			// Start checking for new messages
 			this.iNewMessages = setInterval(this.newMessages.bind(this), 30000);
+
+			// Start checking for unclaimed counts
+			this.iUnclaimed = setInterval(this.unclaimedCount.bind(this), 300000);
 		});
 	}
 
@@ -653,7 +666,7 @@ class Header extends React.Component {
 		Rest.create('auth', 'signout', {}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.serviceError(res.error)) {
+			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 
@@ -682,8 +695,31 @@ class Header extends React.Component {
 			"user": false
 		});
 
-		// Stop checking for new messages
-		clearInterval(this.iNewMessages);
+		// Stop checking for new messages and unclaimed counts
+		if(this.iNewMessages) clearInterval(this.iNewMessages);
+		if(this.iUnclaimed) clearInterval(this.iUnclaimed);
+	}
+
+	unclaimedCount() {
+
+		// Fetch the unclaimed count from the service
+		Rest.read('monolith', 'msgs/unclaimed/count', {}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+				this.setState({"unclaimed": res.data});
+			}
+		});
 	}
 
 	set path(path) {

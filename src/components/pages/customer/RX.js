@@ -130,7 +130,7 @@ export default function RX(props) {
 	}
 
 	// DoseSpot SSO
-	let bSSO = (props.patientId && props.user.dsClinicianId !== '')
+	let bSSO = (props.patientId && (props.user.dsClinicianId !== '')) ? true : false;
 
 	// Render
 	return (

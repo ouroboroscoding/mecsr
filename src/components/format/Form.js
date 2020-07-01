@@ -46,10 +46,9 @@ export default class FormComponent extends React.Component {
 
 		// Set the initial state
 		this.state = {
-			"key": ('value' in props && oReact.primary in props.value) ?
+			"key": ('value' in props && props.value && oReact.primary in props.value) ?
 						props.value[oReact.primary] : null,
 			"primary": oReact.primary,
-			"name": props.name || props.tree._name,
 			"type": props['type']
 		}
 
@@ -72,6 +71,14 @@ export default class FormComponent extends React.Component {
 
 		// Fetch the values from the parent
 		let oValues = this.parent.value;
+
+		// If we have a beforeSubmit function
+		if(this.props.beforeSubmit) {
+			oValues = this.props.beforeSubmit(oValues);
+			if(oValues === false) {
+				return;
+			}
+		}
 
 		// Send the data to the service via rest
 		Rest.create(this.props.service,
@@ -99,7 +106,7 @@ export default class FormComponent extends React.Component {
 			if(res.data) {
 
 				// Show the popup
-				Events.trigger('success', 'Created new ' + this.state.name);
+				Events.trigger('success', 'Created');
 
 				// If there's a success callback
 				if(this.props.success) {
@@ -117,18 +124,24 @@ export default class FormComponent extends React.Component {
 	render() {
 		let title, submit, callback;
 		if(this.state.type === 'create') {
-			title = 'Create ' + this.state.name;
+			if(this.props.title) {
+				title = this.props.title === true ? 'Create ' + this.props.tree._name : this.props.title;
+			}
 			submit = 'Create';
 			callback = this.create;
 		} else {
-			title = 'Update ' + this.state.name;
+			if(this.props.title) {
+				title = this.props.title === true ? 'Update ' + this.props.tree._name : this.props.title;
+			}
 			submit = 'Save';
 			callback = this.update;
 		}
 
 		return (
-			<Box className={"form _" + this.state.name}>
-				<Typography variant="h5">{title}</Typography>
+			<Box className={"form _" + this.props.tree._name}>
+				{this.props.title &&
+					<Typography variant="h5">{title}</Typography>
+				}
 				<Parent
 					ref={el => this.parent = el}
 					name="user"
@@ -162,6 +175,14 @@ export default class FormComponent extends React.Component {
 		// Add the primary key
 		oValues[this.state.primary] = this.state.key;
 
+		// If we have a beforeSubmit function
+		if(this.props.beforeSubmit) {
+			oValues = this.props.beforeSubmit(oValues);
+			if(oValues === false) {
+				return;
+			}
+		}
+
 		// Send the data to the service via rest
 		Rest.update(this.props.service,
 					this.props.noun,
@@ -188,7 +209,7 @@ export default class FormComponent extends React.Component {
 			if(res.data) {
 
 				// Show the popup
-				Events.trigger('success', 'Saved ' + this.state.name);
+				Events.trigger('success', 'Saved');
 
 				// If there's a success callback, call it with the returned data
 				if(this.props.success) {
@@ -197,16 +218,29 @@ export default class FormComponent extends React.Component {
 			}
 		});
 	}
+
+	get value() {
+		return this.parent.value;
+	}
+
+	set value(val) {
+		this.parent.value = val;
+	}
 }
 
 // Valid props
 FormComponent.propTypes = {
+	"beforeSubmit": PropTypes.func,
 	"cancel": PropTypes.func,
 	"errors": PropTypes.object,
 	"name": PropTypes.string,
 	"noun": PropTypes.string.isRequired,
 	"service": PropTypes.string.isRequired,
 	"success": PropTypes.func,
+	"title": PropTypes.oneOfType([
+		PropTypes.bool,
+		PropTypes.string
+	]),
 	"tree": PropTypes.instanceOf(FormatOC.Tree).isRequired,
 	"type": PropTypes.oneOf(['create', 'update']).isRequired,
 	"value": PropTypes.object
@@ -215,5 +249,6 @@ FormComponent.propTypes = {
 // Default props
 FormComponent.defaultProps = {
 	"errors": {},
+	"title": false,
 	"value": {}
 }

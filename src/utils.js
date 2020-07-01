@@ -19,6 +19,10 @@ const rePhone = /^1?(\d{3})(\d{3})(\d{4})$/
  */
 export default {
 
+	customerPath: function(phone, id) {
+		return '/customer/' + phone + '/' + id;
+	},
+
 	date: function(ts) {
 		if(typeof ts === 'number') {
 			ts = new Date(ts*1000);
@@ -134,10 +138,5 @@ export default {
 
 		// Failed to process error
 		return false;
-	},
-
-	safeLocalStorage(name, default_) {
-		let value = localStorage.getItem(name);
-		return value === null ? default_ : value;
 	}
 }

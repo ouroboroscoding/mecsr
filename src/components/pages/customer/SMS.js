@@ -20,7 +20,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 // Material UI Icons
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import PhoneIcon from '@material-ui/icons/Phone';
+//import PhoneIcon from '@material-ui/icons/Phone';
 
 // Generic modules
 import Clipboard from '../../../generic/clipboard';
@@ -86,7 +86,7 @@ export default class SMS extends React.Component {
 
 		// Fetch existing messages
 		if(this.props.user) {
-			this.fetch();
+			this.fetch('auto');
 		}
 	}
 
@@ -139,7 +139,9 @@ export default class SMS extends React.Component {
 				<div className="info">
 					<span className="title">Phone Number: </span>
 					<span className="right20">
-						{Utils.nicePhone(this.props.phoneNumber)}
+						<a href="tel:{this.props.phoneNumber}">
+							{Utils.nicePhone(this.props.phoneNumber)}
+						</a>
 						<Tooltip title="Copy Phone Number">
 							<IconButton onClick={this.copyPhone}>
 								<FileCopyIcon />

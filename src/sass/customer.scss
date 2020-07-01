@@ -15,11 +15,11 @@
 		overflow: auto;
 	}
 
-	.konnektive, .mip, .notes, .prescriptions {
+	.konnektive, .mip, .prescriptions {
 		padding: 10px;
 	}
 
-	.messaging {
+	.messaging, .notes {
 		display: flex;
 		flex-direction: column;
 
@@ -122,6 +122,34 @@
 				right: -15px;
 			}
 
+			.Outgoing.Doctor:before {
+				border-bottom-color: #78C275;
+			}
+
+			.Outgoing.Doctor {
+				background-color: #91da84;
+				border-color: #78C275;
+			}
+
+			.Outgoing.Doctor:after {
+				border-bottom-color: #91da84;
+			}
+
+			.Outgoing.System:before {
+				border-bottom-color: #9a9ba4;
+			}
+
+			.Outgoing.System {
+				background-color: #b3b3b3;
+				border-color: #9a9ba4;
+			}
+
+			.Outgoing.System:after {
+				border-bottom-color: #b3b3b3;
+			}
+
+			/* 19180F subtract this from primary color (background-color) */
+
 			.footer {
 				font-size: 80%;
 			}
@@ -135,7 +163,7 @@
 			}
 		}
 
-		.templates {
+		.templates, .label {
 			flex-grow: 0;
 			flex-shrink: 0;
 			width: 100%;
@@ -196,14 +224,27 @@
 
 	.mip {
 
+		.MuiExpansionPanelSummary-root {
+			background-color: #6b90d4;
+			color: #ffffff;
+		}
+
+		.MuiExpansionPanelDetails-root {
+			display: block;
+		}
+
+		.MuiGrid-item {
+			text-align: center;
+		}
+
 		.question {
 			margin-bottom: 10px;
 
-			.title, .answer, .options {
+			.qtitle, .qanswer, .qoptions {
 				padding: 10px;
 			}
 
-			.title {
+			.qtitle {
 				background-color: #a0dcf9;
 				display: flex;
 				flex-direction: row;
@@ -219,7 +260,7 @@
 				}
 			}
 
-			.options {
+			.qoptions {
 
 				.MuiFormControl-root, .MuiInputBase-root {
 					width: 100%;
@@ -234,7 +275,8 @@
 
 	.prescriptions {
 
-		.rx {
+		.rx, .trigger {
+			margin-bottom: 10px;
 			padding: 10px;
 		}
 	}

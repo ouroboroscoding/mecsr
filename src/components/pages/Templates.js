@@ -25,7 +25,6 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 //import Tabs from '@material-ui/core/Tabs';
 import Tooltip from '@material-ui/core/Tooltip';
-import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
 import AddCircleIcon from '@material-ui/icons/AddCircle';
@@ -73,7 +72,7 @@ function GenericTemplates(props) {
 		} else {
 			templatesSet(null);
 		}
-
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [props.user]); // React to user changes
 
 	function createSuccess(template) {
@@ -139,9 +138,9 @@ function GenericTemplates(props) {
 	}
 
 	return (
-		<Box className="templates">
+		<React.Fragment>
 			<Box className="pageHeader">
-				<Typography variant="h3" className="title">{props.title}</Typography>
+				<div className="title">{props.title}</div>
 				<Tooltip title="Create new template">
 					<IconButton onClick={createToggle}>
 						<AddCircleIcon />
@@ -152,11 +151,10 @@ function GenericTemplates(props) {
 				<Paper className="padded">
 					<FormComponent
 						cancel={createToggle}
-						errors={{1200: "Email already in use", 1204: "Password not strong enough"}}
-						name={props.createTitle}
 						noun={props.noun}
 						service="csr"
 						success={createSuccess}
+						title="Create New"
 						tree={props.tree}
 						type="create"
 					/>
@@ -175,8 +173,7 @@ function GenericTemplates(props) {
 					tree={props.tree}
 				/>
 			}
-
-		</Box>
+		</React.Fragment>
 	);
 }
 
@@ -211,7 +208,7 @@ export default function Templates(props) {
 					<Tab label="Email" />
 				</Tabs>
 			</AppBar>*/}
-			<div className="sms" style={{display: 'flex'}}>
+			<div className="templates">
 				<GenericTemplates
 					createTitle="SMS Template"
 					noun="template/sms"
@@ -230,7 +227,7 @@ export default function Templates(props) {
 				/>
 			</div>*/}
 			<div className="legend">
-				<Typography variant="h4">Legend</Typography>
+				<div className="subtitle">Legend</div>
 				<Table>
 					<TableHead>
 						<TableRow>

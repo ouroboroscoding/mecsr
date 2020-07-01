@@ -9,6 +9,7 @@
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
     "csv-writer": "^1.6.0",
+    "env-cmd": "^10.1.0",
     "format-oc": "^1.5.11",
     "node-sass": "^4.13.1",
     "notistack": "^0.9.9",
@@ -21,7 +22,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "prod": "react-scripts build",
+    "uat": "env-cmd -f .env.uat react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

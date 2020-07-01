@@ -17,10 +17,10 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
 // Customer components
-import DoseSpot from './customer/DoseSpot';
 import KNK from './customer/KNK';
 import MIP from './customer/MIP';
 import Notes from './customer/Notes';
+import RX from './customer/RX';
 import SMS from './customer/SMS';
 
 // Generic modules
@@ -41,14 +41,13 @@ export default class Customer extends React.Component {
 		// Initial state
 		this.state = {
 			customer: null,
-			customer_id: null,
-			mip: null,
-			notes: null,
+			mips: null,
 			orders: [],
 			patient_id: null,
 			prescriptions: null,
 			shipping: [],
 			sms_tpls: [],
+			trigger: null,
 			tab: 0
 		}
 
@@ -68,9 +67,20 @@ export default class Customer extends React.Component {
 		// If we have a user logged in
 		if(this.props.user) {
 
-			// If we have don't have a customer id
-			if(this.state.customer_id === null) {
-				this.fetchCustomerId();
+			// If we have a customer ID
+			if(this.props.customerId) {
+				this.fetchKnkCustomer();
+				this.fetchMips();
+				this.fetchPatientId();
+				this.fetchShipping();
+				this.fetchTrigger();
+			} else {
+				this.setState({
+					customer: 0,
+					mips: 0,
+					prescriptions: 0,
+					trigger: 0
+				});
 			}
 
 			// Fetch templates
@@ -84,53 +94,11 @@ export default class Customer extends React.Component {
 		Events.remove('newMessage', this.newMessage);
 	}
 
-	fetchCustomerId() {
-
-		// Try to get the customer ID by phone number
-		Rest.read('monolith', 'customer/id/byPhone', {
-			"phoneNumber": this.props.phoneNumber
-		}).done(res => {
-
-			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-
-			// If there's a warning
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if('data' in res) {
-
-				// Set the customer ID
-				this.setState({
-					customer_id: res.data
-				}, () => {
-					if(res.data === 0) {
-						this.setState({
-							customer: 0,
-							mip: 0,
-							prescriptions: 0
-						});
-					} else {
-						this.fetchKnkCustomer();
-						this.fetchMip();
-						this.fetchNotes();
-						this.fetchPatientId();
-						this.fetchShipping();
-					}
-				});
-			}
-		});
-	}
-
 	fetchKnkCustomer(id) {
 
 		// Find the customer ID
 		Rest.read('konnektive', 'customer', {
-			id: this.state.customer_id
+			id: this.props.customerId
 		}).done(res => {
 
 			// If there's an error
@@ -158,11 +126,11 @@ export default class Customer extends React.Component {
 		});
 	}
 
-	fetchMip() {
+	fetchMips() {
 
 		// Find the MIP using the phone number
-		Rest.read('monolith', 'customer/mip', {
-			customerId: this.state.customer_id
+		Rest.read('monolith', 'customer/mips', {
+			customerId: this.props.customerId
 		}).done(res => {
 
 			// If there's an error
@@ -180,35 +148,7 @@ export default class Customer extends React.Component {
 
 				// Set the MIP
 				this.setState({
-					mip: res.data
-				});
-			}
-		});
-	}
-
-	fetchNotes() {
-
-		// Find the MIP using the phone number
-		Rest.read('monolith', 'customer/notes', {
-			customerId: this.state.customer_id
-		}).done(res => {
-
-			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-
-			// If there's a warning
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if('data' in res) {
-
-				// Set the MIP
-				this.setState({
-					notes: res.data
+					mips: res.data
 				});
 			}
 		});
@@ -247,7 +187,7 @@ export default class Customer extends React.Component {
 
 		// Find the MIP using the phone number
 		Rest.read('monolith', 'customer/dsid', {
-			customerId: this.state.customer_id
+			customerId: this.props.customerId
 		}).done(res => {
 
 			// If there's an error
@@ -263,12 +203,20 @@ export default class Customer extends React.Component {
 			// If there's data
 			if('data' in res) {
 
+				// New state
+				let oState = {
+					"patient_id": res.data
+				}
+
 				// If there's an id
 				if(res.data) {
 					this.fetchPrescriptions(res.data, this.props.user.dsClinicianId);
 				} else {
-					this.setState({patient_id: 0});
+					oState.prescriptions = 0;
 				}
+
+				// Set the state
+				this.setState(oState);
 			}
 		});
 	}
@@ -276,9 +224,8 @@ export default class Customer extends React.Component {
 	fetchPrescriptions(id, clinician) {
 
 		// Find the MIP using the phone number
-		Rest.read('dosespot', 'patient/prescriptions', {
-			patient_id: parseInt(id, 10),
-			clinician_id: parseInt(clinician, 10)
+		Rest.read('prescriptions', 'patient/prescriptions', {
+			patient_id: parseInt(id, 10)
 		}).done(res => {
 
 			// If there's an error
@@ -306,7 +253,7 @@ export default class Customer extends React.Component {
 
 		// Fetch them from the server
 		Rest.read('monolith', 'customer/shipping', {
-			customerId: this.state.customer_id
+			customerId: this.props.customerId
 		}).done(res => {
 
 			// If there's an error
@@ -327,7 +274,7 @@ export default class Customer extends React.Component {
 					shipping: res.data
 				});
 			}
-		})
+		});
 	}
 
 	fetchSMSTemplates() {
@@ -351,6 +298,34 @@ export default class Customer extends React.Component {
 				// Set the state
 				this.setState({
 					sms_tpls: res.data
+				});
+			}
+		});
+	}
+
+	fetchTrigger() {
+
+		// Fetch them from the server
+		Rest.read('monolith', 'customer/trigger/info', {
+			customerId: this.props.customerId
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+
+				// Set the state
+				this.setState({
+					trigger: res.data
 				});
 			}
 		});
@@ -394,17 +369,24 @@ export default class Customer extends React.Component {
 				</div>
 				<div className="mip" style={{display: this.state.tab === 2 ? 'block' : 'none'}}>
 					<MIP
-						mip={this.state.mip}
+						customer={this.state.customer}
+						mips={this.state.mips}
+						user={this.props.user}
 					/>
 				</div>
-				<div className="notes" style={{display: this.state.tab === 3 ? 'block' : 'none'}}>
+				<div className="notes" style={{display: this.state.tab === 3 ? 'flex' : 'none'}}>
 					<Notes
-						notes={this.state.notes}
+						customerId={this.props.customerId}
+						user={this.props.user}
+						visible={this.state.tab === 3}
 					/>
 				</div>
 				<div className="prescriptions" style={{display: this.state.tab === 4 ? 'block' : 'none'}}>
-					<DoseSpot
+					<RX
+						patientId={this.state.patient_id}
 						prescriptions={this.state.prescriptions}
+						trigger={this.state.trigger}
+						user={this.props.user}
 					/>
 				</div>
 			</div>

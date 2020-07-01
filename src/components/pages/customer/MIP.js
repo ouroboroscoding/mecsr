@@ -15,8 +15,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
+import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
@@ -24,6 +28,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 // Material UI icons
 import EditIcon from '@material-ui/icons/Edit';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 // Generic modules
 import Events from '../../../generic/events';
@@ -182,7 +187,7 @@ function QuestionOptions(props) {
 
 	// Return the options plus the submit/cancel buttons
 	return (
-		<Box className="options form">
+		<Box className="qoptions form">
 			{field}
 			<Box className="actions">
 				<Button variant="contained" color="secondary" onClick={props.onCancel}>Cancel</Button>
@@ -202,6 +207,7 @@ function Question(props) {
 	// Effect
 	useEffect(() => {
 		answerSet(props.question.answer);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	function editToggle() {
@@ -211,7 +217,7 @@ function Question(props) {
 	function save(answer) {
 
 		// Sent the value to the server
-		Rest.update('monolith', 'customer/mip', {
+		Rest.update('monolith', 'customer/mip/answer', {
 			landing_id: props.landing,
 			ref: props.question.ref,
 			value: answer
@@ -239,11 +245,13 @@ function Question(props) {
 
 	return (
 		<Paper className="question">
-			<Box className="title">
+			<Box className="qtitle">
 				<span>{props.question.title}</span>
-				<Tooltip title="Edit the answer">
-					<EditIcon className="fakeAnchor" onClick={editToggle} />
-				</Tooltip>
+				{props.edittable &&
+					<Tooltip title="Edit the answer">
+						<EditIcon className="fakeAnchor" onClick={editToggle} />
+					</Tooltip>
+				}
 			</Box>
 			{edit ?
 				<QuestionOptions
@@ -254,7 +262,7 @@ function Question(props) {
 					type={props.question.type}
 				/>
 			:
-				<Box className="answer">
+				<Box className="qanswer">
 					{answer ? answer.split('|').join(', ') : <span className="noanswer">No Answer</span>}
 				</Box>
 			}
@@ -265,27 +273,87 @@ function Question(props) {
 // MIP component
 export default function MIP(props) {
 
+	// State
+	const [expanded, expandedSet] = useState(false);
+
+	// Handle accordian change
+	function handleChange(event, isExpanded) {
+
+		// Set the new expanded
+		expandedSet(isExpanded ? event.currentTarget.id : false);
+	}
+
+	// Generate base MIP link
+	let sMipUrl = 'https://' + process.env.REACT_APP_MIP_DOMAIN + '/mip/form/callcenter?affId=memo&';
+
+	// If we have a user
+	if(props.user) {
+		sMipUrl += 'agentId=' + encodeURIComponent(props.user.userName) + '&';
+	}
+
+	// If we have customer info
+	if(props.customer) {
+		sMipUrl += 'firstName=' + encodeURIComponent(props.customer.billing.firstName) + '&' +
+					'lastName=' + encodeURIComponent(props.customer.billing.lastName) + '&' +
+					'email=' + encodeURIComponent(props.customer.email) + '&' +
+					'phone=' + encodeURIComponent(props.customer.phone) + '&';
+	}
+
 	// If we're still loading
-	if(props.mip === null) {
+	if(props.mips === null) {
 		return <p>Loading...</p>
 	}
 
 	// If there's no mip associated
-	else if(props.mip === 0) {
-		return <p>No MIP found for this customer</p>
+	else if(props.mips === 0) {
+		return (
+			<React.Fragment>
+				<div style={{textAlign: "right"}}>
+					<a href={sMipUrl + 'formId=MIP-A2'} target="_blank" rel="noopener noreferrer">New ED Mip</a>
+					&nbsp;|&nbsp;
+					<a href={sMipUrl + 'formId=MIP-H1'} target="_blank" rel="noopener noreferrer">New HRT Mip</a>
+				</div>
+				<p>No MIP found for this customer</p>
+			</React.Fragment>
+		)
 	}
 
 	// Else, show the mip
 	else {
+
 		return (
 			<React.Fragment>
-				{props.mip.questions.map((o, i) =>
-					<Question
-						key={i}
-						options={props.mip.options[o.ref] || null}
-						question={o}
-						landing={props.mip.landing_id}
-					/>
+				<div style={{textAlign: "right"}}>
+					<a href={sMipUrl + 'formId=MIP-A2'} target="_blank" rel="noopener noreferrer">New ED Mip</a>
+					&nbsp;|&nbsp;
+					<a href={sMipUrl + 'formId=MIP-H1'} target="_blank" rel="noopener noreferrer">New HRT Mip</a>
+				</div>
+				{props.mips.map((o, i) =>
+					<ExpansionPanel key={i} expanded={expanded === o.id || (!expanded && i === 0)} onChange={handleChange}>
+						<ExpansionPanelSummary
+							expandIcon={<ExpandMoreIcon />}
+							aria-controls={o.id + "_content"}
+							id={o.id}
+						>
+							<Grid container spacing={0}>
+								<Grid item xs={2}>{o.date.split('T')[0]}</Grid>
+								<Grid item xs={6}>{o.id}</Grid>
+								<Grid item xs={2}>{o.form}</Grid>
+								<Grid item xs={2}>{o.completed ? "Completed" : <span style={{color: "red"}}>Incomplete</span>}</Grid>
+							</Grid>
+						</ExpansionPanelSummary>
+						<ExpansionPanelDetails>
+							{o.questions.map((oQ, iQ) =>
+								<Question
+									edittable={i === 0}
+									key={iQ}
+									options={o.options[oQ.ref] || null}
+									question={oQ}
+									landing={o.id}
+								/>
+							)}
+						</ExpansionPanelDetails>
+					</ExpansionPanel>
 				)}
 			</React.Fragment>
 		);

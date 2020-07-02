@@ -121,7 +121,8 @@ export default class Unclaimed extends React.Component {
 
 					// Set the new state
 					this.setState({
-						records: records
+						records: records,
+						filtered: this.filter(records, this.state)
 					});
 				}
 			}

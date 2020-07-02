@@ -33,14 +33,29 @@ function Message(props) {
 	if(props.content.slice(0,8) === 'Received') {
 		let lMatch = reReceived.exec(props.content);
 		msg.direction = 'Incoming';
-		msg.content = lMatch[2];
-		msg.date = lMatch[1];
-	} else {
+		if(lMatch) {
+			msg.content = lMatch[2];
+			msg.date = lMatch[1];
+		} else {
+			msg.content = props.content;
+			msg.date = 'invalid';
+		}
+	} else if(props.content.slice(0,7) === 'Sent by') {
 		let lMatch = reSent.exec(props.content);
 		msg.direction = 'Outgoing';
-		msg.content = lMatch[3];
-		msg.date = lMatch[2];
-		msg.from = lMatch[1];
+		if(lMatch) {
+			msg.content = lMatch[3];
+			msg.date = lMatch[2];
+			msg.from = lMatch[1];
+		} else {
+			msg.content = props.content;
+			msg.date = 'invalid';
+			msg.from = 'unknown';
+		}
+	} else {
+		msg.direction = 'Invalid';
+		msg.content = props.content;
+		msg.date = 'invalid';
 	}
 
 	return (

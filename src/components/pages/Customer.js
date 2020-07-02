@@ -55,7 +55,10 @@ export default class Customer extends React.Component {
 		this.smsRef = null;
 
 		// Bind methods
+		this.knkCustomerRefresh = this.knkCustomerRefresh.bind(this);
+		this.knkOrdersRefresh = this.knkOrdersRefresh.bind(this);
 		this.newMessage = this.newMessage.bind(this);
+		this.rxRefresh = this.rxRefresh.bind(this);
 		this.tabChange = this.tabChange.bind(this);
 	}
 
@@ -94,7 +97,7 @@ export default class Customer extends React.Component {
 		Events.remove('newMessage', this.newMessage);
 	}
 
-	fetchKnkCustomer(id) {
+	fetchKnkCustomer() {
 
 		// Find the customer ID
 		Rest.read('konnektive', 'customer', {
@@ -119,8 +122,37 @@ export default class Customer extends React.Component {
 					customer: res.data
 				}, () => {
 					if(res.data.id) {
-						this.fetchOrders();
+						this.fetchKnkOrders();
 					}
+				});
+			}
+		});
+	}
+
+	fetchKnkOrders() {
+
+		// Get the orders from the REST service
+		Rest.read('konnektive', 'customer/orders', {
+			id: this.state.customer.id,
+			transactions: true
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				// Set the state
+				this.setState({
+					orders: res.data
 				});
 			}
 		});
@@ -149,35 +181,6 @@ export default class Customer extends React.Component {
 				// Set the MIP
 				this.setState({
 					mips: res.data
-				});
-			}
-		});
-	}
-
-	fetchOrders() {
-
-		// Get the orders from the REST service
-		Rest.read('konnektive', 'customer/orders', {
-			id: this.state.customer.id,
-			transactions: true
-		}).done(res => {
-
-			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-
-			// If there's a warning
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if(res.data) {
-
-				// Set the state
-				this.setState({
-					orders: res.data
 				});
 			}
 		});
@@ -331,6 +334,26 @@ export default class Customer extends React.Component {
 		});
 	}
 
+	knkCustomerRefresh() {
+
+		// Set the state to null
+		this.setState({
+			customer: null
+		}, () => {
+			this.fetchKnkCustomer();
+		});
+	}
+
+	knkOrdersRefresh() {
+
+		// Set the state to null
+		this.setState({
+			orders: null
+		}, () => {
+			this.fetchKnkOrders();
+		});
+	}
+
 	newMessage() {
 		this.smsRef.fetch("smooth");
 	}
@@ -364,6 +387,8 @@ export default class Customer extends React.Component {
 					<KNK
 						customer={this.state.customer}
 						orders={this.state.orders}
+						refreshCustomer={this.knkCustomerRefresh}
+						refreshOrders={this.knkOrdersRefresh}
 						tracking={this.state.shipping}
 					/>
 				</div>
@@ -385,12 +410,26 @@ export default class Customer extends React.Component {
 					<RX
 						patientId={this.state.patient_id}
 						prescriptions={this.state.prescriptions}
+						refresh={this.rxRefresh}
 						trigger={this.state.trigger}
 						user={this.props.user}
 					/>
 				</div>
 			</div>
 		);
+	}
+
+	rxRefresh() {
+
+		// Set the state to null
+		this.setState({
+			prescriptions: null
+		}, () => {
+			this.fetchPrescriptions(
+				this.state.patient_id,
+				this.props.user.dsClinicianId
+			);
+		});
 	}
 
 	tabChange(event, tab) {

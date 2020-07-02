@@ -19,6 +19,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 // Material UI Icons
 import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 // Generic modules
 import Events from '../../../generic/events';
@@ -137,7 +138,13 @@ export default function RX(props) {
 		<React.Fragment>
 			{trigger}
 			<div className="pageHeader">
-				<div ref={rxTitle} className="title">Prescriptions</div>
+				<div ref={rxTitle} className="title">Prescriptions
+					<Tooltip title="Refresh Prescriptions">
+						<IconButton onClick={props.refresh}>
+							<RefreshIcon />
+						</IconButton>
+					</Tooltip>
+				</div>
 				{bSSO &&
 					<Tooltip title="Toggle DoseSpot SSO">
 						<IconButton onClick={toggleSSO}>

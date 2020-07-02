@@ -423,12 +423,10 @@ export default class Customer extends React.Component {
 
 		// Set the state to null
 		this.setState({
+			patient_id: null,
 			prescriptions: null
 		}, () => {
-			this.fetchPrescriptions(
-				this.state.patient_id,
-				this.props.user.dsClinicianId
-			);
+			this.fetchPatientId();
 		});
 	}
 

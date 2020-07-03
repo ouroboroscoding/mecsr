@@ -274,7 +274,14 @@ class Header extends React.Component {
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
+
+				// If we got a duplicate
+				if(res.error.code === 1101) {
+					Events.trigger('error', 'Customer has already been claimed. Refreshing list.');
+					Events.trigger('Unclaimed');
+				} else {
+					Events.trigger('error', JSON.stringify(res.error));
+				}
 			}
 
 			// If there's a warning

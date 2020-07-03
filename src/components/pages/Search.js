@@ -14,7 +14,10 @@ import React from 'react';
 // Material UI
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
 import Grid from '@material-ui/core/Grid';
+import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 
 // Components
@@ -23,6 +26,7 @@ import MsgSummary from '../composites/MsgSummary';
 // Generic modules
 import Events from '../../generic/events';
 import Rest from '../../generic/rest';
+import Tools from '../../generic/tools';
 
 // Local modules
 import Utils from '../../utils';
@@ -38,17 +42,26 @@ export default class Search extends React.Component {
 		// Initial state
 		this.state = {
 			content: '',
+			email: '',
+			id: '',
 			name: '',
 			phone: '',
 			records: [],
+			searchType: '0',
 			user: props.user ? true : false
 		}
 
 		// Bind methods
 		this.contentChange = this.contentChange.bind(this);
+		this.emailChange = this.emailChange.bind(this);
+		this.idChange = this.idChange.bind(this);
+		this.keyPressedConversations = this.keyPressedConversations.bind(this);
+		this.keyPressedCustomer = this.keyPressedCustomer.bind(this);
 		this.nameChange = this.nameChange.bind(this);
 		this.phoneChange = this.phoneChange.bind(this);
-		this.search = this.search.bind(this);
+		this.searchChange = this.searchChange.bind(this);
+		this.searchConversations = this.searchConversations.bind(this);
+		this.searchCustomer = this.searchCustomer.bind(this);
 		this.signedIn = this.signedIn.bind(this);
 		this.signedOut = this.signedOut.bind(this);
 	}
@@ -71,6 +84,26 @@ export default class Search extends React.Component {
 		this.setState({content: event.target.value});
 	}
 
+	emailChange(event) {
+		this.setState({email: event.target.value});
+	}
+
+	idChange(event) {
+		this.setState({id: event.target.value});
+	}
+
+	keyPressedConversations(event) {
+		if(event.key === 'Enter') {
+			this.searchConversations();
+		}
+	}
+
+	keyPressedCustomer(event) {
+		if(event.key === 'Enter') {
+			this.searchCustomer();
+		}
+	}
+
 	nameChange(event) {
 		this.setState({name: event.target.value});
 	}
@@ -79,7 +112,13 @@ export default class Search extends React.Component {
 		this.setState({phone: event.target.value});
 	}
 
-	search() {
+	searchChange(event) {
+		this.setState({
+			searchType: event.target.value
+		});
+	}
+
+	searchConversations() {
 
 		// Generate params
 		let oParams = {};
@@ -91,6 +130,11 @@ export default class Search extends React.Component {
 		}
 		if(this.state.content.trim() !== '') {
 			oParams.content = this.state.content;
+		}
+
+		// If there's no params, do nothing
+		if(Tools.empty(oParams)) {
+			return;
 		}
 
 		// Fetch the unclaimed
@@ -117,53 +161,155 @@ export default class Search extends React.Component {
 		});
 	}
 
+	searchCustomer() {
+
+		// Generate params
+		let oParams = {};
+		if(this.state.id.trim() !== '') {
+			oParams.id = this.state.id;
+		}
+		if(this.state.email.trim() !== '') {
+			oParams.email = this.state.email;
+		}
+
+		// If there's no params, do nothing
+		if(Tools.empty(oParams)) {
+			return;
+		}
+
+		// Fetch the unclaimed
+		Rest.read('monolith', 'msgs/search/customer', oParams).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				// Set the state
+				this.setState({
+					records: res.data
+				});
+			}
+		});
+	}
+
 	render() {
 		return (
 			<Box id="search">
 				<Grid container spacing={0} className="form">
-					<Grid item xs={12} sm={6} md={3}>
-						<TextField
-							label="Phone Number"
-							onChange={this.phoneChange}
-							type="text"
-							value={this.state.phone}
-							variant="outlined"
-							InputLabelProps={{
-								shrink: true,
-							}}
-						/>
+					<Grid item xs={12} sm={12} md={2}>
+						<FormControl variant="outlined">
+							<InputLabel htmlFor="search-type">Escalate To</InputLabel>
+							<Select
+								inputProps={{
+									id: 'search-type'
+								}}
+								label="Search Type"
+								onChange={this.searchChange}
+								native
+								value={this.state.searchType}
+								variant="outlined"
+							>
+								<option value="0">Search Conversations</option>
+								<option value="1">Search Customers</option>
+							</Select>
+						</FormControl>
 					</Grid>
-					<Grid item xs={12} sm={6} md={3}>
-						<TextField
-							label="Name"
-							onChange={this.nameChange}
-							type="text"
-							value={this.state.name}
-							variant="outlined"
-							InputLabelProps={{
-								shrink: true,
-							}}
-						/>
-					</Grid>
-					<Grid item xs={12} sm={6} md={3}>
-						<TextField
-							label="Messages"
-							onChange={this.contentChange}
-							type="text"
-							value={this.state.content}
-							variant="outlined"
-							InputLabelProps={{
-								shrink: true,
-							}}
-						/>
-					</Grid>
-					<Grid item xs={12} sm={6} md={3}>
-						<Button
-							color="primary"
-							onClick={this.search}
-							variant="contained"
-						>Search</Button>
-					</Grid>
+					{this.state.searchType === '0' &&
+						<React.Fragment>
+							<Grid item xs={12} sm={6} md={3}>
+								<TextField
+									label="Phone Number"
+									onChange={this.phoneChange}
+									onKeyPress={this.keyPressedConversations}
+									type="text"
+									value={this.state.phone}
+									variant="outlined"
+									InputLabelProps={{
+										shrink: true,
+									}}
+								/>
+							</Grid>
+							<Grid item xs={12} sm={6} md={3}>
+								<TextField
+									label="Name"
+									onChange={this.nameChange}
+									onKeyPress={this.keyPressedConversations}
+									type="text"
+									value={this.state.name}
+									variant="outlined"
+									InputLabelProps={{
+										shrink: true,
+									}}
+								/>
+							</Grid>
+							<Grid item xs={12} sm={6} md={3}>
+								<TextField
+									label="Messages"
+									onChange={this.contentChange}
+									onKeyPress={this.keyPressedConversations}
+									type="text"
+									value={this.state.content}
+									variant="outlined"
+									InputLabelProps={{
+										shrink: true,
+									}}
+								/>
+							</Grid>
+							<Grid item xs={12} sm={6} md={1}>
+								<Button
+									color="primary"
+									onClick={this.searchConversations}
+									variant="contained"
+								>Search</Button>
+							</Grid>
+						</React.Fragment>
+					}
+					{this.state.searchType === '1' &&
+						<React.Fragment>
+							<Grid item xs={12} sm={6} md={3}>
+								<TextField
+									label="Customer ID"
+									onChange={this.idChange}
+									onKeyPress={this.keyPressedCustomer}
+									type="text"
+									value={this.state.id}
+									variant="outlined"
+									InputLabelProps={{
+										shrink: true,
+									}}
+								/>
+							</Grid>
+							<Grid item xs={12} sm={6} md={3}>
+								<TextField
+									label="Email"
+									onChange={this.emailChange}
+									onKeyPress={this.keyPressedCustomer}
+									type="text"
+									value={this.state.email}
+									variant="outlined"
+									InputLabelProps={{
+										shrink: true,
+									}}
+								/>
+							</Grid>
+							<Grid item xs={12} sm={6} md={1}>
+								<Button
+									color="primary"
+									onClick={this.searchCustomer}
+									variant="contained"
+								>Search</Button>
+							</Grid>
+						</React.Fragment>
+					}
 				</Grid>
 				<Box className="summaries">
 					{this.state.records.map((o,i) =>

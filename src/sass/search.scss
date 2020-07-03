@@ -8,8 +8,12 @@
 		flex-shrink: 0;
 		padding: 20px 10px 10px;
 
-		.MuiFormControl-root {
-			width: 95%;
+		.MuiFormControl-root, .MuiSelect-root {
+			width: calc(100% - 15px);
+		}
+
+		.MuiGrid-item {
+			margin-bottom: 15px;
 		}
 	}
 

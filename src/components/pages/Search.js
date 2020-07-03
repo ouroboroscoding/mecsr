@@ -207,7 +207,7 @@ export default class Search extends React.Component {
 				<Grid container spacing={0} className="form">
 					<Grid item xs={12} sm={12} md={2}>
 						<FormControl variant="outlined">
-							<InputLabel htmlFor="search-type">Escalate To</InputLabel>
+							<InputLabel htmlFor="search-type">Search By</InputLabel>
 							<Select
 								inputProps={{
 									id: 'search-type'
@@ -218,8 +218,8 @@ export default class Search extends React.Component {
 								value={this.state.searchType}
 								variant="outlined"
 							>
-								<option value="0">Search Conversations</option>
-								<option value="1">Search Customers</option>
+								<option value="0">Conversations</option>
+								<option value="1">Customers</option>
 							</Select>
 						</FormControl>
 					</Grid>

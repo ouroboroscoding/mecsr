@@ -309,7 +309,7 @@ export default class Customer extends React.Component {
 	fetchTrigger() {
 
 		// Fetch them from the server
-		Rest.read('monolith', 'customer/trigger/info', {
+		Rest.read('welldyne', 'trigger/info', {
 			customerId: this.props.customerId
 		}).done(res => {
 

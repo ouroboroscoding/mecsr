@@ -12,7 +12,7 @@
 const Tools = require('./tools.js');
 
 // name regex
-const nameRE = /^[a-zA-Z]+$/;
+const nameRE = /^[a-zA-Z_]+$/;
 
 // Callbacks
 const watches = {};

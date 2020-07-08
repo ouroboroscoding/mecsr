@@ -386,7 +386,8 @@ class Header extends React.Component {
 
 						// Set the new state
 						this.setState({
-							claimed: lClaimed
+							claimed: lClaimed,
+							path: '/unclaimed'
 						});
 
 						// Trigger the event that a customer was unclaimed
@@ -410,7 +411,8 @@ class Header extends React.Component {
 
 				// Set the new state
 				this.setState({
-					claimed: lClaimed
+					claimed: lClaimed,
+					path: '/unclaimed'
 				});
 
 				// Trigger the event that a customer was unclaimed

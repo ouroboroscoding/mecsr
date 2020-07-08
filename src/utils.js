@@ -14,6 +14,14 @@ import Events from './generic/events';
 // Regex
 const rePhone = /^1?(\d{3})(\d{3})(\d{4})$/
 
+// Rights
+const oRights = {
+	"create": 0x04,
+	"delete": 0x08,
+	"read": 0x01,
+	"update": 0x02
+}
+
 /**
  * Utils
  */
@@ -91,6 +99,22 @@ export default {
 
 		// Return the Tree
 		return oRet;
+	},
+
+	hasRight: function(user, name, type) {
+
+		// If we have no user
+		if(!user) {
+			return false;
+		}
+
+		// If the user doesn't have the right
+		if(!(name in user.permissions)) {
+			return false;
+		}
+
+		// Return on the right having the type
+		return (user.permissions[name].rights & oRights[type]) ? true : false;
 	},
 
 	nicePhone: function(val) {

@@ -25,6 +25,7 @@ import Alerts from './composites/Alerts';
 import Header from './composites/Header';
 import Signin from './composites/Signin';
 // Page component modules
+import Agents from './pages/Agents';
 import Customer from './pages/Customer';
 import Search from './pages/Search';
 import Templates from './pages/Templates';
@@ -98,20 +99,17 @@ function Site(props) {
 				/>
 				<div id="content">
 					<Switch>
+						<Route path="/agents">
+							<Agents user={user} />
+						</Route>
 						<Route path="/unclaimed">
-							<Unclaimed
-								user={user}
-							/>
+							<Unclaimed user={user} />
 						</Route>
 						<Route path="/search">
-							<Search
-								user={user}
-							/>
+							<Search user={user} />
 						</Route>
 						<Route path="/templates">
-							<Templates
-								user={user}
-							/>
+							<Templates user={user} />
 						</Route>
 						<Route
 							path="/customer/:phoneNumber/:customerId"

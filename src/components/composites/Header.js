@@ -36,6 +36,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import MenuIcon from '@material-ui/icons/Menu';
 import MergeTypeIcon from '@material-ui/icons/MergeType';
 import NewReleasesIcon from '@material-ui/icons/NewReleases';
+import PeopleIcon from '@material-ui/icons/People';
 import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import PhoneIcon from '@material-ui/icons/Phone';
 import SearchIcon from '@material-ui/icons/Search';
@@ -145,10 +146,10 @@ function CustomerItem(props) {
 						primary={props.name}
 						secondary={
 							<React.Fragment>
-								<p>
+								<span>
 									ID: {props.id}<br/>
 									#: {Utils.nicePhone(props.phone)}
-								</p>
+								</span>
 								<span className="customerActions">
 									<span className="tooltip">
 										<Tooltip title="Remove Claim">
@@ -488,7 +489,6 @@ class Header extends React.Component {
 
 			// If there's data
 			if('data' in res) {
-				console.log('New Messages: ', res.data);
 
 				// If there's any
 				if(!Tools.empty(res.data)) {
@@ -537,15 +537,31 @@ class Header extends React.Component {
 
 	render() {
 
+		// Create the drawer items
 		let drawer = (
 			<List style={{padding: 0}}>
-				<Link to="/templates" onClick={this.menuItem}>
-					<ListItem button selected={this.state.path === "/templates"}>
-						<ListItemIcon><CommentIcon /></ListItemIcon>
-						<ListItemText primary="Templates" />
-					</ListItem>
-				</Link>
-				<Divider />
+				{Utils.hasRight(this.state.user, 'csr_agents', 'read') &&
+					<React.Fragment>
+						<Link to="/agents" onClick={this.menuItem}>
+							<ListItem button selected={this.state.path === "/agents"}>
+								<ListItemIcon><PeopleIcon /></ListItemIcon>
+								<ListItemText primary="Agents" />
+							</ListItem>
+						</Link>
+						<Divider />
+					</React.Fragment>
+				}
+				{Utils.hasRight(this.state.user, 'csr_templates', 'read') &&
+					<React.Fragment>
+						<Link to="/templates" onClick={this.menuItem}>
+							<ListItem button selected={this.state.path === "/templates"}>
+								<ListItemIcon><CommentIcon /></ListItemIcon>
+								<ListItemText primary="Templates" />
+							</ListItem>
+						</Link>
+						<Divider />
+					</React.Fragment>
+				}
 				<Link to="/unclaimed" onClick={this.menuItem}>
 					<ListItem button selected={this.state.path === "/unclaimed"}>
 						<ListItemIcon><AllInboxIcon /></ListItemIcon>
@@ -590,7 +606,7 @@ class Header extends React.Component {
 						}
 						<Typography variant="h6" className="title">
 							<Link to="/">
-								MeCSR
+								ME Customer Service
 							</Link>
 						</Typography>
 						<div id="loaderWrapper">

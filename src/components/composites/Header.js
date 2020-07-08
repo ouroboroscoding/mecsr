@@ -542,7 +542,7 @@ class Header extends React.Component {
 			<List style={{padding: 0}}>
 				{Utils.hasRight(this.state.user, 'csr_agents', 'read') &&
 					<React.Fragment>
-						<Link to="/agents" onClick={this.menuItem}>
+						<Link to="/agents" onClick={this.menuClick}>
 							<ListItem button selected={this.state.path === "/agents"}>
 								<ListItemIcon><PeopleIcon /></ListItemIcon>
 								<ListItemText primary="Agents" />
@@ -553,7 +553,7 @@ class Header extends React.Component {
 				}
 				{Utils.hasRight(this.state.user, 'csr_templates', 'read') &&
 					<React.Fragment>
-						<Link to="/templates" onClick={this.menuItem}>
+						<Link to="/templates" onClick={this.menuClick}>
 							<ListItem button selected={this.state.path === "/templates"}>
 								<ListItemIcon><CommentIcon /></ListItemIcon>
 								<ListItemText primary="Templates" />
@@ -562,13 +562,13 @@ class Header extends React.Component {
 						<Divider />
 					</React.Fragment>
 				}
-				<Link to="/unclaimed" onClick={this.menuItem}>
+				<Link to="/unclaimed" onClick={this.menuClick}>
 					<ListItem button selected={this.state.path === "/unclaimed"}>
 						<ListItemIcon><AllInboxIcon /></ListItemIcon>
 						<ListItemText primary={'Unclaimed (' + this.state.unclaimed + ')'} />
 					</ListItem>
 				</Link>
-				<Link to="/search" onClick={this.menuItem}>
+				<Link to="/search" onClick={this.menuClick}>
 					<ListItem button selected={this.state.path === "/search"}>
 						<ListItemIcon><SearchIcon /></ListItemIcon>
 						<ListItemText primary="Search" />
@@ -605,7 +605,7 @@ class Header extends React.Component {
 							</IconButton>
 						}
 						<Typography variant="h6" className="title">
-							<Link to="/">
+							<Link to="/" onClick={this.menuClick}>
 								ME Customer Service
 							</Link>
 						</Typography>

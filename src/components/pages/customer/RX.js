@@ -84,22 +84,24 @@ export default function RX(props) {
 		trigger = null;
 	}
 	else {
-		trigger = [
-			<div className="title">Latest WellDyne Trigger</div>,
-			<Paper className="trigger">
-				<p><strong>Triggered: </strong><span>{props.trigger.triggered.split(' ')[0]}</span></p>
-				<p><strong>Opened: </strong><span>{props.trigger.opened ? props.trigger.opened.split(' ')[0] : ''}</span></p>
-				<p><strong>Shipped: </strong><span>{props.trigger.shipped ? props.trigger.shipped.split(' ')[0] : ''}</span></p>
-				<p><strong>Eligible Since: </strong><span>{props.trigger.eligSince ? props.trigger.eligSince.split(' ')[0] : ''}</span></p>
-				<p><strong>Eligible Through: </strong><span>{props.trigger.eligThru ? props.trigger.eligThru.split(' ')[0] : ''}</span></p>
-				{(props.trigger.outreachQueue || props.trigger.outreachReason) &&
-					<React.Fragment>
-						<p><strong>Outreach Queue: </strong><span>{props.trigger.outreachQueue}</span></p>
-						<p><strong>Outreach Reason: </strong><span>{props.trigger.outreachReason}</span></p>
-					</React.Fragment>
-				}
-			</Paper>
-		];
+		trigger = (
+			<React.Fragment>
+				<div className="title">Latest WellDyne Trigger</div>
+				<Paper className="trigger">
+					<p><strong>Triggered: </strong><span>{props.trigger.triggered.split(' ')[0]}</span></p>
+					<p><strong>Opened: </strong><span>{props.trigger.opened ? props.trigger.opened.split(' ')[0] : ''}</span></p>
+					<p><strong>Shipped: </strong><span>{props.trigger.shipped ? props.trigger.shipped.split(' ')[0] : ''}</span></p>
+					<p><strong>Eligible Since: </strong><span>{props.trigger.eligSince ? props.trigger.eligSince.split(' ')[0] : ''}</span></p>
+					<p><strong>Eligible Through: </strong><span>{props.trigger.eligThru ? props.trigger.eligThru.split(' ')[0] : ''}</span></p>
+					{(props.trigger.outreachQueue || props.trigger.outreachReason) &&
+						<React.Fragment>
+							<p><strong>Outreach Queue: </strong><span>{props.trigger.outreachQueue}</span></p>
+							<p><strong>Outreach Reason: </strong><span>{props.trigger.outreachReason}</span></p>
+						</React.Fragment>
+					}
+				</Paper>
+			</React.Fragment>
+		);
 	}
 
 	// Prescriptions

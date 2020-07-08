@@ -141,11 +141,13 @@ function GenericTemplates(props) {
 		<React.Fragment>
 			<Box className="pageHeader">
 				<div className="title">{props.title}</div>
-				<Tooltip title="Create new template">
-					<IconButton onClick={createToggle}>
-						<AddCircleIcon />
-					</IconButton>
-				</Tooltip>
+				{Utils.hasRight(props.user, 'csr_templates', 'create') &&
+					<Tooltip title="Create new template">
+						<IconButton onClick={createToggle}>
+							<AddCircleIcon />
+						</IconButton>
+					</Tooltip>
+				}
 			</Box>
 			{create &&
 				<Paper className="padded">
@@ -168,9 +170,10 @@ function GenericTemplates(props) {
 					data={templates}
 					noun={props.noun}
 					orderBy="title"
-					remove={removeTemplate}
+					remove={Utils.hasRight(props.user, 'csr_templates', 'delete') ? removeTemplate : false}
 					service="csr"
 					tree={props.tree}
+					update={Utils.hasRight(props.user, 'csr_templates', 'update')}
 				/>
 			}
 		</React.Fragment>

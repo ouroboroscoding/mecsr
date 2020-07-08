@@ -95,7 +95,7 @@ class Signin extends React.Component {
 				open={true}
 				aria-labelledby="confirmation-dialog-title"
 			>
-				<DialogTitle id="confirmation-dialog-title">MeCSR</DialogTitle>
+				<DialogTitle id="confirmation-dialog-title">Sign In</DialogTitle>
 				{this.state.form === 'signin' &&
 					<React.Fragment>
 						<DialogContent dividers>
@@ -151,6 +151,9 @@ class Signin extends React.Component {
 						break;
 					case 1201:
 						Events.trigger('error', 'User or password invalid');
+						break;
+					case 1503:
+						Events.trigger('error', 'User marked as inactive');
 						break;
 					default:
 						Events.trigger('error', JSON.stringify(res.error));

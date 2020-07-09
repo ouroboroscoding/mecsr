@@ -152,7 +152,7 @@ export default function KNK(props) {
 							<React.Fragment key={i}>
 								<TableRow>
 									<TableCell>
-										<p><nobr><strong>ID: </strong><a href={"https://crm.konnektive.com/customer/cs/orders/?orderId=" + o.id} target="_blank" rel="noopener noreferrer">{o.id}</a></nobr></p>
+										<p><nobr><strong>ID: </strong>{o.id}</nobr></p>
 										<p><strong>Campaign: </strong><span>{o.campaign}</span></p>
 										<p><nobr><strong>Email: </strong><span>{o.email}</span></nobr></p>
 										<p><nobr><strong>Phone: </strong><span>{o.phone}</span></nobr></p>

@@ -26,6 +26,7 @@ import SMS from './customer/SMS';
 // Generic modules
 import Events from '../../generic/events';
 import Rest from '../../generic/rest';
+import Tools from '../../generic/tools';
 
 // Local modules
 import Utils from '../../utils';
@@ -55,6 +56,7 @@ export default class Customer extends React.Component {
 		this.smsRef = null;
 
 		// Bind methods
+		this.adhocAdd = this.adhocAdd.bind(this);
 		this.knkCustomerRefresh = this.knkCustomerRefresh.bind(this);
 		this.knkOrdersRefresh = this.knkOrdersRefresh.bind(this);
 		this.newMessage = this.newMessage.bind(this);
@@ -95,6 +97,39 @@ export default class Customer extends React.Component {
 
 		// Stop tracking any new message events
 		Events.remove('newMessage', this.newMessage);
+	}
+
+	adhocAdd(type) {
+
+		// Send the request
+		Rest.create('welldyne', 'adhoc', {
+			"customerId": this.state.customer.id,
+			"type": type
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				// Clone the current trigger
+				let trigger = Tools.clone(this.state.trigger);
+
+				// Update the adhocType
+				trigger.adhocType = type;
+
+				// Update the state
+				this.setState({"trigger": trigger});
+			}
+		});
 	}
 
 	fetchKnkCustomer() {
@@ -408,9 +443,10 @@ export default class Customer extends React.Component {
 				</div>
 				<div className="prescriptions" style={{display: this.state.tab === 4 ? 'block' : 'none'}}>
 					<RX
+						onAdhocAdd={this.adhocAdd}
+						onRefresh={this.rxRefresh}
 						patientId={this.state.patient_id}
 						prescriptions={this.state.prescriptions}
-						refresh={this.rxRefresh}
 						trigger={this.state.trigger}
 						user={this.props.user}
 					/>

@@ -27,7 +27,9 @@ const DELETE = 8;
 const ALL    = 15;
 const TYPES = [
 	{name: "csr_agents", title: "Agents", allowed: ALL},
-	{name: "csr_templates", title: "Templates", allowed: ALL}
+	{name: "csr_templates", title: "Templates", allowed: ALL},
+	{name: "welldyne_adhoc", title: "WellDyneRX Adhoc", allowed: CREATE | READ | DELETE},
+	{name: "welldyne_outreach", title: "WellDyneRX Outreach", allowed: ALL}
 ]
 
 // Permission
@@ -101,7 +103,7 @@ export default class Permissions extends React.Component {
 		if(value[name]) {
 			value[name].rights = rights;
 		} else {
-			value[name] = {"rights": rights};
+			value[name] = {"rights": rights, "idents": null};
 		}
 
 		// Update the state

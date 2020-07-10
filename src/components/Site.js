@@ -30,6 +30,7 @@ import Customer from './pages/Customer';
 import Search from './pages/Search';
 import Templates from './pages/Templates';
 import Unclaimed from './pages/Unclaimed';
+import WellDyne from './pages/WellDyne';
 
 // Local modules
 import { LoaderHide, LoaderShow } from './composites/Loader';
@@ -110,6 +111,9 @@ function Site(props) {
 						</Route>
 						<Route path="/templates">
 							<Templates user={user} />
+						</Route>
+						<Route path="/welldyne">
+							<WellDyne user={user} />
 						</Route>
 						<Route
 							path="/customer/:phoneNumber/:customerId"

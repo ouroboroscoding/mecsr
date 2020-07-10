@@ -33,12 +33,13 @@ import CloseIcon from '@material-ui/icons/Close';
 import CheckIcon from '@material-ui/icons/Check';
 import CommentIcon from '@material-ui/icons/Comment';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import ForumIcon from '@material-ui/icons/Forum';
+import LocalPharmacyIcon from '@material-ui/icons/LocalPharmacy';
 import MenuIcon from '@material-ui/icons/Menu';
 import MergeTypeIcon from '@material-ui/icons/MergeType';
 import NewReleasesIcon from '@material-ui/icons/NewReleases';
 import PeopleIcon from '@material-ui/icons/People';
 import PermIdentityIcon from '@material-ui/icons/PermIdentity';
-import PhoneIcon from '@material-ui/icons/Phone';
 import SearchIcon from '@material-ui/icons/Search';
 
 // Local components
@@ -139,7 +140,7 @@ function CustomerItem(props) {
 					<ListItemAvatar>
 						{props.newMsgs ?
 							<Avatar style={{backgroundColor: 'red'}}><NewReleasesIcon /></Avatar> :
-							<Avatar><PhoneIcon /></Avatar>
+							<Avatar><ForumIcon /></Avatar>
 						}
 					</ListItemAvatar>
 					<ListItemText
@@ -559,6 +560,17 @@ class Header extends React.Component {
 							<ListItem button selected={this.state.path === "/templates"}>
 								<ListItemIcon><CommentIcon /></ListItemIcon>
 								<ListItemText primary="Templates" />
+							</ListItem>
+						</Link>
+						<Divider />
+					</React.Fragment>
+				}
+				{(Utils.hasRight(this.state.user, 'welldyne_adhoc', 'read') || Utils.hasRight(this.state.user, 'welldyne_outreach', 'read')) &&
+					<React.Fragment>
+						<Link to="/welldyne" onClick={this.menuClick}>
+							<ListItem button selected={this.state.path === "/welldyne"}>
+								<ListItemIcon><LocalPharmacyIcon /></ListItemIcon>
+								<ListItemText primary="WellDyne" />
 							</ListItem>
 						</Link>
 						<Divider />

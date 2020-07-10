@@ -12,8 +12,12 @@
 import React, { useRef, useState } from 'react';
 
 // Material UI
+import Button from '@material-ui/core/Button';
+import FormControl from '@material-ui/core/FormControl';
 import IconButton from '@material-ui/core/IconButton';
+import InputLabel from '@material-ui/core/InputLabel';
 import Paper from '@material-ui/core/Paper';
+import Select from '@material-ui/core/Select';
 import Tooltip from '@material-ui/core/Tooltip';
 
 // Material UI Icons
@@ -36,6 +40,7 @@ export default function RX(props) {
 
 	// Refs
 	let rxTitle = useRef();
+	let adhocType = useRef();
 
 	// Toggle the SSO iframe
 	function toggleSSO() {
@@ -75,6 +80,12 @@ export default function RX(props) {
 		}
 	}
 
+	function adHocAdd() {
+
+		// Let the parent know
+		props.onAdhocAdd(adhocType.current.value);
+	}
+
 	// Trigger
 	let trigger = null;
 	if(props.trigger === null) {
@@ -98,6 +109,21 @@ export default function RX(props) {
 							<p><strong>Outreach Queue: </strong><span>{props.trigger.outreachQueue}</span></p>
 							<p><strong>Outreach Reason: </strong><span>{props.trigger.outreachReason}</span></p>
 						</React.Fragment>
+					}
+					{props.trigger.adhocType &&
+						<p><strong>AdHoc Type: </strong><span>{props.trigger.adhocType}</span></p>
+					}
+					{(props.trigger.adhocType === null && Utils.hasRight(props.user, 'welldyne_adhoc', 'create')) &&
+						<p><strong>AdHoc Type: </strong>
+							<Select
+								inputRef={adhocType}
+								native
+							>
+								<option>Cancel Order</option>
+								<option>Update Address</option>
+							</Select>
+							<Button variant="contained" color="primary" onClick={adHocAdd} style={{height: '32px', marginLeft: '10px'}}>Add</Button>
+						</p>
 					}
 				</Paper>
 			</React.Fragment>
@@ -142,7 +168,7 @@ export default function RX(props) {
 			<div className="pageHeader">
 				<div ref={rxTitle} className="title">Prescriptions
 					<Tooltip title="Refresh Prescriptions">
-						<IconButton onClick={props.refresh}>
+						<IconButton onClick={props.onRefresh}>
 							<RefreshIcon />
 						</IconButton>
 					</Tooltip>

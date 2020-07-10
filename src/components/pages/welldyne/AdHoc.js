@@ -60,7 +60,7 @@ export default function AdHoc(props) {
 	let [records, recordsSet] = useState(null);
 	let [create, createSet] = useState(false);
 
-	// Effects
+	// Fetch records effect
 	useEffect(() => {
 
 		// If we have a user with the correct rights
@@ -76,11 +76,16 @@ export default function AdHoc(props) {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [props.user]); // React to user changes
 
-	function createSuccess(template) {
-		console.log(template);
+	// Track triggers effect
+	useEffect(() => {
+		Events.add('adhocCreated', createSuccess);
+		return () => {Events.remove('adhocCreated', createSuccess)}
+	}, []);
+
+	function createSuccess(record) {
 		recordsSet(records => {
 			let ret = Tools.clone(records);
-			ret.unshift(template);
+			ret.unshift(record);
 			return ret;
 		});
 		createSet(false);

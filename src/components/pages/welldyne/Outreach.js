@@ -21,6 +21,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 // Material UI Icons
 import AddCircleIcon from '@material-ui/icons/AddCircle';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 // Format Components
 import ResultsComponent from '../../format/Results';
@@ -77,11 +78,54 @@ export default function Outreach(props) {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [props.user]); // React to user changes
 
-	function createSuccess(template) {
-		console.log(template);
+	function adhocSwitch(id) {
+
+		// Send the request to the service
+		Rest.update('welldyne', 'outreach/adhoc', {
+			"id": id
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				// Use the current records to set the new records
+				recordsSet(records => {
+
+					// Clone the records
+					let ret = Tools.clone(records);
+
+					// Find the index
+					let iIndex = Tools.afindi(ret, 'id', id);
+
+					// If one is found, remove it
+					if(iIndex > -1) {
+						ret.splice(iIndex, 1);
+					}
+
+					// Return the new records
+					return ret;
+				});
+
+				// Tell the adhoc page there's a new record
+				Events.trigger('adhocCreated', res.data);
+			}
+		});
+	}
+
+	function createSuccess(record) {
 		recordsSet(records => {
 			let ret = Tools.clone(records);
-			ret.unshift(template);
+			ret.unshift(record);
 			return ret;
 		});
 		createSet(false);
@@ -155,19 +199,23 @@ export default function Outreach(props) {
 			// If there's data
 			if(res.data) {
 
-				// Clone the records
-				let lRecords = Tools.clone(records);
+				// Use the current records to set the new records
+				recordsSet(records => {
 
-				// Find the index
-				let iIndex = Tools.afindi(lRecords, 'id', iID);
+					// Clone the records
+					let ret = Tools.clone(records);
 
-				// If one is found, update the ready flag
-				if(iIndex > -1) {
-					lRecords[iIndex]['ready'] = bReady;
-				}
+					// Find the index
+					let iIndex = Tools.afindi(ret, 'id', iID);
 
-				// Update the records
-				recordsSet(lRecords);
+					// If one is found, update the ready flag
+					if(iIndex > -1) {
+						ret[iIndex]['ready'] = bReady;
+					}
+
+					// Update the records
+					return ret;
+				});
 			}
 		})
 	}
@@ -201,7 +249,15 @@ export default function Outreach(props) {
 	} else if(records === -1) {
 		results = <div>You lack the rights to view Outreach records.</div>
 	} else {
+		// If the user has both outreach delete, and adhoc create, all for
+		//	switching
+		let lActions = Utils.hasRight(props.user, 'welldyne_outreach', 'delete') &&
+						Utils.hasRight(props.user, 'welldyne_adhoc', 'create') ?
+						[{"tooltip": "AdHoc (Remove Error)", "icon": ArrowBackIcon, "callback": adhocSwitch}] :
+						[];
+
 		results = <ResultsComponent
+					actions={lActions}
 					custom={{"ready": readyRender}}
 					data={records}
 					noun="outreach"

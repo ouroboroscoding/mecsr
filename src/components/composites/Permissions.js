@@ -99,11 +99,20 @@ export default class Permissions extends React.Component {
 		// Clone the current values
 		let value = Tools.clone(this.state.value);
 
-		// Update the specific permission
-		if(value[name]) {
-			value[name].rights = rights;
-		} else {
-			value[name] = {"rights": rights, "idents": null};
+		// If there are rights
+		if(rights) {
+
+			// Update the specific permission
+			if(value[name]) {
+				value[name].rights = rights;
+			} else {
+				value[name] = {"rights": rights, "idents": null};
+			}
+		}
+
+		// Else, remove the right
+		else {
+			delete value[name];
 		}
 
 		// Update the state

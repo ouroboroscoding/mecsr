@@ -29,6 +29,7 @@ import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
 import AllInboxIcon from '@material-ui/icons/AllInbox';
+import AssessmentIcon from '@material-ui/icons/Assessment';
 import CloseIcon from '@material-ui/icons/Close';
 import CheckIcon from '@material-ui/icons/Check';
 import CommentIcon from '@material-ui/icons/Comment';
@@ -94,7 +95,7 @@ function CustomerItem(props) {
 		}
 
 		// Trigger the claimed being removed
-		Events.trigger('claimedRemove', props.phone);
+		Events.trigger('claimedRemove', props.phone, props.selected);
 	}
 
 	function escalateSubmit(agent) {
@@ -127,7 +128,7 @@ function CustomerItem(props) {
 				}
 
 				// Trigger the claimed being removed
-				Events.trigger('claimedRemove', props.phone, false);
+				Events.trigger('claimedRemove', props.phone, props.selected, false);
 			}
 		});
 	}
@@ -351,7 +352,7 @@ class Header extends React.Component {
 		});
 	}
 
-	claimedRemove(number, call_delete = true) {
+	claimedRemove(number, switch_path, call_delete = true) {
 
 		if(call_delete) {
 
@@ -386,10 +387,11 @@ class Header extends React.Component {
 						lClaimed.splice(iIndex, 1);
 
 						// Set the new state
-						this.setState({
-							claimed: lClaimed,
-							path: '/unclaimed'
-						});
+						let oState = {claimed: lClaimed}
+						if(switch_path) {
+							oState.path = '/unclaimed';
+						}
+						this.setState(oState);
 
 						// Trigger the event that a customer was unclaimed
 						Events.trigger('Unclaimed', number);
@@ -411,10 +413,11 @@ class Header extends React.Component {
 				lClaimed.splice(iIndex, 1);
 
 				// Set the new state
-				this.setState({
-					claimed: lClaimed,
-					path: '/unclaimed'
-				});
+				let oState = {claimed: lClaimed}
+				if(switch_path) {
+					oState.path = '/unclaimed';
+				}
+				this.setState(oState);
 
 				// Trigger the event that a customer was unclaimed
 				Events.trigger('Unclaimed', number);
@@ -549,6 +552,17 @@ class Header extends React.Component {
 							<ListItem button selected={this.state.path === "/agents"}>
 								<ListItemIcon><PeopleIcon /></ListItemIcon>
 								<ListItemText primary="Agents" />
+							</ListItem>
+						</Link>
+						<Divider />
+					</React.Fragment>
+				}
+				{Utils.hasRight(this.state.user, 'csr_stats', 'read') &&
+					<React.Fragment>
+						<Link to="/stats" onClick={this.menuClick}>
+							<ListItem button selected={this.state.path === "/stats"}>
+								<ListItemIcon><AssessmentIcon /></ListItemIcon>
+								<ListItemText primary="Stats" />
 							</ListItem>
 						</Link>
 						<Divider />

@@ -1,0 +1,19 @@
+#stats {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+
+	header {
+		flex-grow: 0;
+		flex-shrink: 0;
+	}
+
+	.claimed {
+		flex-basis: 0;
+		flex-grow: 2;
+		flex-shrink: 2;
+		overflow: auto;
+		padding: 10px;
+		width: 100%;
+	}
+}

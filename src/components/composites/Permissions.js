@@ -14,6 +14,7 @@ import React from 'react';
 
 // Material UI
 import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
 import Switch from '@material-ui/core/Switch';
 
 // Generic
@@ -26,10 +27,19 @@ const UPDATE = 2;
 const DELETE = 8;
 const ALL    = 15;
 const TYPES = [
-	{name: "csr_agents", title: "Agents", allowed: ALL},
-	{name: "csr_templates", title: "Templates", allowed: ALL},
-	{name: "welldyne_adhoc", title: "WellDyneRX Adhoc", allowed: CREATE | READ | DELETE},
-	{name: "welldyne_outreach", title: "WellDyneRX Outreach", allowed: ALL}
+	{title: "Customer Service", rights: [
+		{name: "csr_agents", title: "Agents", allowed: ALL},
+		{name: "csr_claims", title: "Claims", allowed: CREATE | UPDATE | DELETE},
+		{name: "csr_messaging", title: "Messaging", allowed: CREATE | READ},
+		{name: "csr_templates", title: "Templates", allowed: ALL}]},
+	{title: "CRM", rights: [
+		{name: "crm_customers", title: "CRM Data", allowed: READ}]},
+	{title: "Memo", rights: [
+		{name: "memo_mips", title: "Memo MIP", allowed: READ | UPDATE},
+		{name: "memo_notes", title: "Memo Notes", allowed: READ | CREATE}]},
+	{title: "Memo", rights: [
+		{name: "welldyne_adhoc", title: "WellDyneRX Adhoc", allowed: CREATE | READ | DELETE},
+		{name: "welldyne_outreach", title: "WellDyneRX Outreach", allowed: ALL}]}
 ]
 
 // Permission
@@ -120,24 +130,26 @@ export default class Permissions extends React.Component {
 	}
 
 	render() {
-		return (
-			<Grid container spacing={2} className="permissions">
-				<Grid item xs={4} className="title"><span>Name</span></Grid>
-				<Grid item xs={2} className="title"><span>Create</span></Grid>
-				<Grid item xs={2} className="title"><span>Read</span></Grid>
-				<Grid item xs={2} className="title"><span>Update</span></Grid>
-				<Grid item xs={2} className="title"><span>Delete</span></Grid>
-				{TYPES.map(perm =>
-					<Permission
-						allowed={perm.allowed}
-						key={perm.name}
-						name={perm.name}
-						onChange={this.change}
-						title={perm.title}
-						value={this.state.value[perm.name] ? this.state.value[perm.name].rights : 0}
-					/>
-				)}
-			</Grid>
+		return TYPES.map(section =>
+			<Paper>
+				<Grid container spacing={2} className="permissions">
+					<Grid item xs={4} className="title"><span>{section.title}</span></Grid>
+					<Grid item xs={2} className="title"><span>Create</span></Grid>
+					<Grid item xs={2} className="title"><span>Read</span></Grid>
+					<Grid item xs={2} className="title"><span>Update</span></Grid>
+					<Grid item xs={2} className="title"><span>Delete</span></Grid>
+					{section.rights.map(perm =>
+						<Permission
+							allowed={perm.allowed}
+							key={perm.name}
+							name={perm.name}
+							onChange={this.change}
+							title={perm.title}
+							value={this.state.value[perm.name] ? this.state.value[perm.name].rights : 0}
+						/>
+					)}
+				</Grid>
+			</Paper>
 		);
 	}
 

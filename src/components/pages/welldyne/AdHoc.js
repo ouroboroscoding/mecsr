@@ -51,7 +51,7 @@ const AdHocTree = new Tree(AdHocDef);
  *
  * Wraps common code that both tabs use
  *
- * @name GenericWellDyne
+ * @name AdHoc
  * @extends React.Component
  */
 export default function AdHoc(props) {

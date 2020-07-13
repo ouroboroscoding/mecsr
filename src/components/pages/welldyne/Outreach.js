@@ -53,7 +53,7 @@ const OutreachTree = new Tree(OutreachDef);
  *
  * Wraps common code that both tabs use
  *
- * @name GenericWellDyne
+ * @name Outreach
  * @extends React.Component
  */
 export default function Outreach(props) {

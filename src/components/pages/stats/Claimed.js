@@ -107,7 +107,7 @@ export default function Claimed(props) {
 	return (
 		<React.Fragment>
 			<Box className="pageHeader">
-				<div className="title">Claimed by User</div>
+				<div className="title">Claimed by Agent</div>
 			</Box>
 			{results}
 		</React.Fragment>

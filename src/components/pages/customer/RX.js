@@ -13,9 +13,7 @@ import React, { useRef, useState } from 'react';
 
 // Material UI
 import Button from '@material-ui/core/Button';
-import FormControl from '@material-ui/core/FormControl';
 import IconButton from '@material-ui/core/IconButton';
-import InputLabel from '@material-ui/core/InputLabel';
 import Paper from '@material-ui/core/Paper';
 import Select from '@material-ui/core/Select';
 import Tooltip from '@material-ui/core/Tooltip';

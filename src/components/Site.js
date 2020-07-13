@@ -28,6 +28,7 @@ import Signin from './composites/Signin';
 import Agents from './pages/Agents';
 import Customer from './pages/Customer';
 import Search from './pages/Search';
+import Stats from './pages/Stats';
 import Templates from './pages/Templates';
 import Unclaimed from './pages/Unclaimed';
 import WellDyne from './pages/WellDyne';
@@ -108,6 +109,9 @@ function Site(props) {
 						</Route>
 						<Route path="/search">
 							<Search user={user} />
+						</Route>
+						<Route path="/stats">
+							<Stats user={user} />
 						</Route>
 						<Route path="/templates">
 							<Templates user={user} />

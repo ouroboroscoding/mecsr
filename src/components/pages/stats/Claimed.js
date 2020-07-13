@@ -1,0 +1,115 @@
+/**
+ * Stats Claimed
+ *
+ * Stats for claimed customers
+ *
+ * @author Chris Nasr <bast@maleexcel.com>
+ * @copyright MaleExcelMedical
+ * @created 2020-07-13
+ */
+
+// NPM modules
+import Tree from 'format-oc/Tree'
+import React, { useState, useEffect } from 'react';
+
+// Material UI
+import Box from '@material-ui/core/Box';
+
+// Format Components
+import ResultsComponent from '../../format/Results';
+
+// Generic modules
+import Events from '../../../generic/events';
+import Rest from '../../../generic/rest';
+
+// Local modules
+import Utils from '../../../utils';
+
+// Generate the Tree
+const ClaimedTree = new Tree({
+	"__name__": "Claimed_Stats",
+	"name": "string",
+	"count": "uint"
+});
+
+/**
+ * Claimed
+ *
+ * Wraps common code that both tabs use
+ *
+ * @name Claimed
+ * @extends React.Component
+ */
+export default function Claimed(props) {
+
+	// State
+	let [records, recordsSet] = useState(null);
+
+	// Fetch records effect
+	useEffect(() => {
+
+		// If we have a user with the correct rights
+		if(props.user) {
+			if(Utils.hasRight(props.user, 'csr_stats', 'read')) {
+				fetchRecords();
+			} else {
+				recordsSet(-1);
+			}
+		} else {
+			recordsSet(null);
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [props.user]); // React to user changes
+
+	// Fetch all the records from the server
+	function fetchRecords() {
+
+		// Fetch all records
+		Rest.read('monolith', 'stats/claimed', {}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				// Set the records
+				recordsSet(res.data);
+			}
+		});
+	}
+
+	// Figure out results
+	let results = ''
+	if(records === null) {
+		results = <div>Loading...</div>
+	} else if(records === -1) {
+		results = <div>You lack the rights to view Claimed stats.</div>
+	} else {
+		results = <ResultsComponent
+					data={records}
+					noun="stats/claims"
+					orderBy="name"
+					remove={false}
+					service="monolith"
+					tree={ClaimedTree}
+					update={false}
+				/>
+	}
+
+	return (
+		<React.Fragment>
+			<Box className="pageHeader">
+				<div className="title">Claimed by Agent</div>
+			</Box>
+			{results}
+		</React.Fragment>
+	);
+}

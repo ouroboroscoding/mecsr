@@ -140,7 +140,7 @@ export default function Agents(props) {
 			}
 
 			// If there's data
-			if('data' in res) {
+			if(res.data) {
 
 				// Set the permissions
 				permissionsSet({

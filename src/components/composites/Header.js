@@ -86,7 +86,25 @@ function CustomerItem(props) {
 
 		// If we resolved
 		if(resolve) {
+
+			// Hide the dialog
 			resolveSet(false);
+
+			// Mark the conversation as hidden on the server side
+			Rest.update('monolith', 'customer/hide', {
+				customerPhone: props.phone
+			}).done(res => {
+
+				// If there's an error
+				if(res.error && !Utils.restError(res.error)) {
+					Events.trigger('error', JSON.stringify(res.error));
+				}
+
+				// If there's a warning
+				if(res.warning) {
+					Events.trigger('warning', JSON.stringify(res.warning));
+				}
+			});
 		}
 
 		// If we're currently selected, change the page

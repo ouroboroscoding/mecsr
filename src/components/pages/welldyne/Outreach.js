@@ -40,10 +40,11 @@ import OutreachDef from '../../../definitions/welldyne/outreach';
 OutreachDef['__react__'] = {
 	"primary": "id",
 	"create": ["customerId", "queue", "reason", "ready"],
-	"results": ["customerId", "customerName", "queue", "reason", "userName", "ready"]
+	"results": ["customerId", "customerName", "triggered", "queue", "reason", "userName", "ready"]
 }
 OutreachDef['customerName'] = {"__type__": "string", "__react__": {"title": "Customer"}}
 OutreachDef['userName'] = {"__type__": "string", "__react__": {"title": "User"}}
+OutreachDef['triggered'] = {"__type__": "date"}
 
 // Generate the Tree
 const OutreachTree = new Tree(OutreachDef);

@@ -148,6 +148,8 @@ export default function RX(props) {
 						{o.EffectiveDate &&
 							<p><strong>Effective: </strong><span>{o.EffectiveDate.substring(0, 10)}</span></p>
 						}
+						<p><strong>Status: </strong><span>{o.StatusText}</span></p>
+						<p><strong>Medication Status: </strong><span>{o.MedicationStatusText}</span></p>
 						<p><strong>Refills: </strong><span>{o.Refills}</span></p>
 						<p><strong>Directions: </strong><span>{o.Directions}</span></p>
 					</Paper>

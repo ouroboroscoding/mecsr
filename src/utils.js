@@ -139,6 +139,15 @@ export default {
 				// Nothing else to do
 				return true;
 
+			// Insufficient rights
+			case 1000:
+
+				// Notify the user
+				Events.trigger('error', 'You lack the necessary rights to do the requested action');
+
+				// Nothing else to do
+				return true;
+
 			// Invalid fields
 			case 1001:
 
@@ -147,15 +156,6 @@ export default {
 
 				// But allow the child to deal with the messages themselves
 				return false;
-
-			// Insufficient rights
-			case 1002:
-
-				// Notify the user
-				Events.trigger('error', 'You lack the necessary rights to do the action requested');
-
-				// Nothing else to do
-				return true;
 
 			// no default
 		}

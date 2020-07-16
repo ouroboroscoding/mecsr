@@ -1,22 +1,18 @@
 /**
- * Stats Claimed
+ * Stats WellDyne
  *
- * Stats for claimed customers
+ * Stats associated with WellDyne
  *
  * @author Chris Nasr <bast@maleexcel.com>
  * @copyright MaleExcelMedical
- * @created 2020-07-13
+ * @created 2020-07-16
  */
 
 // NPM modules
-import Tree from 'format-oc/Tree'
 import React, { useState, useEffect } from 'react';
 
 // Material UI
 import Box from '@material-ui/core/Box';
-
-// Format Components
-import ResultsComponent from '../../format/Results';
 
 // Generic modules
 import Events from '../../../generic/events';
@@ -25,22 +21,15 @@ import Rest from '../../../generic/rest';
 // Local modules
 import Utils from '../../../utils';
 
-// Generate the Tree
-const ClaimedTree = new Tree({
-	"__name__": "Claimed_Stats",
-	"name": "string",
-	"count": "uint"
-});
-
 /**
- * Claimed
+ * WellDyne
  *
- * Shows claimed customers by agent
+ * Shows stats associated with WellDyne
  *
- * @name Claimed
+ * @name WellDyne
  * @extends React.Component
  */
-export default function Claimed(props) {
+export default function WellDyne(props) {
 
 	// State
 	let [records, recordsSet] = useState(null);
@@ -65,7 +54,7 @@ export default function Claimed(props) {
 	function fetchRecords() {
 
 		// Fetch all records
-		Rest.read('monolith', 'stats/claimed', {}).done(res => {
+		Rest.read('welldyne', 'stats', {}).done(res => {
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
@@ -91,23 +80,20 @@ export default function Claimed(props) {
 	if(records === null) {
 		results = <div>Loading...</div>
 	} else if(records === -1) {
-		results = <div>You lack the rights to view Claimed stats.</div>
+		results = <div>You lack the rights to view WellDyne stats.</div>
 	} else {
-		results = <ResultsComponent
-					data={records}
-					noun="stats/claims"
-					orderBy="name"
-					remove={false}
-					service="monolith"
-					tree={ClaimedTree}
-					update={false}
-				/>
+		results = (
+			<React.Fragment>
+				<p><strong>Latest triggered by customer vs how of those have been shipped: </strong></p>
+				<p>{records.vs[0]} / {records.vs[1]}</p>
+			</React.Fragment>
+		);
 	}
 
 	return (
 		<React.Fragment>
 			<Box className="pageHeader">
-				<div className="title">Claimed by Agent</div>
+				<div className="title">WellDyne Stats</div>
 			</Box>
 			{results}
 		</React.Fragment>

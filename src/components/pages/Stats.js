@@ -18,6 +18,7 @@ import Tabs from '@material-ui/core/Tabs';
 
 // Stats components
 import Claimed from './stats/Claimed';
+import WellDyne from './stats/WellDyne';
 
 /**
  * Stats
@@ -47,10 +48,14 @@ export default function Stats(props) {
 					variant="fullWidth"
 				>
 					<Tab label="Claimed" />
+					<Tab label="WellDyne" />
 				</Tabs>
 			</AppBar>
 			<div className="claimed" style={{display: tab === 0 ? 'block' : 'none'}}>
 				<Claimed user={props.user} />
+			</div>
+			<div className="welldyne" style={{display: tab === 1 ? 'block' : 'none'}}>
+				<WellDyne user={props.user} />
 			</div>
 		</div>
 	);

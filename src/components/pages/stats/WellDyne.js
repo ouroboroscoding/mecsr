@@ -89,7 +89,7 @@ export default function WellDyne(props) {
 	} else {
 		results = (
 			<React.Fragment>
-				<p><strong>Latest triggered by customer vs how of those have been shipped: </strong></p>
+				<p><strong>Latest triggered by customer vs how many of those have been shipped: </strong></p>
 				<p>{records.vs[0]} / {records.vs[1]}</p>
 			</React.Fragment>
 		);

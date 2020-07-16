@@ -14,6 +14,11 @@ import React, { useState, useEffect } from 'react';
 
 // Material UI
 import Box from '@material-ui/core/Box';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+
+// Material UI Icons
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 // Format Components
 import ResultsComponent from '../../format/Results';
@@ -107,7 +112,13 @@ export default function Claimed(props) {
 	return (
 		<React.Fragment>
 			<Box className="pageHeader">
-				<div className="title">Claimed by Agent</div>
+				<div className="title">Claimed by Agent
+					<Tooltip title="Refresh Prescriptions">
+						<IconButton onClick={fetchRecords}>
+							<RefreshIcon />
+						</IconButton>
+					</Tooltip>
+				</div>
 			</Box>
 			{results}
 		</React.Fragment>

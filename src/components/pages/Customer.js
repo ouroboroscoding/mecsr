@@ -136,7 +136,8 @@ export default class Customer extends React.Component {
 
 		// Find the customer ID
 		Rest.read('konnektive', 'customer', {
-			customerId: this.props.customerId
+			customerId: this.props.customerId,
+			detailed: true
 		}).done(res => {
 
 			// If there's an error

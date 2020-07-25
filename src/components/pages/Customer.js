@@ -142,7 +142,11 @@ export default class Customer extends React.Component {
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
+				if(res.error.code === 1104) {
+					this.setState({customer: 0});
+				} else {
+					Events.trigger('error', JSON.stringify(res.error));
+				}
 			}
 
 			// If there's a warning

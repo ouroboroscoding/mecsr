@@ -125,6 +125,11 @@ export default {
 		return '(' + lMatch[1] + ') ' + lMatch[2] + '-' + lMatch[3];
 	},
 
+	parsePath(path) {
+		// Split the path by /
+		return path.substr(1).split('/');
+	},
+
 	restError: function(err) {
 
 		// What error is it?
@@ -162,5 +167,9 @@ export default {
 
 		// Failed to process error
 		return false;
+	},
+
+	viewedPath: function(phone, id) {
+		return '/view/' + phone + '/' + id;
 	}
 }

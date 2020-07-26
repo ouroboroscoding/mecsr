@@ -171,41 +171,45 @@ export default class SMS extends React.Component {
 					)}
 					<div className="scroll" ref={el => this.messagesBottom = el} />
 				</div>
-				<div className="templates">
-					<Select
-						className='select'
-						disabled={this.state.stop}
-						native
-						onChange={this.useTemplate}
-						value={this.state.value}
-						variant="outlined"
-					>
-						<option key={-1} value={-1}>Use template...</option>
-						{this.props.templates.map((o,i) =>
-							<option key={i} value={i}>{o.title}</option>
-						)}
-					</Select>
-				</div>
-				<div className="send">
-					<TextField
-						className="text"
-						disabled={this.state.stop}
-						inputRef={el => this.text = el}
-						multiline
-						onKeyPress={this.textPress}
-						rows={3}
-						variant="outlined"
-					/>
-					<Button
-						color="primary"
-						disabled={this.state.stop}
-						size="large"
-						onClick={this.send}
-						variant="contained"
-					>
-						Send
-					</Button>
-				</div>
+				{!this.props.readOnly &&
+					<React.Fragment>
+						<div className="templates">
+							<Select
+								className='select'
+								disabled={this.state.stop}
+								native
+								onChange={this.useTemplate}
+								value={this.state.value}
+								variant="outlined"
+							>
+								<option key={-1} value={-1}>Use template...</option>
+								{this.props.templates.map((o,i) =>
+									<option key={i} value={i}>{o.title}</option>
+								)}
+							</Select>
+						</div>
+						<div className="send">
+							<TextField
+								className="text"
+								disabled={this.state.stop}
+								inputRef={el => this.text = el}
+								multiline
+								onKeyPress={this.textPress}
+								rows={3}
+								variant="outlined"
+							/>
+							<Button
+								color="primary"
+								disabled={this.state.stop}
+								size="large"
+								onClick={this.send}
+								variant="contained"
+							>
+								Send
+							</Button>
+						</div>
+					</React.Fragment>
+				}
 			</React.Fragment>
 		)
 	}
@@ -215,6 +219,12 @@ export default class SMS extends React.Component {
 	}
 
 	send() {
+
+		// If read-only mode
+		if(this.props.readOnly) {
+			Events.trigger('error', 'You are in view-only mode. You must claim this customer to continue.');
+			return;
+		}
 
 		// Store the message content
 		let content = this.text.value;

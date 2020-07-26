@@ -9,6 +9,7 @@
  */
 
 // NPM modules
+import PropTypes from 'prop-types';
 import React from 'react';
 
 // Material UI
@@ -88,8 +89,10 @@ export default class Customer extends React.Component {
 				});
 			}
 
-			// Fetch templates
-			this.fetchSMSTemplates();
+			// Fetch templates if needed
+			if(!this.props.readOnly) {
+				this.fetchSMSTemplates();
+			}
 		}
 	}
 
@@ -100,6 +103,12 @@ export default class Customer extends React.Component {
 	}
 
 	adhocAdd(type) {
+
+		// If read-only mode
+		if(this.props.readOnly) {
+			Events.trigger('error', 'You are in view-only mode. You must claim this customer to continue.');
+			return;
+		}
 
 		// Send the request
 		Rest.create('welldyne', 'adhoc', {
@@ -197,7 +206,7 @@ export default class Customer extends React.Component {
 
 		// Find the MIP using the phone number
 		Rest.read('monolith', 'customer/mips', {
-			customerId: this.props.customerId
+			customerId: this.props.customerId.toString()
 		}).done(res => {
 
 			// If there's an error
@@ -225,7 +234,7 @@ export default class Customer extends React.Component {
 
 		// Find the MIP using the phone number
 		Rest.read('monolith', 'customer/dsid', {
-			customerId: this.props.customerId
+			customerId: this.props.customerId.toString()
 		}).done(res => {
 
 			// If there's an error
@@ -291,7 +300,7 @@ export default class Customer extends React.Component {
 
 		// Fetch them from the server
 		Rest.read('monolith', 'customer/shipping', {
-			customerId: this.props.customerId
+			customerId: this.props.customerId.toString()
 		}).done(res => {
 
 			// If there's an error
@@ -414,6 +423,7 @@ export default class Customer extends React.Component {
 						ref={el => this.smsRef = el}
 						customer={this.state.customer}
 						phoneNumber={this.props.phoneNumber}
+						readOnly={this.props.readOnly}
 						templates={this.state.sms_tpls}
 						user={this.props.user}
 					/>
@@ -422,6 +432,7 @@ export default class Customer extends React.Component {
 					<KNK
 						customer={this.state.customer}
 						orders={this.state.orders}
+						readOnly={this.props.readOnly}
 						refreshCustomer={this.knkCustomerRefresh}
 						refreshOrders={this.knkOrdersRefresh}
 						tracking={this.state.shipping}
@@ -431,12 +442,14 @@ export default class Customer extends React.Component {
 					<MIP
 						customer={this.state.customer}
 						mips={this.state.mips}
+						readOnly={this.props.readOnly}
 						user={this.props.user}
 					/>
 				</div>
 				<div className="notes" style={{display: this.state.tab === 3 ? 'flex' : 'none'}}>
 					<Notes
 						customerId={this.props.customerId}
+						readOnly={this.props.readOnly}
 						user={this.props.user}
 						visible={this.state.tab === 3}
 					/>
@@ -447,6 +460,7 @@ export default class Customer extends React.Component {
 						onRefresh={this.rxRefresh}
 						patientId={this.state.patient_id}
 						prescriptions={this.state.prescriptions}
+						readOnly={this.props.readOnly}
 						trigger={this.state.trigger}
 						user={this.props.user}
 					/>
@@ -469,4 +483,21 @@ export default class Customer extends React.Component {
 	tabChange(event, tab) {
 		this.setState({"tab": tab});
 	}
+}
+
+// Valid props
+Customer.propTypes = {
+	"customerId": PropTypes.number,
+	"phoneNumber": PropTypes.string,
+	"readyOnly": PropTypes.bool,
+	"user": PropTypes.oneOfType([
+		PropTypes.bool,
+		PropTypes.object
+	])
+}
+
+// Default props
+Customer.defaultProps = {
+	"readOnly": false,
+	"user": false
 }

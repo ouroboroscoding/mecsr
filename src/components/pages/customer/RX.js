@@ -43,6 +43,12 @@ export default function RX(props) {
 	// Toggle the SSO iframe
 	function toggleSSO() {
 
+		// If read-only mode
+		if(props.readOnly) {
+			Events.trigger('error', 'You are in view-only mode. You must claim this customer to continue.');
+			return;
+		}
+
 		// If we have an SSO, hide the iframe
 		if(sso) {
 			ssoSet(false);
@@ -111,7 +117,7 @@ export default function RX(props) {
 					{props.trigger.adhocType &&
 						<p><strong>AdHoc Type: </strong><span>{props.trigger.adhocType}</span></p>
 					}
-					{(props.trigger.adhocType === null && Utils.hasRight(props.user, 'welldyne_adhoc', 'create')) &&
+					{(props.trigger.adhocType === null && Utils.hasRight(props.user, 'welldyne_adhoc', 'create') && !props.readOnly) &&
 						<p><strong>AdHoc Type: </strong>
 							<Select
 								inputRef={adhocType}
@@ -159,7 +165,7 @@ export default function RX(props) {
 	}
 
 	// DoseSpot SSO
-	let bSSO = (props.patientId && (props.user.dsClinicianId !== '')) ? true : false;
+	let bSSO = (props.patientId && (props.user.dsClinicianId !== '') && !props.readOnly) ? true : false;
 
 	// Render
 	return (

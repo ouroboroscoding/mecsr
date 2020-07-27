@@ -6,12 +6,11 @@
 		margin-left: $menu-width;
 		width: calc(100% - #{$menu-width});
 
-		.mobiletitle {
-			font-size: 1rem;
-		}
-
 		.title {
 			font-size: 1.25rem;
+			font-weight: 500;
+			line-height: 1.6;
+			letter-spacing: 0.0075em;
 		}
 
 		.subtitle {

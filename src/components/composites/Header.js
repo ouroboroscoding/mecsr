@@ -797,11 +797,22 @@ class Header extends React.Component {
 								<MenuIcon />
 							</IconButton>
 						}
-						<Typography variant="h6" className="title">
-							<Link to="/" onClick={this.menuClick}>
-								ME Customer Service
-							</Link>
-						</Typography>
+						{this.state.mobile ?
+							<div>
+								<Typography className="title">
+									<Link to="/" onClick={this.menuClick}>ME CS</Link>
+								</Typography>
+							</div>
+							:
+							<div>
+								<Typography className="title">
+									<Link to="/" onClick={this.menuClick}>ME Customer Service</Link>
+								</Typography>
+								<Typography className="subtitle">
+									v{process.env.REACT_APP_VERSION}
+								</Typography>
+							</div>
+						}
 						<div id="loaderWrapper">
 							<Loader />
 						</div>

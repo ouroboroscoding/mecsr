@@ -6,6 +6,18 @@
 		margin-left: $menu-width;
 		width: calc(100% - #{$menu-width});
 
+		.mobiletitle {
+			font-size: 1rem;
+		}
+
+		.title {
+			font-size: 1.25rem;
+		}
+
+		.subtitle {
+			font-size: 1rem;
+		}
+
 		#loaderWrapper {
 			flex-grow: 1;
 			text-align: center;

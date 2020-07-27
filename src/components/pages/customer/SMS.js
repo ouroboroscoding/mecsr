@@ -37,17 +37,25 @@ const regTplVar = /{([^]+?)}/g
 // Message component
 function Message(props) {
 	return (
-		<div className={"message " + props.direction}>
+		<div className={"message " + props.type}>
 			<div className="content">
-				{props.content.split('\n').map((s,i) =>
+				{props.notes.split('\n').map((s,i) =>
 					<p key={i}>{s}</p>
 				)}
 			</div>
 			<div className="footer">
-				{props.direction === 'Outgoing' &&
-					<span className="name">{props.name} at </span>
+				{props.type === 'Outgoing' &&
+					<span>{props.fromName} at </span>
 				}
-				<span className="date">{props.date}</span>
+				<span>{props.createdAt}</span>
+				{(props.type === 'Outgoing' && props.status !== null) &&
+					<React.Fragment>
+						<span> / {props.status}</span>
+						{props.error &&
+							<span className="error"> ({props.error})</span>
+						}
+					</React.Fragment>
+				}
 			</div>
 		</div>
 	);
@@ -64,6 +72,7 @@ export default class SMS extends React.Component {
 		// Initial state
 		this.state = {
 			messages: [],
+			needsStatus: [],
 			stop: false,
 			type: ''
 		}
@@ -73,9 +82,13 @@ export default class SMS extends React.Component {
 		this.sendEl = null;
 		this.text = null;
 
+		// Timers
+		this.iStatuses = null;
+
 		// Bind methods
 		this.callPhone = this.callPhone.bind(this);
 		this.copyPhone = this.copyPhone.bind(this);
+		this.fetchStatus = this.fetchStatus.bind(this);
 		this.scrollToBottom = this.scrollToBottom.bind(this);
 		this.send = this.send.bind(this);
 		this.textPress = this.textPress.bind(this);
@@ -87,6 +100,15 @@ export default class SMS extends React.Component {
 		// Fetch existing messages
 		if(this.props.user) {
 			this.fetch('auto');
+		}
+	}
+
+	componentWillUnmount() {
+
+		// If we have a timer going for the statuses
+		if(this.iStatuses) {
+			clearTimeout(this.iStatuses);
+			this.iStatuses = null;
 		}
 	}
 
@@ -102,6 +124,12 @@ export default class SMS extends React.Component {
 	}
 
 	fetch(type) {
+
+		// If we have a timer going for the statuses
+		if(this.iStatuses) {
+			clearTimeout(this.iStatuses);
+			this.iStatuses = null;
+		}
 
 		// Get the messages from the REST service
 		Rest.read('monolith', 'customer/messages', {
@@ -121,14 +149,96 @@ export default class SMS extends React.Component {
 			// If there's data
 			if(res.data) {
 
+				// Get the IDs of all the messages that need a status
+				let lStatus = [];
+				for(let o of res.data.messages) {
+					if(o.type === 'Outgoing' && !o.status) {
+						lStatus.push(o.id);
+					}
+				}
+
+				// If we have any missing their status
+				if(lStatus.length > 0) {
+					this.iStatuses = setTimeout(this.fetchStatus, 30000);
+				}
+
 				// Set the state
 				this.setState({
 					messages: res.data.messages,
+					needsStatus: lStatus,
 					stop: res.data.stop,
 					type: res.data.type
 				}, () => {
 					this.scrollToBottom(type);
 				});
+			}
+		});
+	}
+
+	fetchStatus() {
+
+		// Get the messages status from the REST service
+		Rest.read('monolith', 'msgs/status', {
+			ids: this.state.needsStatus
+		}).done(res => {
+
+			// If there's an error
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+
+				// If we need it
+				let lNewMsgs = null;
+				let lStatus = [];
+
+				// Go through each one (in reverse)
+				for(let o of res.data) {
+
+					// If we have a status
+					if(o.status) {
+
+						// If we haven't cloned the messages yet
+						if(!lNewMsgs) {
+							lNewMsgs = Tools.clone(this.state.messages);
+						}
+
+						// Find the corresponding message
+						let iIndex = Tools.afindi(lNewMsgs, 'id', o.id);
+
+						// If we found it
+						if(iIndex > -1) {
+							lNewMsgs[iIndex].status = o.status;
+							lNewMsgs[iIndex].error = o.errorMessage;
+						}
+					}
+
+					// Else, we still need to look it up
+					else {
+						lStatus.push(o.id);
+					}
+				}
+
+				// If we still have messages that need a status, restart the
+				//	timer
+				if(lStatus.length > 0) {
+					this.iStatuses = setTimeout(this.fetchStatus, 30000);
+				}
+
+				// If we have new status, set the state
+				if(lNewMsgs) {
+					this.setState({
+						messages: lNewMsgs,
+						needsStatus: lStatus
+					});
+				}
 			}
 		});
 	}
@@ -162,50 +272,51 @@ export default class SMS extends React.Component {
 				<div className="messages">
 					{this.state.messages.map((msg, i) =>
 						<Message
-							direction={msg.type}
-							content={msg.notes}
-							key={i}
-							name={msg.fromName}
-							date={msg.createdAt}
+							key={msg.id}
+							{...msg}
 						/>
 					)}
 					<div className="scroll" ref={el => this.messagesBottom = el} />
 				</div>
-				<div className="templates">
-					<Select
-						className='select'
-						disabled={this.state.stop}
-						native
-						onChange={this.useTemplate}
-						value={this.state.value}
-						variant="outlined"
-					>
-						<option key={-1} value={-1}>Use template...</option>
-						{this.props.templates.map((o,i) =>
-							<option key={i} value={i}>{o.title}</option>
-						)}
-					</Select>
-				</div>
-				<div className="send">
-					<TextField
-						className="text"
-						disabled={this.state.stop}
-						inputRef={el => this.text = el}
-						multiline
-						onKeyPress={this.textPress}
-						rows={3}
-						variant="outlined"
-					/>
-					<Button
-						color="primary"
-						disabled={this.state.stop}
-						size="large"
-						onClick={this.send}
-						variant="contained"
-					>
-						Send
-					</Button>
-				</div>
+				{!this.props.readOnly &&
+					<React.Fragment>
+						<div className="templates">
+							<Select
+								className='select'
+								disabled={this.state.stop}
+								native
+								onChange={this.useTemplate}
+								value={this.state.value}
+								variant="outlined"
+							>
+								<option key={-1} value={-1}>Use template...</option>
+								{this.props.templates.map((o,i) =>
+									<option key={i} value={i}>{o.title}</option>
+								)}
+							</Select>
+						</div>
+						<div className="send">
+							<TextField
+								className="text"
+								disabled={this.state.stop}
+								inputRef={el => this.text = el}
+								multiline
+								onKeyPress={this.textPress}
+								rows={3}
+								variant="outlined"
+							/>
+							<Button
+								color="primary"
+								disabled={this.state.stop}
+								size="large"
+								onClick={this.send}
+								variant="contained"
+							>
+								Send
+							</Button>
+						</div>
+					</React.Fragment>
+				}
 			</React.Fragment>
 		)
 	}
@@ -215,6 +326,12 @@ export default class SMS extends React.Component {
 	}
 
 	send() {
+
+		// If read-only mode
+		if(this.props.readOnly) {
+			Events.trigger('error', 'You are in view-only mode. You must claim this customer to continue.');
+			return;
+		}
 
 		// Store the message content
 		let content = this.text.value;
@@ -249,20 +366,34 @@ export default class SMS extends React.Component {
 				// Clear the message
 				this.text.value = '';
 
-				// Clone the current messsages
-				let messages = Tools.clone(this.state.messages);
+				// Clone the current messsages and status
+				let lNewMsgs = Tools.clone(this.state.messages);
+				let lStatus = Tools.clone(this.state.needsStatus);
 
 				// Add the new one to the end
-				messages.push({
+				lNewMsgs.push({
+					id: res.data,
+					status: 'Sent',
+					error: null,
 					type: 'Outgoing',
 					notes: content,
 					fromName: this.props.user.firstName + ' ' + this.props.user.lastName,
 					createdAt: Utils.datetime(new Date())
 				});
 
+				// Add the id to those that need statuses
+				lStatus.push(res.data);
+
+				// Clear the existing timer and create a new one
+				if(!this.iStatuses) {
+					clearInterval(this.iStatuses);
+				}
+				this.iStatuses = setTimeout(this.fetchStatus, 30000);
+
 				// Set the new state
 				this.setState({
-					messages: messages
+					messages: lNewMsgs,
+					needsStatus: lStatus
 				}, () => {
 					this.scrollToBottom("smooth");
 				});

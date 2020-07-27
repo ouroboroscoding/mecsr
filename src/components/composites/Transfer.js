@@ -1,7 +1,7 @@
 /**
- * Escalate
+ * Transfer
  *
- * Handles escalate dialog
+ * Handles transfer dialog
  *
  * @author Chris Nasr <bast@maleexcel.com>
  * @copyright MaleExcelMedical
@@ -30,11 +30,11 @@ import Tools from '../../generic/tools';
 // Local modules
 import Utils from '../../utils';
 
-// Escalate
-export default function Escalate(props) {
+// Transfer
+export default function Transfer(props) {
 
 	// State
-	let [agents, agentsSet] = useState([]);
+	let [agents, agentsSet] = useState({});
 	let [agent, agentSet] = useState('');
 
 	// Refs
@@ -42,7 +42,7 @@ export default function Escalate(props) {
 
 	// Effects
 	useEffect(() => {
-		// Fetch the agents we can escalate to
+		// Fetch the agents we can transfer to
 		agentsFetch();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []); // React to user changes
@@ -51,11 +51,11 @@ export default function Escalate(props) {
 		agentSet(event.currentTarget.value);
 	}
 
-	// Fetch agents we can escalate to
+	// Fetch agents we can transfer to
 	function agentsFetch() {
 
 		// Make the request to the service
-		Rest.read('csr', 'escalate_agents', {}).done(res => {
+		Rest.read('csr', 'agent/names', {}).done(res => {
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
@@ -69,6 +69,13 @@ export default function Escalate(props) {
 
 			// If we're ok
 			if(res.data) {
+
+				// Remove the ignore user
+				if(props.ignore in res.data) {
+					delete res.data[props.ignore]
+				}
+
+				// Save the agents
 				agentsSet(res.data);
 			}
 		});
@@ -79,7 +86,7 @@ export default function Escalate(props) {
 
 		// If no agent selected
 		if(!agent) {
-			Events.trigger('error', 'Please select an agent to escalate to');
+			Events.trigger('error', 'Please select an agent to transfer to');
 			return;
 		}
 
@@ -91,7 +98,7 @@ export default function Escalate(props) {
 
 			// Send the message to the server
 			Rest.create('monolith', 'customer/note', {
-				action: 'CSR Note - Escalated',
+				action: 'CSR Note - Transfered',
 				content: content,
 				customer_id: props.customerId
 			}).done(res => {
@@ -115,7 +122,7 @@ export default function Escalate(props) {
 
 		// Else, let the parent handle removing the claim
 		else {
-			props.onSubmit(agent);
+			props.onSubmit(parseInt(agent));
 		}
 	}
 
@@ -129,7 +136,7 @@ export default function Escalate(props) {
 				className: "resolve"
 			}}
 		>
-			<DialogTitle id="confirmation-dialog-title">Escalate</DialogTitle>
+			<DialogTitle id="confirmation-dialog-title">Transfer</DialogTitle>
 			<DialogContent dividers>
 				<p><TextField
 					label="Add Note"
@@ -139,12 +146,12 @@ export default function Escalate(props) {
 					variant="outlined"
 				/></p>
 				<p><FormControl variant="outlined">
-					<InputLabel htmlFor="escalate-agent">Escalate To</InputLabel>
+					<InputLabel htmlFor="transfer-agent">Transfer To</InputLabel>
 					<Select
 						inputProps={{
-							id: 'escalate-agent'
+							id: 'transfer-agent'
 						}}
-						label="Escalate To"
+						label="Transfer To"
 						native
 						onChange={agentChange}
 						value={agent}
@@ -161,7 +168,7 @@ export default function Escalate(props) {
 					Cancel
 				</Button>
 				<Button variant="contained" color="primary" onClick={submit}>
-					Escalate
+					Transfer
 				</Button>
 			</DialogActions>
 		</Dialog>

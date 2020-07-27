@@ -126,6 +126,19 @@ function Site(props) {
 									key={phoneNumber}
 									customerId={customerId}
 									phoneNumber={phoneNumber}
+									readOnly={false}
+									user={user}
+								/>
+							)}
+						/>
+						<Route
+							path="/view/:phoneNumber/:customerId"
+							component={({match: {params:{phoneNumber, customerId}}}) => (
+								<Customer
+									key={phoneNumber}
+									customerId={parseInt(customerId)}
+									phoneNumber={phoneNumber}
+									readOnly={true}
 									user={user}
 								/>
 							)}

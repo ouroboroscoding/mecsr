@@ -26,8 +26,10 @@ const UPDATE = 2;
 const DELETE = 8;
 const ALL    = 15;
 const TYPES = [
-	{name: "csr_agents", title: "Agents", allowed: ALL},
-	{name: "csr_templates", title: "Templates", allowed: ALL},
+	{name: "csr_agents", title: "Agents: Ability to manage agents and permissions", allowed: ALL},
+	{name: "csr_overwrite", title: "Claim Overwrite", allowed: CREATE},
+	{name: "csr_stats", title: "Stats: Allowed to view stats", allowed: READ},
+	{name: "csr_templates", title: "Templates: Ability to create and modify templates", allowed: ALL},
 	{name: "welldyne_adhoc", title: "WellDyneRX Adhoc", allowed: CREATE | READ | DELETE},
 	{name: "welldyne_outreach", title: "WellDyneRX Outreach", allowed: ALL}
 ]
@@ -122,7 +124,7 @@ export default class Permissions extends React.Component {
 	render() {
 		return (
 			<Grid container spacing={2} className="permissions">
-				<Grid item xs={4} className="title"><span>Name</span></Grid>
+				<Grid item xs={4} className="title"><span>Description</span></Grid>
 				<Grid item xs={2} className="title"><span>Create</span></Grid>
 				<Grid item xs={2} className="title"><span>Read</span></Grid>
 				<Grid item xs={2} className="title"><span>Update</span></Grid>

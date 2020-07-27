@@ -176,7 +176,7 @@ export default class Notes extends React.Component {
 					{notes}
 					<div className="scroll" ref={el => this.messagesBottom = el} />
 				</div>
-				{this.state.status &&
+				{(this.state.status && !this.props.readOnly) &&
 					<div className="label">
 						<Select
 							className='select'
@@ -191,24 +191,26 @@ export default class Notes extends React.Component {
 						</Select>
 					</div>
 				}
-				<div className="send">
-					<TextField
-						className="text"
-						inputRef={el => this.text = el}
-						multiline
-						onKeyPress={this.textPress}
-						rows={3}
-						variant="outlined"
-					/>
-					<Button
-						color="primary"
-						size="large"
-						onClick={this.send}
-						variant="contained"
-					>
-						Add Note
-					</Button>
-				</div>
+				{!this.props.readOnly &&
+					<div className="send">
+						<TextField
+							className="text"
+							inputRef={el => this.text = el}
+							multiline
+							onKeyPress={this.textPress}
+							rows={3}
+							variant="outlined"
+						/>
+						<Button
+							color="primary"
+							size="large"
+							onClick={this.send}
+							variant="contained"
+						>
+							Add Note
+						</Button>
+					</div>
+				}
 			</React.Fragment>
 		)
 	}
@@ -218,6 +220,12 @@ export default class Notes extends React.Component {
 	}
 
 	send() {
+
+		// If read-only mode
+		if(this.props.readOnly) {
+			Events.trigger('error', 'You are in view-only mode. You must claim this customer to continue.');
+			return;
+		}
 
 		// Get the content of the note
 		let content = this.text.value;

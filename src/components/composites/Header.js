@@ -460,8 +460,14 @@ class Header extends React.Component {
 		window.removeEventListener("resize", this.resize);
 
 		// Stop checking for new messages and unclaimed counts
-		if(this.iUpdates) clearInterval(this.iUpdates);
-		if(this.iUnclaimed) clearInterval(this.iUnclaimed);
+		if(this.iUpdates) {
+			clearInterval(this.iUpdates);
+			this.iUpdates = null;
+		}
+		if(this.iUnclaimed) {
+			clearInterval(this.iUnclaimed);
+			this.iUpdates = null;
+		}
 	}
 
 	accountToggle() {
@@ -925,8 +931,14 @@ class Header extends React.Component {
 		});
 
 		// Stop checking for new messages and unclaimed counts
-		if(this.iUpdates) clearInterval(this.iUpdates);
-		if(this.iUnclaimed) clearInterval(this.iUnclaimed);
+		if(this.iUpdates) {
+			clearInterval(this.iUpdates);
+			this.iUpdates = null;
+		}
+		if(this.iUnclaimed) {
+			clearInterval(this.iUnclaimed);
+			this.iUpdates = null;
+		}
 	}
 
 	unclaimedCount() {
@@ -1069,23 +1081,33 @@ class Header extends React.Component {
 		// If we've become visible
 		if(state === 'visible') {
 
-			// Update
-			this.update();
-			this.unclaimedCount();
+			// If we have a user
+			if(this.state.user) {
 
-			// Start checking for new messages
-			this.iUpdates = setInterval(this.update.bind(this), 30000);
+				// Update
+				this.update();
+				this.unclaimedCount();
 
-			// Start checking for unclaimed counts
-			this.iUnclaimed = setInterval(this.unclaimedCount.bind(this), 300000);
+				// Start checking for new messages
+				this.iUpdates = setInterval(this.update.bind(this), 30000);
+
+				// Start checking for unclaimed counts
+				this.iUnclaimed = setInterval(this.unclaimedCount.bind(this), 300000);
+			}
 		}
 
 		// Else if we're hidden
 		else if(state === 'hidden') {
 
 			// Stop checking for new messages and unclaimed counts
-			if(this.iUpdates) clearInterval(this.iUpdates);
-			if(this.iUnclaimed) clearInterval(this.iUnclaimed);
+			if(this.iUpdates) {
+				clearInterval(this.iUpdates);
+				this.iUpdates = null;
+			}
+			if(this.iUnclaimed) {
+				clearInterval(this.iUnclaimed);
+				this.iUpdates = null;
+			}
 		}
 	}
 }

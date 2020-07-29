@@ -95,7 +95,7 @@ export default class Notes extends React.Component {
 	componentDidMount() {
 
 		// Fetch existing messages
-		if(this.props.customerId) {
+		if(this.props.user && this.props.customerId) {
 			this.fetch();
 		}
 	}

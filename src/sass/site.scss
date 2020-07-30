@@ -13,11 +13,11 @@ $menu-width: 250px;
 /* pages */
 @import 'agents';
 @import 'customer';
+@import 'pharmacy';
 @import 'search';
 @import 'stats';
 @import 'templates';
 @import 'unclaimed';
-@import 'welldyne';
 
 html, body, #root, #site, #content {
 	height: 100%;

@@ -1,4 +1,4 @@
-#welldyne {
+#pharmacy {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
@@ -8,12 +8,16 @@
 		flex-shrink: 0;
 	}
 
-	.adhoc, .outreach {
+	.fillError, .adhoc, .outreach {
 		flex-basis: 0;
 		flex-grow: 2;
 		flex-shrink: 2;
 		overflow: auto;
 		padding: 10px;
 		width: 100%;
+
+		.MuiCheckbox-root {
+			padding: 0;
+		}
 	}
 }

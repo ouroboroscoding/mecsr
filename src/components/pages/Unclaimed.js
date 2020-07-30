@@ -93,8 +93,6 @@ export default class Unclaimed extends React.Component {
 
 	claim(number, name) {
 
-		console.log('Unclaimed.claim(' + number + ', ' + name + ')');
-
 		// Get the claimed add promise
 		claimed.add(number).then(res => {
 			console.log('received: ' + res.customerId);

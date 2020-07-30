@@ -519,6 +519,7 @@ class Header extends React.Component {
 	}
 
 	claimedFetch() {
+
 		claimed.fetch().then(data => {
 
 			// Init new state
@@ -530,9 +531,10 @@ class Header extends React.Component {
 
 				// If we can't find the customer we're on
 				if(Tools.afindi(data, 'customerPhone', lPath[1]) === -1) {
-					this.props.history.push('/unclaimed');
-					oState.path = '/unclaimed';
-					Events.trigger('error', 'Current claim removed.');
+
+					// Switch to view
+					Events.trigger('viewedAdd', lPath[1], lPath[2]);
+					Events.trigger('error', 'This customer is not claimed, switching to view only.');
 				}
 			}
 
@@ -724,12 +726,14 @@ class Header extends React.Component {
 						<Divider />
 					</React.Fragment>
 				}
-				{(Utils.hasRight(this.state.user, 'welldyne_adhoc', 'read') || Utils.hasRight(this.state.user, 'welldyne_outreach', 'read')) &&
+				{(Utils.hasRight(this.state.user, 'pharmacy_fill', 'read') ||
+					Utils.hasRight(this.state.user, 'welldyne_adhoc', 'read') ||
+					Utils.hasRight(this.state.user, 'welldyne_outreach', 'read')) &&
 					<React.Fragment>
-						<Link to="/welldyne" onClick={this.menuClick}>
-							<ListItem button selected={this.state.path === "/welldyne"}>
+						<Link to="/pharmacy" onClick={this.menuClick}>
+							<ListItem button selected={this.state.path === "/pharmacy"}>
 								<ListItemIcon><LocalPharmacyIcon /></ListItemIcon>
-								<ListItemText primary="WellDyne" />
+								<ListItemText primary="Pharmacy" />
 							</ListItem>
 						</Link>
 						<Divider />
@@ -1013,7 +1017,7 @@ class Header extends React.Component {
 					// Add the record to the end
 					lView.push({
 						customerId: res.data.customerId,
-						customerName: name,
+						customerName: res.data.customerName,
 						customerPhone: number,
 						claimedUser: res.data.claimedUser
 					});

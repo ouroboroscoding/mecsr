@@ -53,6 +53,9 @@ export default class Customer extends React.Component {
 			tab: 0
 		}
 
+		// Mounted?
+		this.mounted = false;
+
 		// Refs
 		this.smsRef = null;
 
@@ -66,6 +69,9 @@ export default class Customer extends React.Component {
 	}
 
 	componentDidMount() {
+
+		// Mark instance as mounted
+		this.mounted = true;
 
 		// Track any new message
 		Events.add('newMessage', this.newMessage);
@@ -97,6 +103,9 @@ export default class Customer extends React.Component {
 	}
 
 	componentWillUnmount() {
+
+		// Mark instance as no longer mounted
+		this.mounted = false;
 
 		// Stop tracking any new message events
 		Events.remove('newMessage', this.newMessage);
@@ -148,6 +157,11 @@ export default class Customer extends React.Component {
 			id: this.props.customerId
 		}).done(res => {
 
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
@@ -181,6 +195,11 @@ export default class Customer extends React.Component {
 			transactions: true
 		}).done(res => {
 
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
@@ -209,6 +228,11 @@ export default class Customer extends React.Component {
 			customerId: this.props.customerId.toString()
 		}).done(res => {
 
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
@@ -236,6 +260,11 @@ export default class Customer extends React.Component {
 		Rest.read('monolith', 'customer/dsid', {
 			customerId: this.props.customerId.toString()
 		}).done(res => {
+
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
@@ -275,6 +304,11 @@ export default class Customer extends React.Component {
 			patient_id: parseInt(id, 10)
 		}).done(res => {
 
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
@@ -303,6 +337,11 @@ export default class Customer extends React.Component {
 			customerId: this.props.customerId.toString()
 		}).done(res => {
 
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
@@ -328,6 +367,11 @@ export default class Customer extends React.Component {
 
 		// Fetch them from the server
 		Rest.read('csr', 'template/smss', {}).done(res => {
+
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
@@ -356,6 +400,11 @@ export default class Customer extends React.Component {
 		Rest.read('welldyne', 'trigger/info', {
 			customerId: this.props.customerId
 		}).done(res => {
+
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {

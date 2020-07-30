@@ -30,6 +30,7 @@ const TYPES = [
 	{name: "csr_overwrite", title: "Claim Overwrite", allowed: CREATE},
 	{name: "csr_stats", title: "Stats: Allowed to view stats", allowed: READ},
 	{name: "csr_templates", title: "Templates: Ability to create and modify templates", allowed: ALL},
+	{name: "pharmacy_fill", title: "Pharmacy Fill", allowed: READ | UPDATE | DELETE},
 	{name: "welldyne_adhoc", title: "WellDyneRX Adhoc", allowed: CREATE | READ | DELETE},
 	{name: "welldyne_outreach", title: "WellDyneRX Outreach", allowed: ALL}
 ]

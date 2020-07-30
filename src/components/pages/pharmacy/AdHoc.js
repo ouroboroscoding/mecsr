@@ -1,7 +1,7 @@
 /**
  * WellDyne AdHoc
  *
- * Created, edit, and delete adhoc records
+ * Create, edit, and delete adhoc records
  *
  * @author Chris Nasr <bast@maleexcel.com>
  * @copyright MaleExcelMedical

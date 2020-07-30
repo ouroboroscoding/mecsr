@@ -77,6 +77,9 @@ export default class Notes extends React.Component {
 			status: null
 		}
 
+		// Mounted?
+		this.mounted = false;
+
 		// Sometimes I loathe react
 		this.scrolled = false;
 
@@ -93,6 +96,9 @@ export default class Notes extends React.Component {
 	}
 
 	componentDidMount() {
+
+		// Mark instance as mounted
+		this.mounted = true;
 
 		// Fetch existing messages
 		if(this.props.user && this.props.customerId) {
@@ -114,12 +120,23 @@ export default class Notes extends React.Component {
 		}
 	}
 
+	componentWillUnmount() {
+
+		// Mark instance as no longer mounted
+		this.mounted = false;
+	}
+
 	fetch(type) {
 
 		// Find the Notes using the customer ID
 		Rest.read('monolith', 'customer/notes', {
 			customerId: this.props.customerId
 		}).done(res => {
+
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {

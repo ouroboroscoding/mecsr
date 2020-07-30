@@ -77,6 +77,9 @@ export default class SMS extends React.Component {
 			type: ''
 		}
 
+		// Mounted?
+		this.mounted = false;
+
 		// Refs
 		this.messagesBottom = null;
 		this.sendEl = null;
@@ -97,6 +100,9 @@ export default class SMS extends React.Component {
 
 	componentDidMount() {
 
+		// Mark instance as mounted
+		this.mounted = true;
+
 		// Fetch existing messages
 		if(this.props.user) {
 			this.fetch('auto');
@@ -104,6 +110,9 @@ export default class SMS extends React.Component {
 	}
 
 	componentWillUnmount() {
+
+		// Mark instance as no longer mounted
+		this.mounted = false;
 
 		// If we have a timer going for the statuses
 		if(this.iStatuses) {
@@ -135,6 +144,11 @@ export default class SMS extends React.Component {
 		Rest.read('monolith', 'customer/messages', {
 			customerPhone: this.props.phoneNumber
 		}).done(res => {
+
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
@@ -181,6 +195,11 @@ export default class SMS extends React.Component {
 		Rest.read('monolith', 'msgs/status', {
 			ids: this.state.needsStatus
 		}).done(res => {
+
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {

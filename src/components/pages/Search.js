@@ -86,8 +86,6 @@ export default class Search extends React.Component {
 
 	claim(number, name) {
 
-		console.log('Search.claim(' + number + ', ' + name + ')');
-
 		// Get the claimed add promise
 		claimed.add(number).then(res => {
 			Events.trigger('claimedAdd', number, name, res.customerId);

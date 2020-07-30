@@ -80,7 +80,6 @@ function Message(props) {
 export default function MsgSummary(props) {
 
 	function claim() {
-		console.log('MsgSummary.claim()');
 		props.onClaim(props.customerPhone, props.customerName);
 	}
 

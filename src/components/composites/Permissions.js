@@ -32,7 +32,7 @@ const TYPES = [
 	{name: "csr_templates", title: "Templates: Ability to create and modify templates", allowed: ALL},
 	{name: "pharmacy_fill", title: "Pharmacy Fill", allowed: READ | UPDATE | DELETE},
 	{name: "welldyne_adhoc", title: "WellDyneRX Adhoc", allowed: CREATE | READ | DELETE},
-	{name: "welldyne_outreach", title: "WellDyneRX Outreach", allowed: ALL}
+	{name: "welldyne_outreach", title: "WellDyneRX Outreach", allowed: READ | UPDATE | DELETE}
 ]
 
 // Permission

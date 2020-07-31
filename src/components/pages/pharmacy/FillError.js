@@ -31,7 +31,7 @@ import Utils from '../../../utils';
 import FillErrorDef from '../../../definitions/monolith/pharmacy_fill_error';
 FillErrorDef['__react__'] = {
 	"primary": "id",
-	"results": ["customerId", "customerName", "orderId", "reason", "failCount", "ready"],
+	"results": ["customerId", "customerName", "orderId", "type", "reason", "failCount", "ready"],
 	"update": ["orderId", "ready"]
 }
 FillErrorDef['customerName'] = {"__type__": "string", "__react__": {"title": "Customer"}}

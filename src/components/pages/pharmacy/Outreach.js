@@ -39,7 +39,6 @@ import Utils from '../../../utils';
 import OutreachDef from '../../../definitions/welldyne/outreach';
 OutreachDef['__react__'] = {
 	"primary": "id",
-	"create": ["customerId", "queue", "reason", "ready"],
 	"results": ["customerId", "customerName", "triggered", "queue", "reason", "userName", "ready"]
 }
 OutreachDef['customerName'] = {"__type__": "string", "__react__": {"title": "Customer"}}
@@ -61,7 +60,6 @@ export default function Outreach(props) {
 
 	// State
 	let [records, recordsSet] = useState(null);
-	let [create, createSet] = useState(false);
 
 	// Effects
 	useEffect(() => {
@@ -121,20 +119,6 @@ export default function Outreach(props) {
 				Events.trigger('adhocCreated', res.data);
 			}
 		});
-	}
-
-	function createSuccess(record) {
-		recordsSet(records => {
-			let ret = Tools.clone(records);
-			ret.unshift(record);
-			return ret;
-		});
-		createSet(false);
-	}
-
-	// Toggle the create form
-	function createToggle() {
-		createSet(b => !b);
 	}
 
 	// Fetch all the records from the server
@@ -274,27 +258,7 @@ export default function Outreach(props) {
 		<React.Fragment>
 			<Box className="pageHeader">
 				<div className="title">Outreach Records</div>
-				{Utils.hasRight(props.user, 'welldyne_outreach', 'create') &&
-					<Tooltip title="Create new template">
-						<IconButton onClick={createToggle}>
-							<AddCircleIcon />
-						</IconButton>
-					</Tooltip>
-				}
 			</Box>
-			{create &&
-				<Paper className="padded">
-					<FormComponent
-						cancel={createToggle}
-						noun="outreach"
-						service="welldyne"
-						success={createSuccess}
-						title="Create New"
-						tree={OutreachTree}
-						type="create"
-					/>
-				</Paper>
-			}
 			{results}
 		</React.Fragment>
 	);

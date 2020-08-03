@@ -728,7 +728,7 @@ class Header extends React.Component {
 				}
 				{(Utils.hasRight(this.state.user, 'pharmacy_fill', 'read') ||
 					Utils.hasRight(this.state.user, 'welldyne_adhoc', 'read') ||
-					Utils.hasRight(this.state.user, 'welldyne_outreach', 'read')) &&
+					Utils.hasRight(this.state.user, 'welldyne_outbound', 'read')) &&
 					<React.Fragment>
 						<Link to="/pharmacy" onClick={this.menuClick}>
 							<ListItem button selected={this.state.path === "/pharmacy"}>

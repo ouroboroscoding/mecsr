@@ -1,7 +1,7 @@
 /**
- * WellDyne Outreach
+ * WellDyne Outbound
  *
- * Created, edit, and delete outreach records
+ * Created, edit, and delete outbound records
  *
  * @author Chris Nasr <bast@maleexcel.com>
  * @copyright MaleExcelMedical
@@ -15,17 +15,12 @@ import React, { useState, useEffect } from 'react';
 // Material UI
 import Box from '@material-ui/core/Box';
 import Checkbox from '@material-ui/core/Checkbox';
-import IconButton from '@material-ui/core/IconButton';
-import Paper from '@material-ui/core/Paper';
-import Tooltip from '@material-ui/core/Tooltip';
 
 // Material UI Icons
-import AddCircleIcon from '@material-ui/icons/AddCircle';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 // Format Components
 import ResultsComponent from '../../format/Results';
-import FormComponent from '../../format/Form';
 
 // Generic modules
 import Events from '../../../generic/events';
@@ -36,27 +31,26 @@ import Tools from '../../../generic/tools';
 import Utils from '../../../utils';
 
 // Definitions
-import OutreachDef from '../../../definitions/welldyne/outreach';
-OutreachDef['__react__'] = {
+import OutboundDef from '../../../definitions/welldyne/outbound';
+OutboundDef['__react__'] = {
 	"primary": "id",
-	"results": ["customerId", "customerName", "triggered", "queue", "reason", "userName", "ready"]
+	"results": ["crm_type", "crm_id", "customer_name", "crm_order", "triggered", "queue", "reason", "ready"]
 }
-OutreachDef['customerName'] = {"__type__": "string", "__react__": {"title": "Customer"}}
-OutreachDef['userName'] = {"__type__": "string", "__react__": {"title": "User"}}
-OutreachDef['triggered'] = {"__type__": "date"}
+OutboundDef['customer_name'] = {"__type__": "string", "__react__": {"title": "Name"}}
+OutboundDef['triggered'] = {"__type__": "date"}
 
 // Generate the Tree
-const OutreachTree = new Tree(OutreachDef);
+const OutboundTree = new Tree(OutboundDef);
 
 /**
- * Outreach
+ * Outbound
  *
  * Wraps common code that both tabs use
  *
  * @name GenericWellDyne
  * @extends React.Component
  */
-export default function Outreach(props) {
+export default function Outbound(props) {
 
 	// State
 	let [records, recordsSet] = useState(null);
@@ -66,7 +60,7 @@ export default function Outreach(props) {
 
 		// If we have a user with the correct rights
 		if(props.user) {
-			if(Utils.hasRight(props.user, 'welldyne_outreach', 'read')) {
+			if(Utils.hasRight(props.user, 'welldyne_outbound', 'read')) {
 				fetchRecords();
 			} else {
 				recordsSet(-1);
@@ -80,7 +74,7 @@ export default function Outreach(props) {
 	function adhocSwitch(id) {
 
 		// Send the request to the service
-		Rest.update('welldyne', 'outreach/adhoc', {
+		Rest.update('welldyne', 'outbound/adhoc', {
 			"id": id
 		}).done(res => {
 
@@ -125,7 +119,7 @@ export default function Outreach(props) {
 	function fetchRecords() {
 
 		// Fetch all records
-		Rest.read('welldyne', 'outreachs', {}).done(res => {
+		Rest.read('welldyne', 'outbounds', {}).done(res => {
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
@@ -166,7 +160,7 @@ export default function Outreach(props) {
 		let bReady = event.currentTarget.checked
 
 		// Send the request to the service
-		Rest.update("welldyne", "outreach/ready", {
+		Rest.update("welldyne", "outbound/ready", {
 			"id": iID,
 			"ready": bReady ? 1 : 0
 		}).done(res => {
@@ -232,11 +226,11 @@ export default function Outreach(props) {
 	if(records === null) {
 		results = <div>Loading...</div>
 	} else if(records === -1) {
-		results = <div>You lack the rights to view Outreach records.</div>
+		results = <div>You lack the rights to view Outbound records.</div>
 	} else {
-		// If the user has both outreach delete, and adhoc create, all for
+		// If the user has both outbound delete, and adhoc create, all for
 		//	switching
-		let lActions = Utils.hasRight(props.user, 'welldyne_outreach', 'delete') &&
+		let lActions = Utils.hasRight(props.user, 'welldyne_outbound', 'delete') &&
 						Utils.hasRight(props.user, 'welldyne_adhoc', 'create') ?
 						[{"tooltip": "AdHoc (Remove Error)", "icon": ArrowBackIcon, "callback": adhocSwitch}] :
 						[];
@@ -245,11 +239,11 @@ export default function Outreach(props) {
 					actions={lActions}
 					custom={{"ready": readyRender}}
 					data={records}
-					noun="outreach"
+					noun="outbound"
 					orderBy="title"
-					remove={Utils.hasRight(props.user, 'welldyne_outreach', 'delete') ? removeRecord : false}
+					remove={Utils.hasRight(props.user, 'welldyne_outbound', 'delete') ? removeRecord : false}
 					service="welldyne"
-					tree={OutreachTree}
+					tree={OutboundTree}
 					update={false}
 				/>
 	}
@@ -257,7 +251,7 @@ export default function Outreach(props) {
 	return (
 		<React.Fragment>
 			<Box className="pageHeader">
-				<div className="title">Outreach Records</div>
+				<div className="title">Outbound Failed Claims</div>
 			</Box>
 			{results}
 		</React.Fragment>

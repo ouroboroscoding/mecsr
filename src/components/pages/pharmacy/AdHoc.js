@@ -37,11 +37,11 @@ import Utils from '../../../utils';
 import AdHocDef from '../../../definitions/welldyne/adhoc';
 AdHocDef['__react__'] = {
 	"primary": "id",
-	"create": ["customerId", "type"],
-	"results": ["customerId", "customerName", "type", "userName"]
+	"create": ["crm_type", "crm_id", "crm_order", "type"],
+	"results": ["crm_type", "crm_id", "customer_name", "crm_order", "type", "user_name"]
 }
-AdHocDef['customerName'] = {"__type__": "string", "__react__": {"title": "Customer"}}
-AdHocDef['userName'] = {"__type__": "string", "__react__": {"title": "User"}}
+AdHocDef['customer_name'] = {"__type__": "string", "__react__": {"title": "Name"}}
+AdHocDef['user_name'] = {"__type__": "string", "__react__": {"title": "Agent"}}
 
 // Generate the Tree
 const AdHocTree = new Tree(AdHocDef);

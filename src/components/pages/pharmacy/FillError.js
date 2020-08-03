@@ -28,13 +28,13 @@ import Tools from '../../../generic/tools';
 import Utils from '../../../utils';
 
 // Definitions
-import FillErrorDef from '../../../definitions/monolith/pharmacy_fill_error';
+import FillErrorDef from '../../../definitions/prescriptions/pharmacy_fill_error';
 FillErrorDef['__react__'] = {
 	"primary": "id",
-	"results": ["customerId", "customerName", "orderId", "list", "type", "reason", "failCount", "ready"],
-	"update": ["orderId", "ready"]
+	"results": ["crm_type", "crm_id", "customer_name", "crm_order", "list", "type", "reason", "fail_count", "ready"],
+	"update": ["crm_order", "ready"]
 }
-FillErrorDef['customerName'] = {"__type__": "string", "__react__": {"title": "Customer"}}
+FillErrorDef['customer_name'] = {"__type__": "string", "__react__": {"title": "Name"}}
 
 // Generate the Tree
 const FillErrorTree = new Tree(FillErrorDef);
@@ -72,7 +72,7 @@ export default function FillError(props) {
 	function fetchRecords() {
 
 		// Fetch all records
-		Rest.read('monolith', 'pharmacy/fill/errors', {}).done(res => {
+		Rest.read('prescriptions', 'pharmacy/fill/errors', {}).done(res => {
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
@@ -113,7 +113,7 @@ export default function FillError(props) {
 		let bReady = event.currentTarget.checked
 
 		// Send the request to the service
-		Rest.update("monolith", "pharmacy/fill/error", {
+		Rest.update("prescriptions", "pharmacy/fill/error", {
 			"id": iID,
 			"ready": bReady ? 1 : 0
 		}).done(res => {
@@ -186,9 +186,9 @@ export default function FillError(props) {
 					data={records}
 					noun="pharmacy/fill/error"
 					order="desc"
-					orderBy="failCount"
+					orderBy="fail_count"
 					remove={Utils.hasRight(props.user, 'pharmacy_fill', 'delete') ? removeRecord : false}
-					service="monolith"
+					service="prescriptions"
 					tree={FillErrorTree}
 					update={true}
 				/>

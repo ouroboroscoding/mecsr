@@ -111,7 +111,7 @@ export default class Customer extends React.Component {
 		Events.remove('newMessage', this.newMessage);
 	}
 
-	adhocAdd(type) {
+	adhocAdd(type, order) {
 
 		// If read-only mode
 		if(this.props.readOnly) {
@@ -121,8 +121,10 @@ export default class Customer extends React.Component {
 
 		// Send the request
 		Rest.create('welldyne', 'adhoc', {
-			"customerId": this.state.customer.id,
-			"type": type
+			crm_type: 'knk',
+			crm_id: this.state.customer.id,
+			crm_order: order,
+			type: type
 		}).done(res => {
 
 			// If there's an error
@@ -398,7 +400,8 @@ export default class Customer extends React.Component {
 
 		// Fetch them from the server
 		Rest.read('welldyne', 'trigger/info', {
-			customerId: this.props.customerId
+			crm_type: 'knk',
+			crm_id: this.props.customerId.toString()
 		}).done(res => {
 
 			// If not mounted
@@ -507,6 +510,7 @@ export default class Customer extends React.Component {
 					<RX
 						onAdhocAdd={this.adhocAdd}
 						onRefresh={this.rxRefresh}
+						orders={this.state.orders}
 						patientId={this.state.patient_id}
 						prescriptions={this.state.prescriptions}
 						readOnly={this.props.readOnly}

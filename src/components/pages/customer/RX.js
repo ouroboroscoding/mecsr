@@ -87,7 +87,10 @@ export default function RX(props) {
 	function adHocAdd() {
 
 		// Let the parent know
-		props.onAdhocAdd(adhocType.current.value);
+		props.onAdhocAdd(
+			adhocType.current.value,
+			props.trigger.crm_order
+		);
 	}
 
 	// Trigger
@@ -106,18 +109,18 @@ export default function RX(props) {
 					<p><strong>Triggered: </strong><span>{props.trigger.triggered.split(' ')[0]}</span></p>
 					<p><strong>Opened: </strong><span>{props.trigger.opened ? props.trigger.opened.split(' ')[0] : ''}</span></p>
 					<p><strong>Shipped: </strong><span>{props.trigger.shipped ? props.trigger.shipped.split(' ')[0] : ''}</span></p>
-					<p><strong>Eligible Since: </strong><span>{props.trigger.eligSince ? props.trigger.eligSince.split(' ')[0] : ''}</span></p>
-					<p><strong>Eligible Through: </strong><span>{props.trigger.eligThru ? props.trigger.eligThru.split(' ')[0] : ''}</span></p>
-					{(props.trigger.outreachQueue || props.trigger.outreachReason) &&
+					<p><strong>Eligible Since: </strong><span>{props.trigger.elig_since ? props.trigger.elig_since.split(' ')[0] : ''}</span></p>
+					<p><strong>Eligible Through: </strong><span>{props.trigger.elig_thru ? props.trigger.elig_thru.split(' ')[0] : ''}</span></p>
+					{(props.trigger.outbound_queue || props.trigger.outbound_reason) &&
 						<React.Fragment>
-							<p><strong>Outreach Queue: </strong><span>{props.trigger.outreachQueue}</span></p>
-							<p><strong>Outreach Reason: </strong><span>{props.trigger.outreachReason}</span></p>
+							<p><strong>Outreach Queue: </strong><span>{props.trigger.outbound_queue}</span></p>
+							<p><strong>Outreach Reason: </strong><span>{props.trigger.outbound_reason}</span></p>
 						</React.Fragment>
 					}
-					{props.trigger.adhocType &&
-						<p><strong>AdHoc Type: </strong><span>{props.trigger.adhocType}</span></p>
+					{props.trigger.adhoc_type &&
+						<p><strong>AdHoc Type: </strong><span>{props.trigger.adhoc_type}</span></p>
 					}
-					{(props.trigger.adhocType === null && Utils.hasRight(props.user, 'welldyne_adhoc', 'create') && !props.readOnly) &&
+					{(props.trigger.adhoc_type === null && Utils.hasRight(props.user, 'welldyne_adhoc', 'create') && !props.readOnly) &&
 						<p><strong>AdHoc Type: </strong>
 							<Select
 								inputRef={adhocType}

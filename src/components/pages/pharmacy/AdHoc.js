@@ -36,7 +36,6 @@ import Utils from '../../../utils';
 // Definitions
 import AdHocDef from '../../../definitions/welldyne/adhoc';
 AdHocDef['__react__'] = {
-	"primary": "id",
 	"create": ["crm_type", "crm_id", "crm_order", "type"],
 	"results": ["crm_type", "crm_id", "customer_name", "crm_order", "type", "user_name"]
 }
@@ -122,7 +121,7 @@ export default function AdHoc(props) {
 	}
 
 	// Remove a template
-	function removeRecord(id) {
+	function removeRecord(_id) {
 
 		// Use the current records to set the new records
 		recordsSet(records => {
@@ -131,7 +130,7 @@ export default function AdHoc(props) {
 			let ret = Tools.clone(records);
 
 			// Find the index
-			let iIndex = Tools.afindi(ret, 'id', id);
+			let iIndex = Tools.afindi(ret, '_id', _id);
 
 			// If one is found, remove it
 			if(iIndex > -1) {

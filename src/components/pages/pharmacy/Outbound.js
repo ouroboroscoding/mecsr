@@ -139,17 +139,21 @@ export default function Outbound(props) {
 		});
 	}
 
-	function readyRender(_id, value) {
-		return (
-			<Checkbox
-				color="primary"
-				checked={value ? true : false}
-				onChange={readyToggle}
-				inputProps={{
-					"data-id": _id
-				}}
-			/>
-		)
+	function readyRender(record) {
+		if(record.crm_order && record.crm_order !== '') {
+			return (
+				<Checkbox
+					color="primary"
+					checked={record.ready ? true : false}
+					onChange={readyToggle}
+					inputProps={{
+						"data-id": record._id
+					}}
+				/>
+			)
+		} else {
+			return '';
+		}
 	}
 
 	function readyToggle(event) {

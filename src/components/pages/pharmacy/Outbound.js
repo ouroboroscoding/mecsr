@@ -70,11 +70,11 @@ export default function Outbound(props) {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [props.user]); // React to user changes
 
-	function adhocSwitch(id) {
+	function adhocSwitch(_id) {
 
 		// Send the request to the service
 		Rest.update('welldyne', 'outbound/adhoc', {
-			"id": id
+			"_id": _id
 		}).done(res => {
 
 			// If there's an error
@@ -97,7 +97,7 @@ export default function Outbound(props) {
 					let ret = Tools.clone(records);
 
 					// Find the index
-					let iIndex = Tools.afindi(ret, 'id', id);
+					let iIndex = Tools.afindi(ret, '_id', _id);
 
 					// If one is found, remove it
 					if(iIndex > -1) {
@@ -139,14 +139,14 @@ export default function Outbound(props) {
 		});
 	}
 
-	function readyRender(id, value) {
+	function readyRender(_id, value) {
 		return (
 			<Checkbox
 				color="primary"
 				checked={value ? true : false}
 				onChange={readyToggle}
 				inputProps={{
-					"data-id": id
+					"data-id": _id
 				}}
 			/>
 		)
@@ -160,8 +160,8 @@ export default function Outbound(props) {
 
 		// Send the request to the service
 		Rest.update("welldyne", "outbound/ready", {
-			"id": iID,
-			"ready": bReady ? 1 : 0
+			"_id": iID,
+			"ready": bReady
 		}).done(res => {
 
 			// If there's an error
@@ -184,7 +184,7 @@ export default function Outbound(props) {
 					let ret = Tools.clone(records);
 
 					// Find the index
-					let iIndex = Tools.afindi(ret, 'id', iID);
+					let iIndex = Tools.afindi(ret, '_id', iID);
 
 					// If one is found, update the ready flag
 					if(iIndex > -1) {

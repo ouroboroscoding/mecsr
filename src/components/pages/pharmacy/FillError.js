@@ -92,14 +92,14 @@ export default function FillError(props) {
 		});
 	}
 
-	function readyRender(id, value) {
+	function readyRender(_id, value) {
 		return (
 			<Checkbox
 				color="primary"
 				checked={value ? true : false}
 				onChange={readyToggle}
 				inputProps={{
-					"data-id": id
+					"data-id": _id
 				}}
 			/>
 		)
@@ -113,8 +113,8 @@ export default function FillError(props) {
 
 		// Send the request to the service
 		Rest.update("prescriptions", "pharmacy/fill/error", {
-			"id": iID,
-			"ready": bReady ? 1 : 0
+			"_id": iID,
+			"ready": bReady
 		}).done(res => {
 
 			// If there's an error
@@ -137,7 +137,7 @@ export default function FillError(props) {
 					let ret = Tools.clone(records);
 
 					// Find the index
-					let iIndex = Tools.afindi(ret, 'id', iID);
+					let iIndex = Tools.afindi(ret, '_id', iID);
 
 					// If one is found, update the ready flag
 					if(iIndex > -1) {

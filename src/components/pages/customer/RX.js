@@ -108,7 +108,7 @@ export default function RX(props) {
 					<Paper key={o._id} className="paper">
 						<Grid container spacing={2}>
 							<Grid item xs={12} md={4}><strong>KNK Order: </strong><span>{o.crm_order}</span></Grid>
-							<Grid item xs={12} md={4}><strong>Type: </strong><span>{o.list + (o.type != '' ? '(' + o.type + ')' : '')}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Type: </strong><span>{o.list + (o.type !== '' ? '(' + o.type + ')' : '')}</span></Grid>
 							<Grid item xs={12} md={4}><strong>Fail Count: </strong><span>{o.fail_count}</span></Grid>
 						</Grid>
 					</Paper>

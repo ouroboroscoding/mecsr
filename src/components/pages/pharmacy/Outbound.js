@@ -155,12 +155,12 @@ export default function Outbound(props) {
 	function readyToggle(event) {
 
 		// Get the ID and ready flag
-		let iID = parseInt(event.currentTarget.dataset.id);
+		let sID = event.currentTarget.dataset.id;
 		let bReady = event.currentTarget.checked
 
 		// Send the request to the service
 		Rest.update("welldyne", "outbound/ready", {
-			"_id": iID,
+			"_id": sID,
 			"ready": bReady
 		}).done(res => {
 
@@ -184,7 +184,7 @@ export default function Outbound(props) {
 					let ret = Tools.clone(records);
 
 					// Find the index
-					let iIndex = Tools.afindi(ret, '_id', iID);
+					let iIndex = Tools.afindi(ret, '_id', sID);
 
 					// If one is found, update the ready flag
 					if(iIndex > -1) {

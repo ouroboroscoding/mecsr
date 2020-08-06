@@ -31,7 +31,7 @@ export default {
 		return '/customer/' + phone + '/' + id;
 	},
 
-	date: function(ts) {
+	date: function(ts, separator='/') {
 		if(typeof ts === 'number') {
 			ts = new Date(ts*1000);
 		}
@@ -40,7 +40,7 @@ export default {
 		if(M.length === 1) M = '0' + M;
 		var D = '' + ts.getDate();
 		if(D.length === 1) D = '0' + D;
-		return Y + '/' + M + '/' + D;
+		return Y + separator + M + separator + D;
 	},
 
 	datetime: function(ts) {

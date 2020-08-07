@@ -92,29 +92,33 @@ export default function FillError(props) {
 		});
 	}
 
-	function readyRender(id, value) {
-		return (
-			<Checkbox
-				color="primary"
-				checked={value ? true : false}
-				onChange={readyToggle}
-				inputProps={{
-					"data-id": id
-				}}
-			/>
-		)
+	function readyRender(record) {
+		if(record.crm_order && record.crm_order !== '') {
+			return (
+				<Checkbox
+					color="primary"
+					checked={record.ready ? true : false}
+					onChange={readyToggle}
+					inputProps={{
+						"data-id": record._id
+					}}
+				/>
+			)
+		} else {
+			return '';
+		}
 	}
 
 	function readyToggle(event) {
 
 		// Get the ID and ready flag
-		let iID = parseInt(event.currentTarget.dataset.id);
+		let sID = event.currentTarget.dataset.id;
 		let bReady = event.currentTarget.checked
 
 		// Send the request to the service
 		Rest.update("prescriptions", "pharmacy/fill/error", {
-			"id": iID,
-			"ready": bReady ? 1 : 0
+			"_id": sID,
+			"ready": bReady
 		}).done(res => {
 
 			// If there's an error
@@ -137,7 +141,7 @@ export default function FillError(props) {
 					let ret = Tools.clone(records);
 
 					// Find the index
-					let iIndex = Tools.afindi(ret, 'id', iID);
+					let iIndex = Tools.afindi(ret, '_id', sID);
 
 					// If one is found, update the ready flag
 					if(iIndex > -1) {

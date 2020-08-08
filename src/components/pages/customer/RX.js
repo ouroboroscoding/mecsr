@@ -109,7 +109,12 @@ export default function RX(props) {
 						<Grid container spacing={2}>
 							<Grid item xs={12} md={4}><strong>KNK Order: </strong><span>{o.crm_order}</span></Grid>
 							<Grid item xs={12} md={4}><strong>Type: </strong><span>{o.list + (o.type !== '' ? '(' + o.type + ')' : '')}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Reason: </strong><span>{o.reason}</span></Grid>
 							<Grid item xs={12} md={4}><strong>Fail Count: </strong><span>{o.fail_count}</span></Grid>
+							<Grid item xs={12} md={4}><strong>{o._created === o._updated ? 'Failed' : 'First Failure'}: </strong><span>{Utils.date(o._created, '-')}</span></Grid>
+							{o._created !== o._updated &&
+								<Grid item xs={12} md={4}><strong>Most Recent: </strong><span>{Utils.date(o._updated, '-')}</span></Grid>
+							}
 						</Grid>
 					</Paper>
 				)}
@@ -140,6 +145,7 @@ export default function RX(props) {
 							<Grid item xs={12} md={4}><strong>Shipped: </strong><span>{o.shipped ? o.shipped.split(' ')[0] : ''}</span></Grid>
 							<Grid item xs={12} md={4}><strong>Eligible Since: </strong><span>{o.elig_since ? o.elig_since.split(' ')[0] : ''}</span></Grid>
 							<Grid item xs={12} md={8}><strong>Eligible Through: </strong><span>{o.elig_thru ? o.elig_thru.split(' ')[0] : ''}</span></Grid>
+							<Grid item xs={12}><strong>Raw: </strong><span>{o.raw}</span></Grid>
 							{(o.outbound_queue || o.outbound_reason) &&
 								<React.Fragment>
 									<Grid item xs={12}><strong>Outbound: </strong><span>{o.outbound_queue} ({o.outbound_reason})</span></Grid>
@@ -160,7 +166,6 @@ export default function RX(props) {
 									<Button variant="contained" color="primary" onClick={adHocAdd} style={{height: '32px', marginLeft: '10px'}}>Add</Button>
 								</Grid>
 							}
-							<Grid item xs={12}><strong>Raw: </strong><span>{o.raw}</span></Grid>
 						</Grid>
 					</Paper>
 				)}
@@ -179,20 +184,22 @@ export default function RX(props) {
 	else {
 		prescriptions = (
 			<React.Fragment>
-				{props.prescriptions.map((o, i) =>
-					<Paper key={i} className="paper">
-						<p><strong>ID: </strong><span>{o.PrescriptionId}</span></p>
-						<p><strong>Pharmacy: </strong><span>{o.PharmacyName}</span></p>
-						<p><strong>Prescriber: </strong><span>{o.PrescriberName}</span></p>
-						<p><strong>Product: </strong><span>{o.DisplayName} ({o.Quantity})</span></p>
-						<p><strong>Written: </strong><span>{o.WrittenDate.substring(0, 10)}</span></p>
-						{o.EffectiveDate &&
-							<p><strong>Effective: </strong><span>{o.EffectiveDate.substring(0, 10)}</span></p>
-						}
-						<p><strong>Status: </strong><span>{o.StatusText}</span></p>
-						<p><strong>Medication Status: </strong><span>{o.MedicationStatusText}</span></p>
-						<p><strong>Refills: </strong><span>{o.Refills}</span></p>
-						<p><strong>Directions: </strong><span>{o.Directions}</span></p>
+				{props.prescriptions.map(o =>
+					<Paper key={o.PrescriptionId} className="paper">
+						<Grid container spacing={2}>
+							<Grid item xs={12} md={4}><strong>ID: </strong><span>{o.PrescriptionId}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Pharmacy: </strong><span>{o.PharmacyName}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Prescriber: </strong><span>{o.PrescriberName}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Product: </strong><span>{o.DisplayName} ({o.Quantity})</span></Grid>
+							<Grid item xs={12} md={o.EffectiveDate ? 4 : 8}><strong>Written: </strong><span>{o.WrittenDate.substring(0, 10)}</span></Grid>
+							{o.EffectiveDate &&
+								<Grid item xs={12} md={4}><strong>Effective: </strong><span>{o.EffectiveDate.substring(0, 10)}</span></Grid>
+							}
+							<Grid item xs={12} md={4}><strong>Status: </strong><span>{o.StatusText}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Medication Status: </strong><span>{o.MedicationStatusText}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Refills: </strong><span>{o.Refills}</span></Grid>
+							<Grid item xs={12}><strong>Directions: </strong><span>{o.Directions}</span></Grid>
+						</Grid>
 					</Paper>
 				)}
 			</React.Fragment>

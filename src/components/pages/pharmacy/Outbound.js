@@ -33,7 +33,7 @@ import Utils from '../../../utils';
 // Definitions
 import OutboundDef from '../../../definitions/welldyne/outbound';
 OutboundDef['__react__'] = {
-	"results": ["crm_type", "crm_id", "customer_name", "crm_order", "triggered", "queue", "reason", "ready"]
+	"results": ["crm_id", "customer_name", "crm_order", "triggered", "queue", "reason", "ready"]
 }
 OutboundDef['customer_name'] = {"__type__": "string", "__react__": {"title": "Name"}}
 OutboundDef['triggered'] = {"__type__": "date"}

@@ -124,7 +124,7 @@ export default class Customer extends React.Component {
 		// Send the request
 		Rest.create('welldyne', 'adhoc', {
 			crm_type: 'knk',
-			crm_id: this.state.customer.id,
+			crm_id: this.state.customer.id.toString(),
 			crm_order: order,
 			type: type
 		}).done(res => {
@@ -150,7 +150,7 @@ export default class Customer extends React.Component {
 				if(iIndex > -1) {
 
 					// Update the adhocType
-					triggers[iIndex].adhocType = type;
+					triggers[iIndex].adhoc_type = type;
 
 					// Update the state
 					this.setState({"triggers": triggers});

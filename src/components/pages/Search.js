@@ -50,7 +50,7 @@ export default class Search extends React.Component {
 			name: '',
 			phone: '',
 			records: [],
-			searchType: '0',
+			searchType: Tools.safeLocalStorage('searchType', '0'),
 			user: props.user || false
 		}
 
@@ -132,6 +132,7 @@ export default class Search extends React.Component {
 	}
 
 	searchChange(event) {
+		localStorage.setItem('searchType', event.target.value);
 		this.setState({
 			searchType: event.target.value
 		});

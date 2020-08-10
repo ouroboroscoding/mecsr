@@ -36,8 +36,8 @@ import Utils from '../../../utils';
 // Definitions
 import AdHocDef from '../../../definitions/welldyne/adhoc';
 AdHocDef['__react__'] = {
-	"create": ["crm_type", "crm_id", "crm_order", "type"],
-	"results": ["crm_type", "crm_id", "customer_name", "crm_order", "type", "user_name"]
+	"create": ["crm_id", "crm_order", "type"],
+	"results": ["crm_id", "customer_name", "crm_order", "type", "user_name"]
 }
 AdHocDef['customer_name'] = {"__type__": "string", "__react__": {"title": "Name"}}
 AdHocDef['user_name'] = {"__type__": "string", "__react__": {"title": "Agent"}}

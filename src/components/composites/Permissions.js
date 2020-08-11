@@ -134,8 +134,8 @@ export default class Permissions extends React.Component {
 
 	render() {
 		return TYPES.map(section =>
-			<Paper>
-				<Grid container spacing={2} className="permissions">
+			<Paper className="permissions">
+				<Grid container spacing={2}>
 					<Grid item xs={4} className="title"><span>{section.title}</span></Grid>
 					<Grid item xs={2} className="title"><span>Create</span></Grid>
 					<Grid item xs={2} className="title"><span>Read</span></Grid>

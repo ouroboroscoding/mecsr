@@ -213,7 +213,7 @@ function Question(props) {
 	function save(answer) {
 
 		// If read-only mode
-		if(props.editable) {
+		if(!props.editable) {
 			Events.trigger('error', 'You are in view-only mode. You must claim this customer to continue.');
 			return;
 		}

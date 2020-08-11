@@ -124,7 +124,7 @@ export default class Customer extends React.Component {
 		// Send the request
 		Rest.create('welldyne', 'adhoc', {
 			crm_type: 'knk',
-			crm_id: this.state.customer.id.toString(),
+			crm_id: this.state.customer.customerId.toString(),
 			crm_order: order,
 			type: type
 		}).done(res => {
@@ -195,7 +195,8 @@ export default class Customer extends React.Component {
 
 		// Find the customer ID
 		Rest.read('konnektive', 'customer', {
-			id: this.props.customerId
+			customerId: this.props.customerId,
+			detailed: true
 		}).done(res => {
 
 			// If not mounted
@@ -222,7 +223,7 @@ export default class Customer extends React.Component {
 				this.setState({
 					customer: res.data
 				}, () => {
-					if(res.data.id) {
+					if(res.data.customerId) {
 						this.fetchKnkOrders();
 					}
 				});
@@ -234,7 +235,7 @@ export default class Customer extends React.Component {
 
 		// Get the orders from the REST service
 		Rest.read('konnektive', 'customer/orders', {
-			id: this.state.customer.id,
+			customerId: this.state.customer.customerId,
 			transactions: true
 		}).done(res => {
 

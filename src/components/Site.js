@@ -31,7 +31,7 @@ import Search from './pages/Search';
 import Stats from './pages/Stats';
 import Templates from './pages/Templates';
 import Unclaimed from './pages/Unclaimed';
-import WellDyne from './pages/WellDyne';
+import Pharmacy from './pages/Pharmacy';
 
 // Local modules
 import { LoaderHide, LoaderShow } from './composites/Loader';
@@ -116,16 +116,29 @@ function Site(props) {
 						<Route path="/templates">
 							<Templates user={user} />
 						</Route>
-						<Route path="/welldyne">
-							<WellDyne user={user} />
+						<Route path="/pharmacy">
+							<Pharmacy user={user} />
 						</Route>
 						<Route
 							path="/customer/:phoneNumber/:customerId"
 							component={({match: {params:{phoneNumber, customerId}}}) => (
 								<Customer
 									key={phoneNumber}
-									customerId={customerId}
+									customerId={parseInt(customerId)}
 									phoneNumber={phoneNumber}
+									readOnly={false}
+									user={user}
+								/>
+							)}
+						/>
+						<Route
+							path="/view/:phoneNumber/:customerId"
+							component={({match: {params:{phoneNumber, customerId}}}) => (
+								<Customer
+									key={phoneNumber}
+									customerId={parseInt(customerId)}
+									phoneNumber={phoneNumber}
+									readOnly={true}
 									user={user}
 								/>
 							)}

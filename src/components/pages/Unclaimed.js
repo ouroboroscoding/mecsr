@@ -20,6 +20,9 @@ import Grid from '@material-ui/core/Grid';
 // Components
 import MsgSummary from '../composites/MsgSummary';
 
+// Component functions
+import claimed from '../functions/claimed';
+
 // Generic modules
 import Events from '../../generic/events';
 import Rest from '../../generic/rest';
@@ -43,10 +46,11 @@ export default class Unclaimed extends React.Component {
 			sales: Tools.safeLocalStorage('unclaimed_sales', 'Y') === 'Y',
 			salesNoSent: Tools.safeLocalStorage('unclaimed_sales_no_sent', 'Y') === 'Y',
 			support: Tools.safeLocalStorage('unclaimed_support', 'Y') === 'Y',
-			user: props.user ? true : false
+			user: props.user
 		}
 
 		// Bind methods
+		this.claim = this.claim.bind(this);
 		this.filter = this.filter.bind(this);
 		this.hide = this.hide.bind(this);
 		this.refresh = this.refresh.bind(this);
@@ -85,6 +89,23 @@ export default class Unclaimed extends React.Component {
 		Events.remove('signedIn', this.signedIn);
 		Events.remove('signedOut', this.signedOut);
 		Events.remove('Unclaimed', this.refresh);
+	}
+
+	claim(number, name) {
+
+		// Get the claimed add promise
+		claimed.add(number).then(res => {
+			console.log('received: ' + res.customerId);
+			Events.trigger('claimedAdd', number, name, res.customerId);
+		}, error => {
+			// If we got a duplicate
+			if(error.code === 1101) {
+				Events.trigger('error', 'Customer has already been claimed. Refreshing unclaimed.');
+				Events.trigger('Unclaimed');
+			} else {
+				Events.trigger('error', JSON.stringify(error));
+			}
+		});
 	}
 
 	hide(number) {
@@ -220,8 +241,10 @@ export default class Unclaimed extends React.Component {
 				<Box className="summaries">
 					{this.state.filtered.map((o,i) =>
 						<MsgSummary
+							onClaim={this.claim}
 							key={i}
 							onHide={this.hide}
+							user={this.state.user}
 							{...o}
 						/>
 					)}
@@ -283,7 +306,7 @@ export default class Unclaimed extends React.Component {
 
 	signedIn(user) {
 		this.setState({
-			user: true
+			user: user
 		}, () => {
 			this.fetch();
 		})

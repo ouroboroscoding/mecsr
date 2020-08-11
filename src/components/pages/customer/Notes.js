@@ -77,6 +77,9 @@ export default class Notes extends React.Component {
 			status: null
 		}
 
+		// Mounted?
+		this.mounted = false;
+
 		// Sometimes I loathe react
 		this.scrolled = false;
 
@@ -94,8 +97,11 @@ export default class Notes extends React.Component {
 
 	componentDidMount() {
 
+		// Mark instance as mounted
+		this.mounted = true;
+
 		// Fetch existing messages
-		if(this.props.customerId) {
+		if(this.props.user && this.props.customerId) {
 			this.fetch();
 		}
 	}
@@ -114,12 +120,23 @@ export default class Notes extends React.Component {
 		}
 	}
 
+	componentWillUnmount() {
+
+		// Mark instance as no longer mounted
+		this.mounted = false;
+	}
+
 	fetch(type) {
 
 		// Find the Notes using the customer ID
 		Rest.read('monolith', 'customer/notes', {
 			customerId: this.props.customerId
 		}).done(res => {
+
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
@@ -176,7 +193,7 @@ export default class Notes extends React.Component {
 					{notes}
 					<div className="scroll" ref={el => this.messagesBottom = el} />
 				</div>
-				{this.state.status &&
+				{(this.state.status && !this.props.readOnly) &&
 					<div className="label">
 						<Select
 							className='select'
@@ -191,24 +208,26 @@ export default class Notes extends React.Component {
 						</Select>
 					</div>
 				}
-				<div className="send">
-					<TextField
-						className="text"
-						inputRef={el => this.text = el}
-						multiline
-						onKeyPress={this.textPress}
-						rows={3}
-						variant="outlined"
-					/>
-					<Button
-						color="primary"
-						size="large"
-						onClick={this.send}
-						variant="contained"
-					>
-						Add Note
-					</Button>
-				</div>
+				{!this.props.readOnly &&
+					<div className="send">
+						<TextField
+							className="text"
+							inputRef={el => this.text = el}
+							multiline
+							onKeyPress={this.textPress}
+							rows={3}
+							variant="outlined"
+						/>
+						<Button
+							color="primary"
+							size="large"
+							onClick={this.send}
+							variant="contained"
+						>
+							Add Note
+						</Button>
+					</div>
+				}
 			</React.Fragment>
 		)
 	}
@@ -218,6 +237,12 @@ export default class Notes extends React.Component {
 	}
 
 	send() {
+
+		// If read-only mode
+		if(this.props.readOnly) {
+			Events.trigger('error', 'You are in view-only mode. You must claim this customer to continue.');
+			return;
+		}
 
 		// Get the content of the note
 		let content = this.text.value;

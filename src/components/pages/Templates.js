@@ -76,7 +76,6 @@ function GenericTemplates(props) {
 	}, [props.user]); // React to user changes
 
 	function createSuccess(template) {
-		console.log(template);
 		templatesSet(templates => {
 			let ret = Tools.clone(templates);
 			ret.unshift(template);

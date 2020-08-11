@@ -49,18 +49,14 @@ class QuestionMultiple extends React.Component {
 	}
 	clicked(event) {
 		let index = parseInt(event.target.dataset.index);
-		console.log('index: ', index);
 		let option = this.props.options[index];
-		console.log('option: ', option);
 		let value = Tools.clone(this.state.value);
-		console.log('pre value: ', value);
 		if(event.target.checked) {
 			value.push(option);
 		} else {
 			value.splice(value.indexOf(option), 1);
 		}
 		this.setState({value: value})
-		console.log('post value: ', value);
 	}
 	render() {
 		return (
@@ -216,6 +212,12 @@ function Question(props) {
 
 	function save(answer) {
 
+		// If read-only mode
+		if(props.editable) {
+			Events.trigger('error', 'You are in view-only mode. You must claim this customer to continue.');
+			return;
+		}
+
 		// Sent the value to the server
 		Rest.update('monolith', 'customer/mip/answer', {
 			landing_id: props.landing,
@@ -247,7 +249,7 @@ function Question(props) {
 		<Paper className="question">
 			<Box className="qtitle">
 				<span>{props.question.title}</span>
-				{props.edittable &&
+				{props.editable &&
 					<Tooltip title="Edit the answer">
 						<EditIcon className="fakeAnchor" onClick={editToggle} />
 					</Tooltip>
@@ -345,7 +347,7 @@ export default function MIP(props) {
 						<ExpansionPanelDetails>
 							{o.questions.map((oQ, iQ) =>
 								<Question
-									edittable={i === 0}
+									editable={i === 0 && !props.readOnly}
 									key={iQ}
 									options={o.options[oQ.ref] || null}
 									question={oQ}

@@ -28,6 +28,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
+import AddIcon from '@material-ui/icons/Add';
 import AllInboxIcon from '@material-ui/icons/AllInbox';
 import AssessmentIcon from '@material-ui/icons/Assessment';
 import CloseIcon from '@material-ui/icons/Close';
@@ -43,14 +44,18 @@ import PeopleIcon from '@material-ui/icons/People';
 import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import SearchIcon from '@material-ui/icons/Search';
 
+// Component functions
+import claimed from '../functions/claimed';
+
 // Local components
 import Account from './Account';
-import Escalate from './Escalate';
+import Transfer from './Transfer';
 import Loader from './Loader';
 import Resolve from './Resolve';
 
 // Generic modules
 import Events from '../../generic/events';
+import PageVisibility from '../../generic/pageVisibility';
 import Rest from '../../generic/rest';
 import Tools from '../../generic/tools';
 
@@ -61,7 +66,7 @@ import Utils from '../../utils';
 function CustomerItem(props) {
 
 	// State
-	let [escalate, escalateSet] = useState(false);
+	let [transfer, transferSet] = useState(false);
 	let [resolve, resolveSet] = useState(false);
 
 	// Hooks
@@ -112,49 +117,55 @@ function CustomerItem(props) {
 			history.push('/unclaimed');
 		}
 
-		// Trigger the claimed being removed
-		Events.trigger('claimedRemove', props.phone, props.selected);
-	}
-
-	function escalateSubmit(agent) {
-
-		// Tell the service to swith the claim
-		Rest.update('monolith', 'customer/claim', {
-			phoneNumber: props.phone,
-			user_id: agent
-		}).done(res => {
-
-			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-
-			// If there's a warning
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if(res.data) {
-
-				// Remove escalate dialog
-				escalateSet(false);
-
-				// If we're currently selected, change the page
-				if(props.selected) {
-					history.push('/unclaimed');
-				}
-
-				// Trigger the claimed being removed
-				Events.trigger('claimedRemove', props.phone, props.selected, false);
-			}
+		// Send the request to the server
+		claimed.remove(props.phone).then(() => {
+			// Trigger the claimed being removed
+			Events.trigger('claimedRemove', props.phone, props.selected);
+		}, error => {
+			Events.trigger('error', JSON.stringify(error));
 		});
 	}
 
-	// Return the component
+	// Resolve click
+	function resolveClick(event) {
+		event.stopPropagation();
+		event.preventDefault();
+		resolveSet(true);
+	}
+
+	// Transfer click
+	function transferClick(event) {
+		event.stopPropagation();
+		event.preventDefault();
+		transferSet(props.user.id);
+	}
+
+	// Transfer dialog submit
+	function transferSubmit(agent) {
+
+		// Call the request
+		claimed.transfer(props.phone, agent).then(res => {
+
+			// Remove transfer dialog
+			transferSet(false);
+
+			// If we're currently selected, change the page
+			if(props.selected) {
+				history.push('/unclaimed');
+			}
+
+			// Trigger the claimed being removed
+			Events.trigger('claimedRemove', props.phone, props.selected);
+
+		}, error => {
+			Events.trigger('error', JSON.stringify(error));
+		});
+	}
+
+	// Render
 	return (
 		<React.Fragment>
-			<Link to={"/customer/" + props.phone + '/' + props.id} onClick={click}>
+			<Link to={Utils.customerPath(props.phone, props.id)} onClick={click}>
 				<ListItem button selected={props.selected}>
 					<ListItemAvatar>
 						{props.newMsgs ?
@@ -179,15 +190,15 @@ function CustomerItem(props) {
 										</Tooltip>
 									</span>
 									<span className="tooltip">
-										<Tooltip title="Escalate">
-											<IconButton className="escalate" onClick={e => escalateSet(true)}>
+										<Tooltip title="Transfer">
+											<IconButton className="transfer" onClick={transferClick}>
 												<MergeTypeIcon />
 											</IconButton>
 										</Tooltip>
 									</span>
 									<span className="tooltip">
 										<Tooltip title="Resolve">
-											<IconButton className="resolve" onClick={e => resolveSet(true)}>
+											<IconButton className="resolve" onClick={resolveClick}>
 												<CheckIcon />
 											</IconButton>
 										</Tooltip>
@@ -198,11 +209,12 @@ function CustomerItem(props) {
 					/>
 				</ListItem>
 			</Link>
-			{escalate &&
-				<Escalate
+			{transfer !== false &&
+				<Transfer
 					customerId={props.id}
-					onClose={e => escalateSet(false)}
-					onSubmit={escalateSubmit}
+					ignore={transfer}
+					onClose={e => transferSet(false)}
+					onSubmit={transferSubmit}
 				/>
 			}
 			{resolve &&
@@ -210,6 +222,156 @@ function CustomerItem(props) {
 					customerId={props.id}
 					onClose={e => resolveSet(false)}
 					onSubmit={remove}
+				/>
+			}
+		</React.Fragment>
+	);
+}
+
+// View Item component
+function ViewItem(props) {
+
+	// State
+	let [transfer, transferSet] = useState(false);
+
+	// Hooks
+	let history = useHistory();
+
+	// Claim
+	function claim(event) {
+		event.stopPropagation();
+		event.preventDefault();
+
+		// Attempt to claim the conversation
+		claimed.add(props.phone).then(res => {
+			Events.trigger('claimedAdd', props.phone, props.name, res.customerId);
+			Events.trigger('viewedRemove', props.phone, false);
+		}, error => {
+			// If we got a duplicate
+			if(error.code === 1101) {
+				Events.trigger('error', 'Customer has already been claimed.');
+				Events.trigger('viewedDuplicate', props.phone, error.msg);
+			} else {
+				Events.trigger('error', JSON.stringify(error));
+			}
+		});
+	}
+
+	// Click event
+	function click(event) {
+		props.onClick(
+			Utils.viewedPath(props.phone, props.id),
+			props.phone
+		)
+	}
+
+	// X click
+	function remove(event) {
+
+		// Stop all propogation of the event
+		if(event) {
+			event.stopPropagation();
+			event.preventDefault();
+		}
+
+		// If we're currently selected, change the page
+		if(props.selected) {
+			history.push('/unclaimed');
+		}
+
+		// Trigger the viewed being removed
+		Events.trigger('viewedRemove', props.phone, props.selected);
+	}
+
+	// Transfer click
+	function transferClick(event) {
+		event.stopPropagation();
+		event.preventDefault();
+		transferSet(props.claimed);
+	}
+
+	// Transfer dialog submit
+	function transferSubmit(agent) {
+
+		// Call the request
+		claimed.transfer(props.phone, agent).then(res => {
+
+			// Remove transfer dialog
+			transferSet(false);
+
+			// Trigger the claimed being removed
+			Events.trigger('viewedRemove', props.phone, false);
+
+			// If we're adding it to ourselves
+			if(agent === props.user.id) {
+				Events.trigger('claimedAdd', props.phone, props.name, props.id);
+			}
+
+			// Else if it's selected
+			else if(props.selected) {
+				history.push( '/unclaimed');
+			}
+
+		}, error => {
+			Events.trigger('error', JSON.stringify(error));
+		});
+	}
+
+	// Render
+	return (
+		<React.Fragment>
+			<Link to={Utils.viewedPath(props.phone, props.id)} onClick={click}>
+				<ListItem button selected={props.selected}>
+					<ListItemAvatar>
+						{props.newMsgs ?
+							<Avatar style={{backgroundColor: 'red'}}><NewReleasesIcon /></Avatar> :
+							<Avatar><ForumIcon /></Avatar>
+						}
+					</ListItemAvatar>
+					<ListItemText
+						primary={props.name}
+						secondary={
+							<React.Fragment>
+								<span>
+									ID: {props.id}<br/>
+									#: {Utils.nicePhone(props.phone)}
+								</span>
+								<span className="customerActions">
+									<span className="tooltip">
+										<Tooltip title="Remove">
+											<IconButton className="close" onClick={remove}>
+												<CloseIcon />
+											</IconButton>
+										</Tooltip>
+									</span>
+									<span className="tooltip">
+										{(props.claimed && props.overwrite) &&
+											<Tooltip title="Transfer">
+												<IconButton className="transfer" onClick={transferClick}>
+													<MergeTypeIcon />
+												</IconButton>
+											</Tooltip>
+										}
+										{!props.claimed &&
+											<Tooltip title="Claim">
+												<IconButton className="claim" onClick={claim}>
+													<AddIcon />
+												</IconButton>
+											</Tooltip>
+										}
+									</span>
+								</span>
+							</React.Fragment>
+						}
+					/>
+				</ListItem>
+			</Link>
+			{transfer !== false &&
+				<Transfer
+					customerId={props.id}
+					ignore={transfer}
+					onClose={e => transferSet(false)}
+					onSubmit={transferSubmit}
 				/>
 			}
 		</React.Fragment>
@@ -230,13 +392,16 @@ class Header extends React.Component {
 			"claimed": [],
 			"mobile": document.documentElement.clientWidth < 600,
 			"menu": false,
+			"newMsgs": {},
+			"overwrite": props.user ? Utils.hasRight(props.user, 'csr_overwrite', 'create') : false,
 			"path": window.location.pathname,
 			"unclaimed": 0,
-			"user": props.user || false
+			"user": props.user || false,
+			"viewed": []
 		}
 
 		// Timers
-		this.iNewMessages = null;
+		this.iUpdates = null;
 		this.iUnclaimed = null;
 
 		// Bind methods to this instance
@@ -247,11 +412,16 @@ class Header extends React.Component {
 		this.menuClick = this.menuClick.bind(this);
 		this.menuItem = this.menuItem.bind(this);
 		this.menuToggle = this.menuToggle.bind(this);
+		this.newMessages = this.newMessages.bind(this);
 		this.resize = this.resize.bind(this);
 		this.signedIn = this.signedIn.bind(this);
 		this.signedOut = this.signedOut.bind(this);
 		this.signout = this.signout.bind(this);
 		this.unclaimedCount = this.unclaimedCount.bind(this);
+		this.viewedAdd = this.viewedAdd.bind(this);
+		this.viewedDuplicate = this.viewedDuplicate.bind(this);
+		this.viewedRemove = this.viewedRemove.bind(this);
+		this.visibilityChange = this.visibilityChange.bind(this);
 	}
 
 	componentDidMount() {
@@ -261,6 +431,12 @@ class Header extends React.Component {
 		Events.add('signedOut', this.signedOut);
 		Events.add('claimedAdd', this.claimedAdd);
 		Events.add('claimedRemove', this.claimedRemove);
+		Events.add('viewedAdd', this.viewedAdd);
+		Events.add('viewedDuplicate', this.viewedDuplicate);
+		Events.add('viewedRemove', this.viewedRemove);
+
+		// Track document visibility
+		PageVisibility.add(this.visibilityChange);
 
 		// Capture resizes
 		window.addEventListener("resize", this.resize);
@@ -273,173 +449,126 @@ class Header extends React.Component {
 		Events.remove('signedOut', this.signedOut);
 		Events.remove('claimedAdd', this.claimedAdd);
 		Events.remove('claimedRemove', this.claimedRemove);
+		Events.remove('viewedAdd', this.viewedAdd);
+		Events.remove('viewedDuplicate', this.viewedDuplicate);
+		Events.remove('viewedRemove', this.viewedRemove);
+
+		// Track document visibility
+		PageVisibility.remove(this.visibilityChange);
 
 		// Stop capturing resizes
 		window.removeEventListener("resize", this.resize);
 
 		// Stop checking for new messages and unclaimed counts
-		if(this.iNewMessages) clearInterval(this.iNewMessages);
-		if(this.iUnclaimed) clearInterval(this.iUnclaimed);
+		if(this.iUpdates) {
+			clearInterval(this.iUpdates);
+			this.iUpdates = null;
+		}
+		if(this.iUnclaimed) {
+			clearInterval(this.iUnclaimed);
+			this.iUpdates = null;
+		}
 	}
 
 	accountToggle() {
 		this.setState({"account": !this.state.account});
 	}
 
-	claimedAdd(number, name) {
+	claimedAdd(number, name, id) {
 
-		// Send the claim  to the server
-		Rest.create('monolith', 'customer/claim', {
-			phoneNumber: number
-		}).done(res => {
+		// Clone the claimed state
+		let lClaimed = Tools.clone(this.state.claimed);
 
-			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
-
-				// If we got a duplicate
-				if(res.error.code === 1101) {
-					Events.trigger('error', 'Customer has already been claimed. Refreshing list.');
-					Events.trigger('Unclaimed');
-				} else {
-					Events.trigger('error', JSON.stringify(res.error));
-				}
-			}
-
-			// If there's a warning
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if(res.data) {
-
-				// Clone the claimed state
-				let lClaimed = Tools.clone(this.state.claimed);
-
-				// Add the record to the end
-				lClaimed.push({
-					newMsgs: false,
-					customerId: res.data.customerId,
-					customerName: name,
-					customerPhone: number
-				});
-
-				// Generate the path
-				let sPath = Utils.customerPath(number, res.data.customerId);
-
-				// Set the new state
-				this.setState({
-					claimed: lClaimed,
-					path: sPath
-				});
-
-				// Push the history
-				this.props.history.push(sPath);
-			}
+		// Add the record to the end
+		lClaimed.push({
+			customerId: id,
+			customerName: name,
+			customerPhone: number
 		});
+
+		// Generate the path
+		let sPath = Utils.customerPath(number, id);
+
+		// Create the new state
+		let oState = {
+			claimed: lClaimed,
+			path: sPath
+		}
+
+		// Does the new claim exist in the viewed?
+		let iIndex = Tools.afindi(this.state.viewed, 'customerPhone', number);
+
+		// If we found one
+		if(iIndex > -1) {
+
+			// Clone the viewed state
+			let lViewed = Tools.clone(this.state.viewed);
+
+			// Remove the element
+			lViewed.splice(iIndex, 1);
+
+			// Add it to the state
+			oState.viewed = lViewed;
+		}
+
+		// Set the new state
+		this.setState(oState);
+
+		// Push the history
+		this.props.history.push(sPath);
 	}
 
 	claimedFetch() {
 
-		// Fetch the claimed
-		Rest.read('monolith', 'msgs/claimed', {}).done(res => {
+		claimed.fetch().then(data => {
 
-			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
+			// Init new state
+			let oState = {claimed: data};
 
-			// If there's a warning
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
+			// If we're on a customer
+			let lPath = Utils.parsePath(this.state.path);
+			if(lPath[0] === 'customer') {
 
-			// If there's data
-			if(res.data) {
+				// If we can't find the customer we're on
+				if(Tools.afindi(data, 'customerPhone', lPath[1]) === -1) {
 
-				// Add the newMsg flag to each item
-				for(let i in res.data) {
-					res.data[i].newMsgs = false;
+					// Switch to view
+					Events.trigger('viewedAdd', lPath[1], lPath[2]);
+					Events.trigger('error', 'This customer is not claimed, switching to view only.');
 				}
-
-				// Set the state
-				this.setState({
-					claimed: res.data
-				});
 			}
+
+			// Set the new path
+			this.setState(oState);
+
+		}, error => {
+			Events.trigger('error', JSON.stringify(error));
 		});
 	}
 
-	claimedRemove(number, switch_path, call_delete = true) {
+	claimedRemove(number, switch_path) {
 
-		if(call_delete) {
+		// Find the index of the remove customer
+		let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', number);
 
-			// Send the removal to the server
-			Rest.delete('monolith', 'customer/claim', {
-				phoneNumber: number
-			}).done(res => {
-
-				// If there's an error
-				if(res.error && !Utils.restError(res.error)) {
-					Events.trigger('error', JSON.stringify(res.error));
-				}
-
-				// If there's a warning
-				if(res.warning) {
-					Events.trigger('warning', JSON.stringify(res.warning));
-				}
-
-				// If there's data
-				if(res.data) {
-
-					// Clone the claimed state
-					let lClaimed = Tools.clone(this.state.claimed);
-
-					// Find the index of the remove customer
-					let iIndex = Tools.afindi(lClaimed, 'customerPhone', number);
-
-					// If we found one
-					if(iIndex > -1) {
-
-						// Remove the element
-						lClaimed.splice(iIndex, 1);
-
-						// Set the new state
-						let oState = {claimed: lClaimed}
-						if(switch_path) {
-							oState.path = '/unclaimed';
-						}
-						this.setState(oState);
-
-						// Trigger the event that a customer was unclaimed
-						Events.trigger('Unclaimed', number);
-					}
-				}
-			});
-		} else {
+		// If we found one
+		if(iIndex > -1) {
 
 			// Clone the claimed state
 			let lClaimed = Tools.clone(this.state.claimed);
 
-			// Find the index of the remove customer
-			let iIndex = Tools.afindi(lClaimed, 'customerPhone', number);
+			// Remove the element
+			lClaimed.splice(iIndex, 1);
 
-			// If we found one
-			if(iIndex > -1) {
-
-				// Remove the element
-				lClaimed.splice(iIndex, 1);
-
-				// Set the new state
-				let oState = {claimed: lClaimed}
-				if(switch_path) {
-					oState.path = '/unclaimed';
-				}
-				this.setState(oState);
-
-				// Trigger the event that a customer was unclaimed
-				Events.trigger('Unclaimed', number);
+			// Set the new state
+			let oState = {claimed: lClaimed}
+			if(switch_path) {
+				oState.path = '/unclaimed';
 			}
+			this.setState(oState);
+
+			// Trigger the event that a customer was unclaimed
+			Events.trigger('Unclaimed', number);
 		}
 	}
 
@@ -466,20 +595,21 @@ class Header extends React.Component {
 			state.menu = false;
 		}
 
-		// If we clicked on a phone number
-		if(number) {
+		// If we clicked on a claimed phone number
+		if(pathname.indexOf('/'+number+'/') > -1) {
 
-			// Clone the claimed state
-			let lClaimed = Tools.clone(this.state.claimed);
+			// Do we have a new messages flag for this number?
+			if(number in this.state.newMsgs) {
 
-			// Find the index of the clear customer
-			let iIndex = Tools.afindi(lClaimed, 'customerPhone', number);
+				// Clone the new messages
+				let dNewMsgs = Tools.clone(this.state.newMsgs);
 
-			// Reset the flag
-			lClaimed[iIndex].newMsgs = false;
+				// Remove the corresponding key
+				delete dNewMsgs[number];
 
-			// Updated the claimed state
-			state.claimed = lClaimed;
+				// Update the state
+				state.newMsgs = dNewMsgs;
+			}
 		}
 
 		// Set the new state
@@ -496,9 +626,15 @@ class Header extends React.Component {
 
 	newMessages() {
 
+		// Generate the list of numbers
+		let lNumbers = [].concat(
+			this.state.claimed.map(o => o.customerPhone),
+			this.state.viewed.map(o => o.customerPhone)
+		);
+
 		// Send the removal to the server
 		Rest.read('monolith', 'msgs/claimed/new', {
-			numbers: this.state.claimed.map(o => o.customerPhone)
+			numbers: lNumbers
 		}).done(res => {
 
 			// If there's an error
@@ -520,26 +656,21 @@ class Header extends React.Component {
 					// Do we set the state?
 					let bSetState = false;
 
-					// Clone the current claimed
-					let lClaimed = Tools.clone(this.state.claimed);
+					// Clone the current messages
+					let dNewMsgs = Tools.clone(this.state.newMsgs);
 
-					// Go through each one
-					for(let i in lClaimed) {
+					// Go through each one sent
+					for(let sNumber in res.data) {
 
-						// If it's the result
-						if(lClaimed[i].customerPhone in res.data) {
+						// If we're on the customer's page
+						if(this.state.path.indexOf('/'+sNumber+'/') > -1) {
+							Events.trigger('newMessage');
+						}
 
-							// If this is the number we're on, pass along the
-							//	message
-							if(this.state.path === Utils.customerPath(lClaimed[i].customerPhone, lClaimed[i].customerId)) {
-								Events.trigger('newMessage');
-							}
-
-							// Else, mark the menu item as having new messages
-							else {
-								bSetState = true;
-								lClaimed[i].newMsgs = true;
-							}
+						// Else, if we don't already have this in newMsgs
+						else if(!(sNumber in dNewMsgs)) {
+							bSetState = true;
+							dNewMsgs[sNumber] = true;
 						}
 					}
 
@@ -547,13 +678,11 @@ class Header extends React.Component {
 					if(bSetState) {
 
 						// Set the new state
-						this.setState({
-							claimed: lClaimed
-						});
-
-						// Notify
-						Events.trigger('success', 'New messages!');
+						this.setState({newMsgs: dNewMsgs});
 					}
+
+					// Notify
+					Events.trigger('success', 'New messages!');
 				}
 			}
 		});
@@ -597,12 +726,14 @@ class Header extends React.Component {
 						<Divider />
 					</React.Fragment>
 				}
-				{(Utils.hasRight(this.state.user, 'welldyne_adhoc', 'read') || Utils.hasRight(this.state.user, 'welldyne_outreach', 'read')) &&
+				{(Utils.hasRight(this.state.user, 'pharmacy_fill', 'read') ||
+					Utils.hasRight(this.state.user, 'welldyne_adhoc', 'read') ||
+					Utils.hasRight(this.state.user, 'welldyne_outbound', 'read')) &&
 					<React.Fragment>
-						<Link to="/welldyne" onClick={this.menuClick}>
-							<ListItem button selected={this.state.path === "/welldyne"}>
+						<Link to="/pharmacy" onClick={this.menuClick}>
+							<ListItem button selected={this.state.path === "/pharmacy"}>
 								<ListItemIcon><LocalPharmacyIcon /></ListItemIcon>
-								<ListItemText primary="WellDyne" />
+								<ListItemText primary="Pharmacy" />
 							</ListItem>
 						</Link>
 						<Divider />
@@ -620,18 +751,44 @@ class Header extends React.Component {
 						<ListItemText primary="Search" />
 					</ListItem>
 				</Link>
-				<Divider />
-				{this.state.claimed.map((o,i) =>
-					<CustomerItem
-						key={i}
-						id={o.customerId}
-						name={o.customerName}
-						newMsgs={o.newMsgs}
-						onClick={this.menuItem}
-						phone={o.customerPhone}
-						selected={this.state.path === Utils.customerPath(o.customerPhone, o.customerId)}
-					/>
-				)}
+				{this.state.claimed.length > 0 &&
+					<React.Fragment>
+						<Divider />
+						<ListItem><Typography>Claimed</Typography></ListItem>
+						{this.state.claimed.map((o,i) =>
+							<CustomerItem
+								key={i}
+								id={o.customerId}
+								name={o.customerName}
+								newMsgs={o.customerPhone in this.state.newMsgs}
+								onClick={this.menuItem}
+								phone={o.customerPhone}
+								selected={this.state.path === Utils.customerPath(o.customerPhone, o.customerId)}
+								user={this.state.user}
+							/>
+						)}
+					</React.Fragment>
+				}
+				{this.state.viewed.length > 0 &&
+					<React.Fragment>
+						<Divider />
+						<ListItem><Typography>Viewing</Typography></ListItem>
+						{this.state.viewed.map((o,i) =>
+							<ViewItem
+								claimed={o.claimedUser}
+								key={i}
+								id={o.customerId}
+								name={o.customerName}
+								newMsgs={o.customerPhone in this.state.newMsgs}
+								onClick={this.menuItem}
+								overwrite={this.state.overwrite}
+								phone={o.customerPhone}
+								selected={this.state.path === Utils.viewedPath(o.customerPhone, o.customerId)}
+								user={this.state.user}
+							/>
+						)}
+					</React.Fragment>
+				}
 			</List>
 		);
 
@@ -650,11 +807,22 @@ class Header extends React.Component {
 								<MenuIcon />
 							</IconButton>
 						}
-						<Typography variant="h6" className="title">
-							<Link to="/" onClick={this.menuClick}>
-								ME Customer Service
-							</Link>
-						</Typography>
+						{this.state.mobile ?
+							<div>
+								<Typography className="title">
+									<Link to="/" onClick={this.menuClick}>ME CS</Link>
+								</Typography>
+							</div>
+							:
+							<div>
+								<Typography className="title">
+									<Link to="/" onClick={this.menuClick}>ME Customer Service</Link>
+								</Typography>
+								<Typography className="subtitle">
+									v{process.env.REACT_APP_VERSION}
+								</Typography>
+							</div>
+						}
 						<div id="loaderWrapper">
 							<Loader />
 						</div>
@@ -712,7 +880,8 @@ class Header extends React.Component {
 
 		// Hide any modals and set the user
 		this.setState({
-			"user": user,
+			"overwrite": Utils.hasRight(user, 'csr_overwrite', 'create'),
+			"user": user
 		}, () => {
 
 			// Fetch the claimed conversations
@@ -722,7 +891,7 @@ class Header extends React.Component {
 			this.unclaimedCount();
 
 			// Start checking for new messages
-			this.iNewMessages = setInterval(this.newMessages.bind(this), 30000);
+			this.iUpdates = setInterval(this.update.bind(this), 30000);
 
 			// Start checking for unclaimed counts
 			this.iUnclaimed = setInterval(this.unclaimedCount.bind(this), 300000);
@@ -761,12 +930,19 @@ class Header extends React.Component {
 		// Hide and modals and set the user to false
 		this.setState({
 			"claimed": [],
+			"overwrite": false,
 			"user": false
 		});
 
 		// Stop checking for new messages and unclaimed counts
-		if(this.iNewMessages) clearInterval(this.iNewMessages);
-		if(this.iUnclaimed) clearInterval(this.iUnclaimed);
+		if(this.iUpdates) {
+			clearInterval(this.iUpdates);
+			this.iUpdates = null;
+		}
+		if(this.iUnclaimed) {
+			clearInterval(this.iUnclaimed);
+			this.iUpdates = null;
+		}
 	}
 
 	unclaimedCount() {
@@ -791,10 +967,152 @@ class Header extends React.Component {
 		});
 	}
 
-	set path(path) {
-		this.setState({
-			path: path
-		});
+	update() {
+		this.newMessages();
+		this.claimedFetch();
+	}
+
+	viewedAdd(number, name) {
+
+		// Find the index of the customer
+		let iIndex = Tools.afindi(this.state.viewed, 'customerPhone', number);
+
+		// If we found one
+		if(iIndex > -1) {
+
+			// Generate the path
+			let sPath = Utils.viewedPath(number, this.state.viewed[iIndex].customerId);
+
+			// Set the new state
+			this.setState({path: sPath});
+
+			// Push the history
+			this.props.history.push(sPath);
+		}
+
+		// Else, add it
+		else {
+
+			// Send the claim  to the server
+			Rest.read('monolith', 'customer/id/byPhone', {
+				phoneNumber: number
+			}).done(res => {
+
+				// If there's an error
+				if(res.error && !Utils.restError(res.error)) {
+					Events.trigger('error', JSON.stringify(res.error));
+				}
+
+				// If there's a warning
+				if(res.warning) {
+					Events.trigger('warning', JSON.stringify(res.warning));
+				}
+
+				// If there's data
+				if(res.data) {
+
+					// Clone the viewed state
+					let lView = Tools.clone(this.state.viewed);
+
+					// Add the record to the end
+					lView.push({
+						customerId: res.data.customerId,
+						customerName: res.data.customerName,
+						customerPhone: number,
+						claimedUser: res.data.claimedUser
+					});
+
+					// Generate the path
+					let sPath = Utils.viewedPath(number, res.data.customerId);
+
+					// Set the new state
+					this.setState({
+						viewed: lView,
+						path: sPath
+					});
+
+					// Push the history
+					this.props.history.push(sPath);
+				}
+			});
+		}
+	}
+
+	viewedDuplicate(number, user_id) {
+
+		// Find the index of the viewed
+		let iIndex = Tools.afindi(this.state.viewed, 'customerPhone', number);
+
+		// If we found one
+		if(iIndex > -1) {
+
+			// Clone the viewed state
+			let lView = Tools.clone(this.state.viewed);
+
+			// Update the viewed
+			lView[iIndex].claimedUser = user_id;
+
+			// Set the new state
+			this.setState({viewed: lView});
+		}
+	}
+
+	viewedRemove(number, switch_path) {
+
+		// Find the index of the remove viewed
+		let iIndex = Tools.afindi(this.state.viewed, 'customerPhone', number);
+
+		// If we found one
+		if(iIndex > -1) {
+
+			// Clone the viewed state
+			let lView = Tools.clone(this.state.viewed);
+
+			// Remove the element
+			lView.splice(iIndex, 1);
+
+			// Set the new state
+			let oState = {viewed: lView}
+			if(switch_path) {
+				oState.path = '/unclaimed';
+			}
+			this.setState(oState);
+		}
+	}
+
+	visibilityChange(property, state) {
+
+		// If we've become visible
+		if(state === 'visible') {
+
+			// If we have a user
+			if(this.state.user) {
+
+				// Update
+				this.update();
+				this.unclaimedCount();
+
+				// Start checking for new messages
+				this.iUpdates = setInterval(this.update.bind(this), 30000);
+
+				// Start checking for unclaimed counts
+				this.iUnclaimed = setInterval(this.unclaimedCount.bind(this), 300000);
+			}
+		}
+
+		// Else if we're hidden
+		else if(state === 'hidden') {
+
+			// Stop checking for new messages and unclaimed counts
+			if(this.iUpdates) {
+				clearInterval(this.iUpdates);
+				this.iUpdates = null;
+			}
+			if(this.iUnclaimed) {
+				clearInterval(this.iUnclaimed);
+				this.iUpdates = null;
+			}
+		}
 	}
 }
 

@@ -1,5 +1,5 @@
 /**
- * WellDyne
+ * Pharmacy
  *
  * Created, edit, and delete templates used in auto-generating SMS messages
  *
@@ -16,19 +16,20 @@ import AppBar from '@material-ui/core/AppBar';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 
-// WellDyne components
-import AdHoc from './welldyne/AdHoc';
-import Outreach from './welldyne/Outreach';
+// Pharmacy components
+import AdHoc from './pharmacy/AdHoc';
+import FillError from './pharmacy/FillError';
+import Outbound from './pharmacy/Outbound';
 
 /**
- * WellDyne
+ * Pharmacy
  *
- * Wrapper for email and SMS templates
+ * Page for pharmacy related info, errors, outreach, adhoc
  *
- * @name WellDyne
+ * @name Pharmacy
  * @extends React.Component
  */
-export default function WellDyne(props) {
+export default function Pharmacy(props) {
 
 	// State
 	let [tab, tabSet] = useState(0);
@@ -40,22 +41,26 @@ export default function WellDyne(props) {
 
 	// Return the rendered component
 	return (
-		<div id="welldyne">
+		<div id="pharmacy">
 			<AppBar position="static" color="default">
 				<Tabs
 					onChange={tabChange}
 					value={tab}
 					variant="fullWidth"
 				>
-					<Tab label="AdHoc" />
-					<Tab label="Outreach" />
+					<Tab label="Fill Errors" />
+					<Tab label="WDRx AdHoc" />
+					<Tab label="WDRx Outbound Failures" />
 				</Tabs>
 			</AppBar>
-			<div className="adhoc" style={{display: tab === 0 ? 'block' : 'none'}}>
+			<div className="fillError" style={{display: tab === 0 ? 'block' : 'none'}}>
+				<FillError user={props.user} />
+			</div>
+			<div className="adhoc" style={{display: tab === 1 ? 'block' : 'none'}}>
 				<AdHoc user={props.user} />
 			</div>
-			<div className="outreach" style={{display: tab === 1 ? 'block' : 'none'}}>
-				<Outreach user={props.user} />
+			<div className="outreach" style={{display: tab === 2 ? 'block' : 'none'}}>
+				<Outbound user={props.user} />
 			</div>
 		</div>
 	);

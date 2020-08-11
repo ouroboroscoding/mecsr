@@ -9,6 +9,7 @@
  */
 
 // NPM modules
+import PropTypes from 'prop-types';
 import React from 'react';
 
 // Material UI
@@ -42,15 +43,19 @@ export default class Customer extends React.Component {
 		// Initial state
 		this.state = {
 			customer: null,
+			fill_errors: null,
 			mips: null,
 			orders: [],
 			patient_id: null,
 			prescriptions: null,
 			shipping: [],
 			sms_tpls: [],
-			trigger: null,
+			triggers: null,
 			tab: 0
 		}
+
+		// Mounted?
+		this.mounted = false;
 
 		// Refs
 		this.smsRef = null;
@@ -66,6 +71,9 @@ export default class Customer extends React.Component {
 
 	componentDidMount() {
 
+		// Mark instance as mounted
+		this.mounted = true;
+
 		// Track any new message
 		Events.add('newMessage', this.newMessage);
 
@@ -74,45 +82,57 @@ export default class Customer extends React.Component {
 
 			// If we have a customer ID
 			if(this.props.customerId) {
+				this.fetchFillErrors();
 				this.fetchKnkCustomer();
 				this.fetchMips();
 				this.fetchPatientId();
 				this.fetchShipping();
-				this.fetchTrigger();
+				this.fetchTriggers();
 			} else {
 				this.setState({
 					customer: 0,
 					mips: 0,
 					prescriptions: 0,
-					trigger: 0
+					triggers: 0
 				});
 			}
 
-			// Fetch templates
-			this.fetchSMSTemplates();
+			// Fetch templates if needed
+			if(!this.props.readOnly) {
+				this.fetchSMSTemplates();
+			}
 		}
 	}
 
 	componentWillUnmount() {
 
+		// Mark instance as no longer mounted
+		this.mounted = false;
+
 		// Stop tracking any new message events
 		Events.remove('newMessage', this.newMessage);
 	}
 
-	adhocAdd(type) {
+	adhocAdd(type, order) {
+
+		// If read-only mode
+		if(this.props.readOnly) {
+			Events.trigger('error', 'You are in view-only mode. You must claim this customer to continue.');
+			return;
+		}
 
 		// Send the request
 		Rest.create('welldyne', 'adhoc', {
-			"customerId": this.props.customerId,
-			"type": type
+			crm_type: 'knk',
+			crm_id: this.state.customer.id.toString(),
+			crm_order: order,
+			type: type
 		}).done(res => {
 
-			// If there's an error
+			// If there's an error or warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -120,14 +140,53 @@ export default class Customer extends React.Component {
 			// If there's data
 			if(res.data) {
 
-				// Clone the current trigger
-				let trigger = Tools.clone(this.state.trigger);
+				// Clone the current triggers
+				let triggers = Tools.clone(this.state.triggers);
 
-				// Update the adhocType
-				trigger.adhocType = type;
+				// Find the correct order
+				let iIndex = Tools.afindi(triggers, 'crm_order', order);
 
-				// Update the state
-				this.setState({"trigger": trigger});
+				// If we found an index
+				if(iIndex > -1) {
+
+					// Update the adhocType
+					triggers[iIndex].adhoc_type = type;
+
+					// Update the state
+					this.setState({"triggers": triggers});
+				}
+			}
+		});
+	}
+
+	fetchFillErrors() {
+
+		// Request the fill errors
+		Rest.read('prescriptions', 'pharmacy/fill/errors', {
+			"crm_type": 'knk',
+			"crm_id": this.props.customerId.toString()
+		}).done(res => {
+
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// If there's an error or warning
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+
+				// Set the state
+				this.setState({
+					fill_errors: res.data
+				});
 			}
 		});
 	}
@@ -136,11 +195,15 @@ export default class Customer extends React.Component {
 
 		// Find the customer ID
 		Rest.read('konnektive', 'customer', {
-			customerId: this.props.customerId,
-			detailed: true
+			id: this.props.customerId
 		}).done(res => {
 
-			// If there's an error
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// If there's an error or warning
 			if(res.error && !Utils.restError(res.error)) {
 				if(res.error.code === 1104) {
 					this.setState({customer: 0});
@@ -148,8 +211,6 @@ export default class Customer extends React.Component {
 					Events.trigger('error', JSON.stringify(res.error));
 				}
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -161,7 +222,7 @@ export default class Customer extends React.Component {
 				this.setState({
 					customer: res.data
 				}, () => {
-					if(res.data.customerId) {
+					if(res.data.id) {
 						this.fetchKnkOrders();
 					}
 				});
@@ -173,16 +234,19 @@ export default class Customer extends React.Component {
 
 		// Get the orders from the REST service
 		Rest.read('konnektive', 'customer/orders', {
-			customerId: this.state.customer.customerId,
+			id: this.state.customer.id,
 			transactions: true
 		}).done(res => {
 
-			// If there's an error
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// If there's an error or warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -202,15 +266,18 @@ export default class Customer extends React.Component {
 
 		// Find the MIP using the phone number
 		Rest.read('monolith', 'customer/mips', {
-			customerId: this.props.customerId
+			customerId: this.props.customerId.toString()
 		}).done(res => {
 
-			// If there's an error
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// If there's an error or warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -230,15 +297,18 @@ export default class Customer extends React.Component {
 
 		// Find the MIP using the phone number
 		Rest.read('monolith', 'customer/dsid', {
-			customerId: this.props.customerId
+			customerId: this.props.customerId.toString()
 		}).done(res => {
 
-			// If there's an error
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// If there's an error or warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -271,12 +341,15 @@ export default class Customer extends React.Component {
 			patient_id: parseInt(id, 10)
 		}).done(res => {
 
-			// If there's an error
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// If there's an error or warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -296,15 +369,18 @@ export default class Customer extends React.Component {
 
 		// Fetch them from the server
 		Rest.read('monolith', 'customer/shipping', {
-			customerId: this.props.customerId
+			customerId: this.props.customerId.toString()
 		}).done(res => {
 
-			// If there's an error
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// If there's an error or warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -325,12 +401,15 @@ export default class Customer extends React.Component {
 		// Fetch them from the server
 		Rest.read('csr', 'template/smss', {}).done(res => {
 
-			// If there's an error
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// If there's an error or warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -346,19 +425,23 @@ export default class Customer extends React.Component {
 		});
 	}
 
-	fetchTrigger() {
+	fetchTriggers() {
 
 		// Fetch them from the server
 		Rest.read('welldyne', 'trigger/info', {
-			customerId: this.props.customerId
+			crm_type: 'knk',
+			crm_id: this.props.customerId.toString()
 		}).done(res => {
 
-			// If there's an error
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// If there's an error or warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -368,7 +451,7 @@ export default class Customer extends React.Component {
 
 				// Set the state
 				this.setState({
-					trigger: res.data
+					triggers: res.data
 				});
 			}
 		});
@@ -419,6 +502,7 @@ export default class Customer extends React.Component {
 						ref={el => this.smsRef = el}
 						customer={this.state.customer}
 						phoneNumber={this.props.phoneNumber}
+						readOnly={this.props.readOnly}
 						templates={this.state.sms_tpls}
 						user={this.props.user}
 					/>
@@ -427,6 +511,7 @@ export default class Customer extends React.Component {
 					<KNK
 						customer={this.state.customer}
 						orders={this.state.orders}
+						readOnly={this.props.readOnly}
 						refreshCustomer={this.knkCustomerRefresh}
 						refreshOrders={this.knkOrdersRefresh}
 						tracking={this.state.shipping}
@@ -436,23 +521,28 @@ export default class Customer extends React.Component {
 					<MIP
 						customer={this.state.customer}
 						mips={this.state.mips}
+						readOnly={this.props.readOnly}
 						user={this.props.user}
 					/>
 				</div>
 				<div className="notes" style={{display: this.state.tab === 3 ? 'flex' : 'none'}}>
 					<Notes
 						customerId={this.props.customerId}
+						readOnly={this.props.readOnly}
 						user={this.props.user}
 						visible={this.state.tab === 3}
 					/>
 				</div>
 				<div className="prescriptions" style={{display: this.state.tab === 4 ? 'block' : 'none'}}>
 					<RX
+						fillErrors={this.state.fill_errors}
 						onAdhocAdd={this.adhocAdd}
 						onRefresh={this.rxRefresh}
+						orders={this.state.orders}
 						patientId={this.state.patient_id}
 						prescriptions={this.state.prescriptions}
-						trigger={this.state.trigger}
+						readOnly={this.props.readOnly}
+						triggers={this.state.triggers}
 						user={this.props.user}
 					/>
 				</div>
@@ -474,4 +564,21 @@ export default class Customer extends React.Component {
 	tabChange(event, tab) {
 		this.setState({"tab": tab});
 	}
+}
+
+// Valid props
+Customer.propTypes = {
+	"customerId": PropTypes.number,
+	"phoneNumber": PropTypes.string,
+	"readyOnly": PropTypes.bool,
+	"user": PropTypes.oneOfType([
+		PropTypes.bool,
+		PropTypes.object
+	])
+}
+
+// Default props
+Customer.defaultProps = {
+	"readOnly": false,
+	"user": false
 }

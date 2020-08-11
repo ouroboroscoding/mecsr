@@ -23,6 +23,9 @@ import TextField from '@material-ui/core/TextField';
 // Components
 import MsgSummary from '../composites/MsgSummary';
 
+// Component functions
+import claimed from '../functions/claimed';
+
 // Generic modules
 import Events from '../../generic/events';
 import Rest from '../../generic/rest';
@@ -47,11 +50,12 @@ export default class Search extends React.Component {
 			name: '',
 			phone: '',
 			records: [],
-			searchType: '0',
-			user: props.user ? true : false
+			searchType: Tools.safeLocalStorage('searchType', '0'),
+			user: props.user || false
 		}
 
 		// Bind methods
+		this.claim = this.claim.bind(this);
 		this.contentChange = this.contentChange.bind(this);
 		this.emailChange = this.emailChange.bind(this);
 		this.idChange = this.idChange.bind(this);
@@ -78,6 +82,21 @@ export default class Search extends React.Component {
 		// Stop tracking any signedIn/signedOut events
 		Events.remove('signedIn', this.signedIn);
 		Events.remove('signedOut', this.signedOut);
+	}
+
+	claim(number, name) {
+
+		// Get the claimed add promise
+		claimed.add(number).then(res => {
+			Events.trigger('claimedAdd', number, name, res.customerId);
+		}, error => {
+			// If we got a duplicate
+			if(error.code === 1101) {
+				Events.trigger('error', 'Customer has already been claimed.');
+			} else {
+				Events.trigger('error', JSON.stringify(error));
+			}
+		});
 	}
 
 	contentChange(event) {
@@ -113,6 +132,7 @@ export default class Search extends React.Component {
 	}
 
 	searchChange(event) {
+		localStorage.setItem('searchType', event.target.value);
 		this.setState({
 			searchType: event.target.value
 		});
@@ -314,7 +334,9 @@ export default class Search extends React.Component {
 				<Box className="summaries">
 					{this.state.records.map((o,i) =>
 						<MsgSummary
+							onClaim={this.claim}
 							key={i}
+							user={this.state.user}
 							{...o}
 						/>
 					)}
@@ -325,7 +347,7 @@ export default class Search extends React.Component {
 
 	signedIn(user) {
 		this.setState({
-			user: true
+			user: user
 		});
 	}
 

@@ -9,6 +9,7 @@
  */
 
 // NPM modules
+import PropTypes from 'prop-types';
 import React from 'react';
 
 // Material UI
@@ -79,13 +80,21 @@ function Message(props) {
 export default function MsgSummary(props) {
 
 	function claim() {
-		Events.trigger('claimedAdd', props.customerPhone, props.customerName);
+		props.onClaim(props.customerPhone, props.customerName);
 	}
 
 	function hide() {
 		props.onHide(props.customerPhone);
 	}
 
+	function view() {
+		Events.trigger('viewedAdd', props.customerPhone, props.customerName);
+	}
+
+	// If we're the one who claimed it
+	let sClaimedBy = (props.userId === props.user.id) ? 'You' : props.claimedBy;
+
+	// Render
 	return (
 		<Paper className={props.numberOfOrders > 0 ? "summary" : "summary sales"}>
 			<Grid container spacing={3}>
@@ -95,9 +104,12 @@ export default function MsgSummary(props) {
 						<p><Button variant="contained" color="primary" size="large" onClick={hide}>Hide</Button></p>
 					}
 					{props.claimedAt ?
-						<p>Claimed by {props.claimedBy} at {props.claimedAt}</p>
+						<p>Claimed by {sClaimedBy}</p>
 					:
 						<p><Button variant="contained" color="primary" size="large" onClick={claim}>Claim</Button></p>
+					}
+					{sClaimedBy !== 'You' &&
+						<p><Button variant="contained" color="primary" size="large" onClick={view}>View</Button></p>
 					}
 				</Grid>
 				<Grid item xs={6} sm={2}>
@@ -120,3 +132,11 @@ export default function MsgSummary(props) {
 		</Paper>
 	);
 }
+
+// Force props
+MsgSummary.propTypes = {
+	"onClaim": PropTypes.func.isRequired
+}
+
+// Default props
+MsgSummary.defaultTypes = {}

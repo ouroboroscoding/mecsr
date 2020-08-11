@@ -13,6 +13,7 @@ import React, { useRef, useState } from 'react';
 
 // Material UI
 import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import Select from '@material-ui/core/Select';
@@ -42,6 +43,12 @@ export default function RX(props) {
 
 	// Toggle the SSO iframe
 	function toggleSSO() {
+
+		// If read-only mode
+		if(props.readOnly) {
+			Events.trigger('error', 'You are in view-only mode. You must claim this customer to continue.');
+			return;
+		}
 
 		// If we have an SSO, hide the iframe
 		if(sso) {
@@ -81,49 +88,93 @@ export default function RX(props) {
 	function adHocAdd() {
 
 		// Let the parent know
-		props.onAdhocAdd(adhocType.current.value);
+		props.onAdhocAdd(
+			adhocType.current.value,
+			props.triggers[0].crm_order
+		);
+	}
+
+	// Pharmacy Fill
+	let fill = null;
+	if(props.fillErrors === null) {
+		fill = <p>Loading...</p>
+	} else if(props.fillErrors.length === 0) {
+		fill = null;
+	} else {
+		fill = (
+			<React.Fragment>
+				<div className="title">Pharmacy Fill Errors</div>
+				{props.fillErrors.map(o =>
+					<Paper key={o._id} className="paper">
+						<Grid container spacing={2}>
+							<Grid item xs={12} md={4}><strong>KNK Order: </strong><span>{o.crm_order}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Type: </strong><span>{o.list + (o.type !== '' ? '(' + o.type + ')' : '')}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Reason: </strong><span>{o.reason}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Fail Count: </strong><span>{o.fail_count}</span></Grid>
+							<Grid item xs={12} md={4}><strong>{o._created === o._updated ? 'Failed' : 'First Failure'}: </strong><span>{Utils.date(o._created, '-')}</span></Grid>
+							{o._created !== o._updated &&
+								<Grid item xs={12} md={4}><strong>Most Recent: </strong><span>{Utils.date(o._updated, '-')}</span></Grid>
+							}
+						</Grid>
+					</Paper>
+				)}
+			</React.Fragment>
+		)
 	}
 
 	// Trigger
-	let trigger = null;
-	if(props.trigger === null) {
-		trigger = <p>Loading...</p>
+	let triggers = null;
+	if(props.triggers === null) {
+		triggers = <p>Loading...</p>
 	}
-	else if(props.trigger === 0) {
-		trigger = null;
+	else if(props.triggers === 0) {
+		triggers = null;
 	}
 	else {
-		trigger = (
+		triggers = (
 			<React.Fragment>
-				<div className="title">Latest WellDyne Trigger</div>
-				<Paper className="trigger">
-					<p><strong>Triggered: </strong><span>{props.trigger.triggered.split(' ')[0]}</span></p>
-					<p><strong>Opened: </strong><span>{props.trigger.opened ? props.trigger.opened.split(' ')[0] : ''}</span></p>
-					<p><strong>Shipped: </strong><span>{props.trigger.shipped ? props.trigger.shipped.split(' ')[0] : ''}</span></p>
-					<p><strong>Eligible Since: </strong><span>{props.trigger.eligSince ? props.trigger.eligSince.split(' ')[0] : ''}</span></p>
-					<p><strong>Eligible Through: </strong><span>{props.trigger.eligThru ? props.trigger.eligThru.split(' ')[0] : ''}</span></p>
-					{(props.trigger.outreachQueue || props.trigger.outreachReason) &&
-						<React.Fragment>
-							<p><strong>Outreach Queue: </strong><span>{props.trigger.outreachQueue}</span></p>
-							<p><strong>Outreach Reason: </strong><span>{props.trigger.outreachReason}</span></p>
-						</React.Fragment>
+				<div className="title">WellDyneRX Triggers</div>
+				{props.triggers.map((o, i) => {
+					let adhoc = '';
+					if(i === 0) {
+						if(o.adhoc_type) {
+							adhoc = <Grid item xs={12}><strong>AdHoc: </strong><span>{o.adhoc_type}</span></Grid>
+						} else if(Utils.hasRight(props.user, 'welldyne_adhoc', 'create') && !props.readOnly) {
+							adhoc = <Grid item xs={12}><strong>AdHoc Type: </strong>
+										<Select
+											inputRef={adhocType}
+											native
+										>
+											<option>Cancel Order</option>
+											<option>Update Address</option>
+										</Select>
+										<Button variant="contained" color="primary" onClick={adHocAdd} style={{height: '32px', marginLeft: '10px'}}>Add</Button>
+									</Grid>
+						}
 					}
-					{props.trigger.adhocType &&
-						<p><strong>AdHoc Type: </strong><span>{props.trigger.adhocType}</span></p>
-					}
-					{(props.trigger.adhocType === null && Utils.hasRight(props.user, 'welldyne_adhoc', 'create')) &&
-						<p><strong>AdHoc Type: </strong>
-							<Select
-								inputRef={adhocType}
-								native
-							>
-								<option>Cancel Order</option>
-								<option>Update Address</option>
-							</Select>
-							<Button variant="contained" color="primary" onClick={adHocAdd} style={{height: '32px', marginLeft: '10px'}}>Add</Button>
-						</p>
-					}
-				</Paper>
+
+					return (
+						<Paper key={o._id} className="paper">
+							<Grid container spacing={2}>
+								<Grid item xs={12} md={4}><strong>KNK Order: </strong><span>{o.crm_order}</span></Grid>
+								<Grid item xs={12} md={4}><strong>DoseSpot ID: </strong><span>{o.rx_id}</span></Grid>
+								<Grid item xs={12} md={4}><strong>Medication: </strong><span>{o.medication}</span></Grid>
+								<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{Utils.date(o.triggered, '-')}</span></Grid>
+								<Grid item xs={12} md={4}><strong>Opened: </strong><span>{o.opened ? o.opened.split(' ')[0] : ''}</span></Grid>
+								<Grid item xs={12} md={4}><strong>Shipped: </strong><span>{o.shipped ? o.shipped.split(' ')[0] : ''}</span></Grid>
+								<Grid item xs={12} md={4}><strong>Eligible Since: </strong><span>{o.elig_since ? o.elig_since.split(' ')[0] : ''}</span></Grid>
+								<Grid item xs={12} md={8}><strong>Eligible Through: </strong><span>{o.elig_thru ? o.elig_thru.split(' ')[0] : ''}</span></Grid>
+								<Grid item xs={12}><strong>Raw: </strong><span>{o.raw}</span></Grid>
+								{(o.outbound_queue || o.outbound_reason) &&
+									<React.Fragment>
+										<Grid item xs={12}><strong>Outbound: </strong><span>{o.outbound_queue} ({o.outbound_reason})</span></Grid>
+									</React.Fragment>
+								}
+								{adhoc}
+							</Grid>
+						</Paper>
+					);
+				})}
 			</React.Fragment>
 		);
 	}
@@ -139,19 +190,22 @@ export default function RX(props) {
 	else {
 		prescriptions = (
 			<React.Fragment>
-				{props.prescriptions.map((o, i) =>
-					<Paper key={i} className="rx">
-						<p><strong>Pharmacy: </strong><span>{o.PharmacyName}</span></p>
-						<p><strong>Prescriber: </strong><span>{o.PrescriberName}</span></p>
-						<p><strong>Product: </strong><span>{o.DisplayName} ({o.Quantity})</span></p>
-						<p><strong>Written: </strong><span>{o.WrittenDate.substring(0, 10)}</span></p>
-						{o.EffectiveDate &&
-							<p><strong>Effective: </strong><span>{o.EffectiveDate.substring(0, 10)}</span></p>
-						}
-						<p><strong>Status: </strong><span>{o.StatusText}</span></p>
-						<p><strong>Medication Status: </strong><span>{o.MedicationStatusText}</span></p>
-						<p><strong>Refills: </strong><span>{o.Refills}</span></p>
-						<p><strong>Directions: </strong><span>{o.Directions}</span></p>
+				{props.prescriptions.map(o =>
+					<Paper key={o.PrescriptionId} className="paper">
+						<Grid container spacing={2}>
+							<Grid item xs={12} md={4}><strong>ID: </strong><span>{o.PrescriptionId}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Pharmacy: </strong><span>{o.PharmacyName}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Prescriber: </strong><span>{o.PrescriberName}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Product: </strong><span>{o.DisplayName} ({o.Quantity})</span></Grid>
+							<Grid item xs={12} md={o.EffectiveDate ? 4 : 8}><strong>Written: </strong><span>{o.WrittenDate.substring(0, 10)}</span></Grid>
+							{o.EffectiveDate &&
+								<Grid item xs={12} md={4}><strong>Effective: </strong><span>{o.EffectiveDate.substring(0, 10)}</span></Grid>
+							}
+							<Grid item xs={12} md={4}><strong>Status: </strong><span>{o.StatusText}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Medication Status: </strong><span>{o.MedicationStatusText}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Refills: </strong><span>{o.Refills}</span></Grid>
+							<Grid item xs={12}><strong>Directions: </strong><span>{o.Directions}</span></Grid>
+						</Grid>
 					</Paper>
 				)}
 			</React.Fragment>
@@ -159,12 +213,13 @@ export default function RX(props) {
 	}
 
 	// DoseSpot SSO
-	let bSSO = (props.patientId && (props.user.dsClinicianId !== '')) ? true : false;
+	let bSSO = (props.patientId && (props.user.dsClinicianId !== '') && !props.readOnly) ? true : false;
 
 	// Render
 	return (
 		<React.Fragment>
-			{trigger}
+			{fill}
+			{triggers}
 			<div className="pageHeader">
 				<div ref={rxTitle} className="title">Prescriptions
 					<Tooltip title="Refresh Prescriptions">

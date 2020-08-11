@@ -28,18 +28,21 @@ const DELETE = 8;
 const ALL    = 15;
 const TYPES = [
 	{title: "Customer Service", rights: [
-		{name: "csr_agents", title: "Agents", allowed: ALL},
+		{name: "csr_agents", title: "Agents: Ability to manage agents and permissions", allowed: ALL},
 		{name: "csr_claims", title: "Claims", allowed: CREATE | UPDATE | DELETE},
+		{name: "csr_overwrite", title: "Claim Overwrite", allowed: CREATE},
 		{name: "csr_messaging", title: "Messaging", allowed: CREATE | READ},
-		{name: "csr_templates", title: "Templates", allowed: ALL}]},
+		{name: "csr_templates", title: "Templates: Ability to create and modify templates", allowed: ALL}]},
+		{name: "csr_stats", title: "Stats: Allowed to view stats", allowed: READ}]},
 	{title: "CRM", rights: [
 		{name: "crm_customers", title: "CRM Data", allowed: READ}]},
 	{title: "Memo", rights: [
 		{name: "memo_mips", title: "Memo MIP", allowed: READ | UPDATE},
 		{name: "memo_notes", title: "Memo Notes", allowed: READ | CREATE}]},
-	{title: "Memo", rights: [
-		{name: "welldyne_adhoc", title: "WellDyneRX Adhoc", allowed: CREATE | READ | DELETE},
-		{name: "welldyne_outreach", title: "WellDyneRX Outreach", allowed: ALL}]}
+	{title: "Pharmacy", rights: [
+		{name: "pharmacy_fill", title: "Pharmacy Fill", allowed: READ | UPDATE | DELETE},
+		{name: "welldyne_adhoc", title: "Adhoc", allowed: CREATE | READ | DELETE},
+		{name: "welldyne_outbound", title: "Outbound Failed", allowed: READ | UPDATE | DELETE}]}
 ]
 
 // Permission

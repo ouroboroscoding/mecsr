@@ -1,7 +1,7 @@
 /**
  * WellDyne AdHoc
  *
- * Created, edit, and delete adhoc records
+ * Create, edit, and delete adhoc records
  *
  * @author Chris Nasr <bast@maleexcel.com>
  * @copyright MaleExcelMedical
@@ -36,12 +36,11 @@ import Utils from '../../../utils';
 // Definitions
 import AdHocDef from '../../../definitions/welldyne/adhoc';
 AdHocDef['__react__'] = {
-	"primary": "id",
-	"create": ["customerId", "type"],
-	"results": ["customerId", "customerName", "type", "userName"]
+	"create": ["crm_id", "crm_order", "type"],
+	"results": ["crm_id", "customer_name", "crm_order", "type", "user_name"]
 }
-AdHocDef['customerName'] = {"__type__": "string", "__react__": {"title": "Customer"}}
-AdHocDef['userName'] = {"__type__": "string", "__react__": {"title": "User"}}
+AdHocDef['customer_name'] = {"__type__": "string", "__react__": {"title": "Name"}}
+AdHocDef['user_name'] = {"__type__": "string", "__react__": {"title": "Agent"}}
 
 // Generate the Tree
 const AdHocTree = new Tree(AdHocDef);
@@ -122,7 +121,7 @@ export default function AdHoc(props) {
 	}
 
 	// Remove a template
-	function removeRecord(id) {
+	function removeRecord(_id) {
 
 		// Use the current records to set the new records
 		recordsSet(records => {
@@ -131,7 +130,7 @@ export default function AdHoc(props) {
 			let ret = Tools.clone(records);
 
 			// Find the index
-			let iIndex = Tools.afindi(ret, 'id', id);
+			let iIndex = Tools.afindi(ret, '_id', _id);
 
 			// If one is found, remove it
 			if(iIndex > -1) {

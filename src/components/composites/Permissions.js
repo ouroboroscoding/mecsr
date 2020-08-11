@@ -32,7 +32,7 @@ const TYPES = [
 		{name: "csr_claims", title: "Claims", allowed: CREATE | UPDATE | DELETE},
 		{name: "csr_overwrite", title: "Claim Overwrite", allowed: CREATE},
 		{name: "csr_messaging", title: "Messaging", allowed: CREATE | READ},
-		{name: "csr_templates", title: "Templates: Ability to create and modify templates", allowed: ALL}]},
+		{name: "csr_templates", title: "Templates: Ability to create and modify templates", allowed: ALL},
 		{name: "csr_stats", title: "Stats: Allowed to view stats", allowed: READ}]},
 	{title: "CRM", rights: [
 		{name: "crm_customers", title: "CRM Data", allowed: READ}]},

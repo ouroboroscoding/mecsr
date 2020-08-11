@@ -146,6 +146,22 @@ export function compare(v1, v2) {
 }
 
 /**
+ * Date Increment
+ *
+ * Returns a date incremented by the given days. Use negative to decrement
+ *
+ * @name dateInc
+ * @access public
+ * @param uint days The number of days to increment by
+ * @return Date
+ */
+export function dateInc(days=1) {
+	let date = new Date();
+	date.setDate(date.getDate() + days);
+	return date;
+}
+
+/**
  * Empty
  *
  * Returns true if the value type is empty
@@ -302,6 +318,7 @@ export default {
 	afindo: afindo,
 	clone: clone,
 	compare: compare,
+	dateInc: dateInc,
 	empty: empty,
 	isDecimal: isDecimal,
 	isInteger: isInteger,

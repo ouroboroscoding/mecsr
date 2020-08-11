@@ -73,7 +73,7 @@ export default function KNK(props) {
 					<TableBody>
 						<TableRow>
 							<TableCell>
-								<p><strong>ID: </strong><a href={"https://crm.konnektive.com/customer/cs/details/?customerId=" + customer.id} target="_blank" rel="noopener noreferrer">{customer.id}</a></p>
+								<p><strong>ID: </strong><a href={"https://crm.konnektive.com/customer/cs/details/?customerId=" + customer.customerId} target="_blank" rel="noopener noreferrer">{customer.customerId}</a></p>
 								<p><strong>Campaign: </strong><span>{customer.campaign.name + ' (' + customer.campaign.type + ')'}</span></p>
 								<p><strong>Email: </strong><span>{customer.email}</span></p>
 								<p><strong>Phone: </strong><span>{customer.phone}</span></p>
@@ -152,7 +152,7 @@ export default function KNK(props) {
 							<React.Fragment key={i}>
 								<TableRow>
 									<TableCell>
-										<p><nobr><strong>ID: </strong>{o.id}</nobr></p>
+										<p><nobr><strong>ID: </strong>{o.orderId}</nobr></p>
 										<p><strong>Campaign: </strong><span>{o.campaign}</span></p>
 										<p><nobr><strong>Email: </strong><span>{o.email}</span></nobr></p>
 										<p><nobr><strong>Phone: </strong><span>{o.phone}</span></nobr></p>

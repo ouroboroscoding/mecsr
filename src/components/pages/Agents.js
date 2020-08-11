@@ -126,7 +126,7 @@ export default function Agents(props) {
 
 		// Fetch the agent's permissions
 		Rest.read('csr', 'agent/permissions', {
-			"_id": agent_id
+			"agent_id": agent_id
 		}).done(res => {
 
 			// If there's an error
@@ -155,7 +155,7 @@ export default function Agents(props) {
 
 		// Fetch the agent's permissions
 		Rest.update('csr', 'agent/permissions', {
-			"agent": permissions._id,
+			"agent_id": permissions._id,
 			"permissions": permsRef.current.value
 		}).done(res => {
 

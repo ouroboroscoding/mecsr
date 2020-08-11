@@ -273,7 +273,7 @@ export default class Notes extends React.Component {
 
 			// Else, send the customer ID
 			else {
-				oData.customer_id = this.props.customerId
+				oData.customer_id = this.props.customerId.toString()
 			}
 		}
 

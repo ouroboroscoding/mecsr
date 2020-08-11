@@ -14,6 +14,7 @@ import React from 'react';
 
 // Material UI
 import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
 import Switch from '@material-ui/core/Switch';
 
 // Generic
@@ -26,13 +27,22 @@ const UPDATE = 2;
 const DELETE = 8;
 const ALL    = 15;
 const TYPES = [
-	{name: "csr_agents", title: "Agents: Ability to manage agents and permissions", allowed: ALL},
-	{name: "csr_overwrite", title: "Claim Overwrite", allowed: CREATE},
-	{name: "csr_stats", title: "Stats: Allowed to view stats", allowed: READ},
-	{name: "csr_templates", title: "Templates: Ability to create and modify templates", allowed: ALL},
-	{name: "pharmacy_fill", title: "Pharmacy Fill", allowed: READ | UPDATE | DELETE},
-	{name: "welldyne_adhoc", title: "WellDyneRX Adhoc", allowed: CREATE | READ | DELETE},
-	{name: "welldyne_outbound", title: "WellDyneRX Outbound Failed Claims", allowed: READ | UPDATE | DELETE}
+	{title: "Customer Service", rights: [
+		{name: "csr_agents", title: "Agents: Ability to manage agents and permissions", allowed: ALL},
+		{name: "csr_claims", title: "Claims", allowed: CREATE | UPDATE | DELETE},
+		{name: "csr_overwrite", title: "Claim Overwrite", allowed: CREATE},
+		{name: "csr_messaging", title: "Messaging", allowed: CREATE | READ},
+		{name: "csr_templates", title: "Templates: Ability to create and modify templates", allowed: ALL}]},
+		{name: "csr_stats", title: "Stats: Allowed to view stats", allowed: READ}]},
+	{title: "CRM", rights: [
+		{name: "crm_customers", title: "CRM Data", allowed: READ}]},
+	{title: "Memo", rights: [
+		{name: "memo_mips", title: "Memo MIP", allowed: READ | UPDATE},
+		{name: "memo_notes", title: "Memo Notes", allowed: READ | CREATE}]},
+	{title: "Pharmacy", rights: [
+		{name: "pharmacy_fill", title: "Pharmacy Fill", allowed: READ | UPDATE | DELETE},
+		{name: "welldyne_adhoc", title: "Adhoc", allowed: CREATE | READ | DELETE},
+		{name: "welldyne_outbound", title: "Outbound Failed", allowed: READ | UPDATE | DELETE}]}
 ]
 
 // Permission
@@ -123,24 +133,26 @@ export default class Permissions extends React.Component {
 	}
 
 	render() {
-		return (
-			<Grid container spacing={2} className="permissions">
-				<Grid item xs={4} className="title"><span>Description</span></Grid>
-				<Grid item xs={2} className="title"><span>Create</span></Grid>
-				<Grid item xs={2} className="title"><span>Read</span></Grid>
-				<Grid item xs={2} className="title"><span>Update</span></Grid>
-				<Grid item xs={2} className="title"><span>Delete</span></Grid>
-				{TYPES.map(perm =>
-					<Permission
-						allowed={perm.allowed}
-						key={perm.name}
-						name={perm.name}
-						onChange={this.change}
-						title={perm.title}
-						value={this.state.value[perm.name] ? this.state.value[perm.name].rights : 0}
-					/>
-				)}
-			</Grid>
+		return TYPES.map(section =>
+			<Paper>
+				<Grid container spacing={2} className="permissions">
+					<Grid item xs={4} className="title"><span>{section.title}</span></Grid>
+					<Grid item xs={2} className="title"><span>Create</span></Grid>
+					<Grid item xs={2} className="title"><span>Read</span></Grid>
+					<Grid item xs={2} className="title"><span>Update</span></Grid>
+					<Grid item xs={2} className="title"><span>Delete</span></Grid>
+					{section.rights.map(perm =>
+						<Permission
+							allowed={perm.allowed}
+							key={perm.name}
+							name={perm.name}
+							onChange={this.change}
+							title={perm.title}
+							value={this.state.value[perm.name] ? this.state.value[perm.name].rights : 0}
+						/>
+					)}
+				</Grid>
+			</Paper>
 		);
 	}
 

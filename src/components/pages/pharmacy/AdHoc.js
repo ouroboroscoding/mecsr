@@ -14,16 +14,9 @@ import React, { useState, useEffect } from 'react';
 
 // Material UI
 import Box from '@material-ui/core/Box';
-import IconButton from '@material-ui/core/IconButton';
-import Paper from '@material-ui/core/Paper';
-import Tooltip from '@material-ui/core/Tooltip';
-
-// Material UI Icons
-import AddCircleIcon from '@material-ui/icons/AddCircle';
 
 // Format Components
 import ResultsComponent from '../../format/Results';
-import FormComponent from '../../format/Form';
 
 // Generic modules
 import Events from '../../../generic/events';

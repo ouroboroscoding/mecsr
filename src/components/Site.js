@@ -27,6 +27,7 @@ import Signin from './composites/Signin';
 // Page component modules
 import Agents from './pages/Agents';
 import Customer from './pages/Customer';
+import ManualAdHoc from './pages/ManualAdHoc';
 import Search from './pages/Search';
 import Stats from './pages/Stats';
 import Templates from './pages/Templates';
@@ -103,6 +104,9 @@ function Site(props) {
 					<Switch>
 						<Route path="/agents">
 							<Agents user={user} />
+						</Route>
+						<Route path="/manualad">
+							<ManualAdHoc user={user} />
 						</Route>
 						<Route path="/unclaimed">
 							<Unclaimed user={user} />

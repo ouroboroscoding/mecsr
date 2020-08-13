@@ -31,6 +31,60 @@ import Rest from '../../../generic/rest';
 // Local modules
 import Utils from '../../../utils';
 
+// Trigger component
+function Trigger(props) {
+
+	// Refs
+	let adhocType = useRef();
+
+	function adHocAdd() {
+
+		// Let the parent know
+		props.onAdhocAdd(
+			adhocType.current.value,
+			props._id
+		);
+	}
+
+	return (
+		<Paper className="paper">
+			<Grid container spacing={2}>
+				<Grid item xs={12} md={4}><strong>KNK Order: </strong><span>{props.crm_order}</span></Grid>
+				<Grid item xs={12} md={4}><strong>DoseSpot ID: </strong><span>{props.rx_id}</span></Grid>
+				<Grid item xs={12} md={4}><strong>Medication: </strong><span>{props.medication}</span></Grid>
+				<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{Utils.date(props.triggered, '-')}</span></Grid>
+				<Grid item xs={12} md={4}><strong>Opened: </strong><span>{props.opened ? props.opened.split(' ')[0] : ''}</span></Grid>
+				<Grid item xs={12} md={4}><strong>Shipped: </strong><span>{props.shipped ? props.shipped.split(' ')[0] : ''}</span></Grid>
+				<Grid item xs={12} md={4}><strong>Eligible Since: </strong><span>{props.elig_since ? props.elig_since.split(' ')[0] : ''}</span></Grid>
+				<Grid item xs={12} md={8}><strong>Eligible Through: </strong><span>{props.elig_thru ? props.elig_thru.split(' ')[0] : ''}</span></Grid>
+				<Grid item xs={12}><strong>Raw: </strong><span>{props.raw}</span></Grid>
+				{(props.outbound_queue || props.outbound_reason) &&
+					<React.Fragment>
+						<Grid item xs={12}><strong>Outbound: </strong><span>{props.outbound_queue} ({props.outbound_reason})</span></Grid>
+					</React.Fragment>
+				}
+				{props.adhoc_type &&
+
+					<Grid item xs={12}><strong>AdHoc: </strong><span>{props.adhoc_type}</span></Grid>
+				}
+				{(props.adhoc_type === null && Utils.hasRight(props.user, 'welldyne_adhoc', 'create') && !props.readOnly) &&
+					<Grid item xs={12}><strong>AdHoc Type: </strong>
+						<Select
+							inputRef={adhocType}
+							native
+						>
+							<option>Cancel Order</option>
+							<option>Extend Eligibility</option>
+							<option>Update Address</option>
+						</Select>
+						<Button variant="contained" color="primary" onClick={adHocAdd} style={{height: '32px', marginLeft: '10px'}}>Add</Button>
+					</Grid>
+		}
+			</Grid>
+		</Paper>
+	);
+}
+
 // RX component
 export default function RX(props) {
 
@@ -39,7 +93,6 @@ export default function RX(props) {
 
 	// Refs
 	let rxTitle = useRef();
-	let adhocType = useRef();
 
 	// Toggle the SSO iframe
 	function toggleSSO() {
@@ -85,14 +138,6 @@ export default function RX(props) {
 		}
 	}
 
-	function adHocAdd() {
-
-		// Let the parent know
-		props.onAdhocAdd(
-			adhocType.current.value,
-			props.triggers[0].crm_order
-		);
-	}
 
 	// Pharmacy Fill
 	let fill = null;
@@ -108,7 +153,7 @@ export default function RX(props) {
 					<Paper key={o._id} className="paper">
 						<Grid container spacing={2}>
 							<Grid item xs={12} md={4}><strong>KNK Order: </strong><span>{o.crm_order}</span></Grid>
-							<Grid item xs={12} md={4}><strong>Type: </strong><span>{o.list + (o.type !== '' ? '(' + o.type + ')' : '')}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Type: </strong><span>{o.list}</span></Grid>
 							<Grid item xs={12} md={4}><strong>Reason: </strong><span>{o.reason}</span></Grid>
 							<Grid item xs={12} md={4}><strong>Fail Count: </strong><span>{o.fail_count}</span></Grid>
 							<Grid item xs={12} md={4}><strong>{o._created === o._updated ? 'Failed' : 'First Failure'}: </strong><span>{Utils.date(o._created, '-')}</span></Grid>
@@ -134,47 +179,15 @@ export default function RX(props) {
 		triggers = (
 			<React.Fragment>
 				<div className="title">WellDyneRX Triggers</div>
-				{props.triggers.map((o, i) => {
-					let adhoc = '';
-					if(i === 0) {
-						if(o.adhoc_type) {
-							adhoc = <Grid item xs={12}><strong>AdHoc: </strong><span>{o.adhoc_type}</span></Grid>
-						} else if(Utils.hasRight(props.user, 'welldyne_adhoc', 'create') && !props.readOnly) {
-							adhoc = <Grid item xs={12}><strong>AdHoc Type: </strong>
-										<Select
-											inputRef={adhocType}
-											native
-										>
-											<option>Cancel Order</option>
-											<option>Update Address</option>
-										</Select>
-										<Button variant="contained" color="primary" onClick={adHocAdd} style={{height: '32px', marginLeft: '10px'}}>Add</Button>
-									</Grid>
-						}
-					}
-
-					return (
-						<Paper key={o._id} className="paper">
-							<Grid container spacing={2}>
-								<Grid item xs={12} md={4}><strong>KNK Order: </strong><span>{o.crm_order}</span></Grid>
-								<Grid item xs={12} md={4}><strong>DoseSpot ID: </strong><span>{o.rx_id}</span></Grid>
-								<Grid item xs={12} md={4}><strong>Medication: </strong><span>{o.medication}</span></Grid>
-								<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{Utils.date(o.triggered, '-')}</span></Grid>
-								<Grid item xs={12} md={4}><strong>Opened: </strong><span>{o.opened ? o.opened.split(' ')[0] : ''}</span></Grid>
-								<Grid item xs={12} md={4}><strong>Shipped: </strong><span>{o.shipped ? o.shipped.split(' ')[0] : ''}</span></Grid>
-								<Grid item xs={12} md={4}><strong>Eligible Since: </strong><span>{o.elig_since ? o.elig_since.split(' ')[0] : ''}</span></Grid>
-								<Grid item xs={12} md={8}><strong>Eligible Through: </strong><span>{o.elig_thru ? o.elig_thru.split(' ')[0] : ''}</span></Grid>
-								<Grid item xs={12}><strong>Raw: </strong><span>{o.raw}</span></Grid>
-								{(o.outbound_queue || o.outbound_reason) &&
-									<React.Fragment>
-										<Grid item xs={12}><strong>Outbound: </strong><span>{o.outbound_queue} ({o.outbound_reason})</span></Grid>
-									</React.Fragment>
-								}
-								{adhoc}
-							</Grid>
-						</Paper>
-					);
-				})}
+				{props.triggers.map(o =>
+					<Trigger
+						key={o._id}
+						onAdhocAdd={props.onAdhocAdd}
+						readOnly={props.readOnly}
+						user={props.user}
+						{...o}
+					/>
+				)}
 			</React.Fragment>
 		);
 	}

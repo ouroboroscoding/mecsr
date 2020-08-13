@@ -30,7 +30,7 @@ import Utils from '../../../utils';
 // Definitions
 import FillErrorDef from '../../../definitions/prescriptions/pharmacy_fill_error';
 FillErrorDef['__react__'] = {
-	"results": ["crm_id", "customer_name", "crm_order", "list", "type", "reason", "fail_count", "ready"],
+	"results": ["crm_id", "customer_name", "crm_order", "list", "reason", "fail_count", "ready"],
 	"update": ["crm_order", "ready"]
 }
 FillErrorDef['customer_name'] = {"__type__": "string", "__react__": {"title": "Name"}}

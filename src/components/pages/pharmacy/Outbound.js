@@ -202,28 +202,6 @@ export default function Outbound(props) {
 		})
 	}
 
-	// Remove a template
-	function removeRecord(_id) {
-
-		// Use the current records to set the new records
-		recordsSet(records => {
-
-			// Clone the records
-			let ret = Tools.clone(records);
-
-			// Find the index
-			let iIndex = Tools.afindi(ret, '_id', _id);
-
-			// If one is found, remove it
-			if(iIndex > -1) {
-				ret.splice(iIndex, 1);
-			}
-
-			// Return the new records
-			return ret;
-		});
-	}
-
 	// Figure out results
 	let results = ''
 	if(records === null) {
@@ -244,7 +222,7 @@ export default function Outbound(props) {
 					data={records}
 					noun="outbound"
 					orderBy="title"
-					remove={Utils.hasRight(props.user, 'welldyne_outbound', 'delete') ? removeRecord : false}
+					remove={false}
 					service="welldyne"
 					tree={OutboundTree}
 					update={false}

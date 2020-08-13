@@ -77,14 +77,20 @@ export default function Outbound(props) {
 			"_id": _id
 		}).done(res => {
 
-			// If there's an error
+			// If there's an error or a warning
 			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
+				if(res.error.code === 1802) {
+					Events.trigger('error', 'No associated trigger can be found for this error, you will need to manually inform WellDyneRx to remove this.');
+				} else {
+					Events.trigger('error', JSON.stringify(res.error));
+				}
 			}
-
-			// If there's a warning
 			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
+				if(res.warning === 1801) {
+					Events.trigger('warning', "Due to a lack of data this AdHoc can't be created automatically. You will be notifed as soon as it's created.");
+				} else {
+					Events.trigger('warning', JSON.stringify(res.warning));
+				}
 			}
 
 			// If there's data
@@ -108,8 +114,12 @@ export default function Outbound(props) {
 					return ret;
 				});
 
-				// Tell the adhoc page there's a new record
-				Events.trigger('adhocCreated', res.data);
+				// If we got an object back
+				if(Tools.isObject(res.data)) {
+
+					// Tell the adhoc page there's a new record
+					Events.trigger('adhocCreated', res.data);
+				}
 			}
 		});
 	}

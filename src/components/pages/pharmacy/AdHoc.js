@@ -36,10 +36,11 @@ import Utils from '../../../utils';
 // Definitions
 import AdHocDef from '../../../definitions/welldyne/adhoc';
 AdHocDef['__react__'] = {
-	"create": ["crm_id", "crm_order", "type"],
 	"results": ["crm_id", "customer_name", "crm_order", "type", "user_name"]
 }
+AdHocDef['crm_id'] = {"__type__": "string", "__react__": {"title": "ID"}}
 AdHocDef['customer_name'] = {"__type__": "string", "__react__": {"title": "Name"}}
+AdHocDef['crm_order'] = {"__type__": "string", "__react__": {"title": "Order"}}
 AdHocDef['user_name'] = {"__type__": "string", "__react__": {"title": "Agent"}}
 
 // Generate the Tree
@@ -57,7 +58,6 @@ export default function AdHoc(props) {
 
 	// State
 	let [records, recordsSet] = useState(null);
-	let [create, createSet] = useState(false);
 
 	// Fetch records effect
 	useEffect(() => {
@@ -87,12 +87,6 @@ export default function AdHoc(props) {
 			ret.unshift(record);
 			return ret;
 		});
-		createSet(false);
-	}
-
-	// Toggle the create form
-	function createToggle() {
-		createSet(b => !b);
 	}
 
 	// Fetch all the records from the server
@@ -164,27 +158,7 @@ export default function AdHoc(props) {
 		<React.Fragment>
 			<Box className="pageHeader">
 				<div className="title">AdHoc Records</div>
-				{Utils.hasRight(props.user, 'welldyne_adhoc', 'create') &&
-					<Tooltip title="Create new template">
-						<IconButton onClick={createToggle}>
-							<AddCircleIcon />
-						</IconButton>
-					</Tooltip>
-				}
 			</Box>
-			{create &&
-				<Paper className="padded">
-					<FormComponent
-						cancel={createToggle}
-						noun="adhoc"
-						service="welldyne"
-						success={createSuccess}
-						title="Create New"
-						tree={AdHocTree}
-						type="create"
-					/>
-				</Paper>
-			}
 			{results}
 		</React.Fragment>
 	);

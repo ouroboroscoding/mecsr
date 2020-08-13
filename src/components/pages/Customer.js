@@ -113,7 +113,7 @@ export default class Customer extends React.Component {
 		Events.remove('newMessage', this.newMessage);
 	}
 
-	adhocAdd(type, order) {
+	adhocAdd(type, trigger_id) {
 
 		// If read-only mode
 		if(this.props.readOnly) {
@@ -123,9 +123,7 @@ export default class Customer extends React.Component {
 
 		// Send the request
 		Rest.create('welldyne', 'adhoc', {
-			crm_type: 'knk',
-			crm_id: this.state.customer.customerId.toString(),
-			crm_order: order,
+			trigger_id: trigger_id,
 			type: type
 		}).done(res => {
 
@@ -134,7 +132,11 @@ export default class Customer extends React.Component {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
+				if(res.warning === 1801) {
+					Events.trigger('warning', "Due to a lack of data this AdHoc can't be created automatically. You will be notifed as soon as it's created.");
+				} else {
+					Events.trigger('warning', JSON.stringify(res.warning));
+				}
 			}
 
 			// If there's data
@@ -143,13 +145,13 @@ export default class Customer extends React.Component {
 				// Clone the current triggers
 				let triggers = Tools.clone(this.state.triggers);
 
-				// Find the correct order
-				let iIndex = Tools.afindi(triggers, 'crm_order', order);
+				// Find the correct trigger
+				let iIndex = Tools.afindi(triggers, '_id', trigger_id);
 
 				// If we found an index
 				if(iIndex > -1) {
 
-					// Update the adhocType
+					// Update the adhoc_type
 					triggers[iIndex].adhoc_type = type;
 
 					// Update the state

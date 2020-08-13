@@ -34,6 +34,7 @@ import AssessmentIcon from '@material-ui/icons/Assessment';
 import CloseIcon from '@material-ui/icons/Close';
 import CheckIcon from '@material-ui/icons/Check';
 import CommentIcon from '@material-ui/icons/Comment';
+import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ForumIcon from '@material-ui/icons/Forum';
 import LocalPharmacyIcon from '@material-ui/icons/LocalPharmacy';
@@ -699,6 +700,17 @@ class Header extends React.Component {
 							<ListItem button selected={this.state.path === "/agents"}>
 								<ListItemIcon><PeopleIcon /></ListItemIcon>
 								<ListItemText primary="Agents" />
+							</ListItem>
+						</Link>
+						<Divider />
+					</React.Fragment>
+				}
+				{Utils.hasRight(this.state.user, 'manual_adhoc', 'read') &&
+					<React.Fragment>
+						<Link to="/manualad" onClick={this.menuClick}>
+							<ListItem button selected={this.state.path === "/manualad"}>
+								<ListItemIcon><DeveloperModeIcon /></ListItemIcon>
+								<ListItemText primary="Manual AdHoc" />
 							</ListItem>
 						</Link>
 						<Divider />

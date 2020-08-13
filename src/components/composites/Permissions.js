@@ -42,8 +42,7 @@ const TYPES = [
 	{title: "Pharmacy", rights: [
 		{name: "pharmacy_fill", title: "Pharmacy Fill", allowed: READ | UPDATE | DELETE},
 		{name: "welldyne_adhoc", title: "Adhoc", allowed: CREATE | READ | DELETE},
-		{name: "welldyne_outbound", title: "Outbound Failed", allowed: READ | UPDATE | DELETE}]}
-]
+		{name: "welldyne_outbound", title: "Outbound Failed", allowed: READ | UPDATE}]}]
 
 // Permission
 function Permission(props) {

@@ -211,8 +211,7 @@ export default function Outbound(props) {
 	} else {
 		// If the user has both outbound delete, and adhoc create, all for
 		//	switching
-		let lActions = Utils.hasRight(props.user, 'welldyne_outbound', 'delete') &&
-						Utils.hasRight(props.user, 'welldyne_adhoc', 'create') ?
+		let lActions = Utils.hasRight(props.user, 'welldyne_adhoc', 'create') ?
 						[{"tooltip": "AdHoc (Remove Error)", "icon": ArrowBackIcon, "callback": adhocSwitch}] :
 						[];
 

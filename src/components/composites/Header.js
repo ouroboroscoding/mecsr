@@ -393,7 +393,7 @@ class Header extends React.Component {
 			"claimed": [],
 			"mobile": document.documentElement.clientWidth < 600,
 			"menu": false,
-			"newMsgs": {},
+			"newMsgs": Tools.safeLocalStorageJSON('newMsgs', {}),
 			"overwrite": props.user ? Utils.hasRight(props.user, 'csr_overwrite', 'create') : false,
 			"path": window.location.pathname,
 			"unclaimed": 0,
@@ -550,22 +550,34 @@ class Header extends React.Component {
 	claimedRemove(number, switch_path) {
 
 		// Find the index of the remove customer
-		let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', number);
+		let iClaimed = Tools.afindi(this.state.claimed, 'customerPhone', number);
 
 		// If we found one
-		if(iIndex > -1) {
+		if(iClaimed > -1) {
 
 			// Clone the claimed state
 			let lClaimed = Tools.clone(this.state.claimed);
 
 			// Remove the element
-			lClaimed.splice(iIndex, 1);
+			lClaimed.splice(iClaimed, 1);
 
-			// Set the new state
+			// Create new instance of state
 			let oState = {claimed: lClaimed}
+
+			// If the path has switch
 			if(switch_path) {
 				oState.path = '/unclaimed';
 			}
+
+			// If it's in the new messages
+			if(number in this.state.newMsgs) {
+				let dNewMsgs = Tools.clone(this.state.newMsgs);
+				delete dNewMsgs[number];
+				localStorage.setItem('newMsgs', JSON.stringify(dNewMsgs))
+				oState.newMsgs = dNewMsgs;
+			}
+
+			// Set the new state
 			this.setState(oState);
 
 			// Trigger the event that a customer was unclaimed
@@ -610,6 +622,9 @@ class Header extends React.Component {
 
 				// Update the state
 				state.newMsgs = dNewMsgs;
+
+				// Store the new messages in local storage
+				localStorage.setItem('newMsgs', JSON.stringify(dNewMsgs))
 			}
 		}
 
@@ -677,6 +692,9 @@ class Header extends React.Component {
 
 					// If something changed
 					if(bSetState) {
+
+						// Store the new messages
+						localStorage.setItem('newMsgs', JSON.stringify(dNewMsgs));
 
 						// Set the new state
 						this.setState({newMsgs: dNewMsgs});

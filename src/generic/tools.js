@@ -281,6 +281,23 @@ export function safeLocalStorage(name, default_) {
 }
 
 /**
+ * Safe Local Storage JSON
+ *
+ * Fetches a value from local storage or returns the default if no value is
+ * found. Assumes data is stored in JSON
+ *
+ * safeLocalStorageJSON
+ * @access public
+ * @param String name			The name of the local var to fetch
+ * @param String default_		The value to return if the var is not found
+ * @return String
+ */
+export function safeLocalStorageJSON(name, default_) {
+	let value = localStorage.getItem(name);
+	return value === null ? default_ : JSON.parse(value);
+}
+
+/**
  * UCFirst
  *
  * Makes the first character of each word in the text upper case
@@ -325,6 +342,7 @@ export default {
 	isObject: isObject,
 	omap: omap,
 	safeLocalStorage: safeLocalStorage,
+	safeLocalStorageJSON: safeLocalStorageJSON,
 	ucfirst: ucfirst,
 	uuidv4: uuidv4
 }

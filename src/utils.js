@@ -144,6 +144,14 @@ export default {
 				// Nothing else to do
 				return true;
 
+			case 207:
+
+				// Notify the user
+				Events.trigger('error', 'Request to ' + err.msg + ' failed. Please contact support');
+
+				// Nothing else to do
+				return true;
+
 			// Insufficient rights
 			case 1000:
 

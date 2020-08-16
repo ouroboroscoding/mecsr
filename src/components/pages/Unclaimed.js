@@ -95,7 +95,6 @@ export default class Unclaimed extends React.Component {
 
 		// Get the claimed add promise
 		claimed.add(number).then(res => {
-			console.log('received: ' + res.customerId);
 			Events.trigger('claimedAdd', number, name, res.customerId);
 		}, error => {
 			// If we got a duplicate

@@ -29,11 +29,12 @@ import Signin from './composites/Signin';
 import Agents from './pages/Agents';
 import Customer from './pages/Customer';
 import ManualAdHoc from './pages/ManualAdHoc';
+import Pharmacy from './pages/Pharmacy';
 import Search from './pages/Search';
 import Stats from './pages/Stats';
 import Templates from './pages/Templates';
 import Unclaimed from './pages/Unclaimed';
-import Pharmacy from './pages/Pharmacy';
+import VersionHistory from './pages/VersionHistory';
 
 // Local modules
 import { LoaderHide, LoaderShow } from './composites/Loader';
@@ -148,6 +149,9 @@ function Site(props) {
 								/>
 							)}
 						/>
+						<Route path="/">
+							<VersionHistory />
+						</Route>
 					</Switch>
 				</div>
 				<Footer

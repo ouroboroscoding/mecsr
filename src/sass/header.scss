@@ -1,29 +1,38 @@
 #header {
-	flex-grow: 0;
-	flex-shrink: 0;
 
-	.MuiAppBar-root {
+	.bar {
+		background-color: #3f51b5;
+		box-sizing: border-box;
+		color: #fff;
+		display: flex;
+		flex-direction: row;
+		flex-shrink: 0;
 		margin-left: $menu-width;
+			min-height: 48px;
+			padding: 0 10px;
 		width: calc(100% - #{$menu-width});
 
 		.title {
+			flex-basis: 0;
+			flex-grow: 0;
+			flex-shrink: 0;
 			font-size: 1.25rem;
 			font-weight: 500;
 			line-height: 1.6;
 			letter-spacing: 0.0075em;
-		}
-
-		.subtitle {
-			font-size: 1rem;
+			padding: 10px;
 		}
 
 		#loaderWrapper {
+			flex-basis: 0;
 			flex-grow: 1;
+			flex-shrink: 1;
+			padding: 15px;
 			text-align: center;
 		}
 
 		.MuiSvgIcon-root {
-			color: white;
+			color: #fff;
 		}
 	}
 }
@@ -51,6 +60,10 @@
 			color: red;
 		}
 
+		.list:hover {
+			color: #3f51b5;
+		}
+
 		.transfer:hover {
 			color: yellow;
 		}
@@ -70,9 +83,16 @@
 @media (max-width: 600px) {
 
 	#header {
-		.MuiAppBar-root {
-			width: 100%;
-			margin-left: 0;
+		width: 100%;
+		margin-left: 0;
+
+		.MuiIconButton-root {
+			padding: 5px;
+			padding-left: 10px;
+		}
+
+		.MuiToolbar-gutters {
+			padding-right: 5px;
 		}
 	}
 }

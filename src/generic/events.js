@@ -52,7 +52,7 @@ function remove(event, callback) {
 
 		// If the callback exists in the list
 		let i = _callbacks[event].indexOf(callback);
-		if(i !== -1) {
+		if(i > -1) {
 			_callbacks[event].splice(i,1);
 			return true;
 		}

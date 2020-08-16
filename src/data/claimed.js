@@ -9,11 +9,11 @@
  */
 
 // Generic modules
-import Events from '../../generic/events';
-import Rest from '../../generic/rest';
+import Events from '../generic/events';
+import Rest from '../generic/rest';
 
 // Local modules
-import Utils from '../../utils';
+import Utils from '../utils';
 
 /**
  * Add
@@ -27,8 +27,6 @@ import Utils from '../../utils';
  */
 export function add(number) {
 
-	console.log('claimed.add(' + number + ')');
-
 	// Return promise
 	return new Promise((resolve, reject) => {
 
@@ -39,7 +37,12 @@ export function add(number) {
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
-				reject(res.error);
+				// If we're at max claims
+				if(res.error.code === 1504) {
+					Events.trigger('error', 'You\'ve reached the maximum number of claims. Please resolve, transfer, or unclaim previous claims.');
+				} else {
+					reject(res.error);
+				}
 			}
 
 			// If there's a warning

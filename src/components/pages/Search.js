@@ -23,8 +23,8 @@ import TextField from '@material-ui/core/TextField';
 // Components
 import MsgSummary from '../composites/MsgSummary';
 
-// Component functions
-import claimed from '../functions/claimed';
+// Data modules
+import claimed from '../../data/claimed';
 
 // Generic modules
 import Events from '../../generic/events';

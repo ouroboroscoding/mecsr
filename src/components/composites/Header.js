@@ -13,7 +13,6 @@ import React, { useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 
 // Material UI
-import AppBar from '@material-ui/core/AppBar';
 import Avatar from '@material-ui/core/Avatar';
 import Drawer from '@material-ui/core/Drawer';
 import Divider from '@material-ui/core/Divider';
@@ -23,7 +22,6 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import Toolbar from '@material-ui/core/Toolbar';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 
@@ -44,15 +42,17 @@ import NewReleasesIcon from '@material-ui/icons/NewReleases';
 import PeopleIcon from '@material-ui/icons/People';
 import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import SearchIcon from '@material-ui/icons/Search';
-
-// Component functions
-import claimed from '../functions/claimed';
+import ViewListIcon from '@material-ui/icons/ViewList';
 
 // Local components
 import Account from './Account';
 import Transfer from './Transfer';
 import Loader from './Loader';
 import Resolve from './Resolve';
+import { CustomListsDialog } from './CustomLists';
+
+// Data modules
+import claimed from '../../data/claimed';
 
 // Generic modules
 import Events from '../../generic/events';
@@ -67,11 +67,18 @@ import Utils from '../../utils';
 function CustomerItem(props) {
 
 	// State
-	let [transfer, transferSet] = useState(false);
+	let [list, listSet] = useState(false);
 	let [resolve, resolveSet] = useState(false);
+	let [transfer, transferSet] = useState(false);
 
 	// Hooks
 	let history = useHistory();
+
+	function addToListClick(event) {
+		event.stopPropagation();
+		event.preventDefault();
+		listSet(true);
+	}
 
 	// Click event
 	function click(event) {
@@ -191,6 +198,13 @@ function CustomerItem(props) {
 										</Tooltip>
 									</span>
 									<span className="tooltip">
+										<Tooltip title="Add to List">
+											<IconButton className="list" onClick={addToListClick}>
+												<ViewListIcon />
+											</IconButton>
+										</Tooltip>
+									</span>
+									<span className="tooltip">
 										<Tooltip title="Transfer">
 											<IconButton className="transfer" onClick={transferClick}>
 												<MergeTypeIcon />
@@ -225,6 +239,14 @@ function CustomerItem(props) {
 					onSubmit={remove}
 				/>
 			}
+			{list &&
+				<CustomListsDialog
+					customer={props.id}
+					name={props.name}
+					number={props.phone}
+					onClose={() => listSet(false)}
+				/>
+			}
 		</React.Fragment>
 	);
 }
@@ -233,10 +255,17 @@ function CustomerItem(props) {
 function ViewItem(props) {
 
 	// State
+	let [list, listSet] = useState(false);
 	let [transfer, transferSet] = useState(false);
 
 	// Hooks
 	let history = useHistory();
+
+	function addToListClick(event) {
+		event.stopPropagation();
+		event.preventDefault();
+		listSet(true);
+	}
 
 	// Claim
 	function claim(event) {
@@ -346,6 +375,13 @@ function ViewItem(props) {
 										</Tooltip>
 									</span>
 									<span className="tooltip">
+										<Tooltip title="Add to List">
+											<IconButton className="list" onClick={addToListClick}>
+												<ViewListIcon />
+											</IconButton>
+										</Tooltip>
+									</span>
+									<span className="tooltip">
 										{(props.claimed && props.overwrite) &&
 											<Tooltip title="Transfer">
 												<IconButton className="transfer" onClick={transferClick}>
@@ -375,12 +411,20 @@ function ViewItem(props) {
 					onSubmit={transferSubmit}
 				/>
 			}
+			{list &&
+				<CustomListsDialog
+					customer={props.id}
+					name={props.name}
+					number={props.phone}
+					onClose={() => listSet(false)}
+				/>
+			}
 		</React.Fragment>
 	);
 }
 
 // Header component
-class Header extends React.Component {
+export default class Header extends React.Component {
 
 	constructor(props) {
 
@@ -393,7 +437,7 @@ class Header extends React.Component {
 			"claimed": [],
 			"mobile": document.documentElement.clientWidth < 600,
 			"menu": false,
-			"newMsgs": {},
+			"newMsgs": Tools.safeLocalStorageJSON('newMsgs', {}),
 			"overwrite": props.user ? Utils.hasRight(props.user, 'csr_overwrite', 'create') : false,
 			"path": window.location.pathname,
 			"unclaimed": 0,
@@ -550,22 +594,34 @@ class Header extends React.Component {
 	claimedRemove(number, switch_path) {
 
 		// Find the index of the remove customer
-		let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', number);
+		let iClaimed = Tools.afindi(this.state.claimed, 'customerPhone', number);
 
 		// If we found one
-		if(iIndex > -1) {
+		if(iClaimed > -1) {
 
 			// Clone the claimed state
 			let lClaimed = Tools.clone(this.state.claimed);
 
 			// Remove the element
-			lClaimed.splice(iIndex, 1);
+			lClaimed.splice(iClaimed, 1);
 
-			// Set the new state
+			// Create new instance of state
 			let oState = {claimed: lClaimed}
+
+			// If the path has switch
 			if(switch_path) {
 				oState.path = '/unclaimed';
 			}
+
+			// If it's in the new messages
+			if(number in this.state.newMsgs) {
+				let dNewMsgs = Tools.clone(this.state.newMsgs);
+				delete dNewMsgs[number];
+				localStorage.setItem('newMsgs', JSON.stringify(dNewMsgs))
+				oState.newMsgs = dNewMsgs;
+			}
+
+			// Set the new state
 			this.setState(oState);
 
 			// Trigger the event that a customer was unclaimed
@@ -610,6 +666,9 @@ class Header extends React.Component {
 
 				// Update the state
 				state.newMsgs = dNewMsgs;
+
+				// Store the new messages in local storage
+				localStorage.setItem('newMsgs', JSON.stringify(dNewMsgs))
 			}
 		}
 
@@ -677,6 +736,9 @@ class Header extends React.Component {
 
 					// If something changed
 					if(bSetState) {
+
+						// Store the new messages
+						localStorage.setItem('newMsgs', JSON.stringify(dNewMsgs));
 
 						// Set the new state
 						this.setState({newMsgs: dNewMsgs});
@@ -806,54 +868,33 @@ class Header extends React.Component {
 
 		return (
 			<div id="header">
-				{this.state.account &&
-					<Account
-						onCancel={this.accountToggle}
-						user={this.state.user}
-					/>
-				}
-				<AppBar position="relative">
-					<Toolbar>
-						{this.state.mobile &&
-							<IconButton edge="start" color="inherit" aria-label="menu" onClick={this.menuToggle}>
-								<MenuIcon />
-							</IconButton>
-						}
-						{this.state.mobile ?
-							<div>
-								<Typography className="title">
-									<Link to="/" onClick={this.menuClick}>ME CS</Link>
-								</Typography>
-							</div>
-							:
-							<div>
-								<Typography className="title">
-									<Link to="/" onClick={this.menuClick}>ME Customer Service</Link>
-								</Typography>
-								<Typography className="subtitle">
-									v{process.env.REACT_APP_VERSION}
-								</Typography>
-							</div>
-						}
-						<div id="loaderWrapper">
-							<Loader />
-						</div>
-						{this.state.user &&
-							<React.Fragment>
-								<Tooltip title="Edit User">
-									<IconButton onClick={this.accountToggle}>
-										<PermIdentityIcon />
-									</IconButton>
-								</Tooltip>
-								<Tooltip title="Sign Out">
-									<IconButton onClick={this.signout}>
-										<ExitToAppIcon />
-									</IconButton>
-								</Tooltip>
-							</React.Fragment>
-						}
-					</Toolbar>
-				</AppBar>
+				<div className="bar">
+					{this.state.mobile &&
+						<IconButton edge="start" color="inherit" aria-label="menu" onClick={this.menuToggle}>
+							<MenuIcon />
+						</IconButton>
+					}
+					<div><Typography className="title">
+						<Link to="/" onClick={this.menuClick}>{this.state.mobile ? 'ME CS' : 'ME Customer Service'}</Link>
+					</Typography></div>
+					<div id="loaderWrapper">
+						<Loader />
+					</div>
+					{this.state.user &&
+						<React.Fragment>
+							<Tooltip title="Edit User">
+								<IconButton onClick={this.accountToggle}>
+									<PermIdentityIcon />
+								</IconButton>
+							</Tooltip>
+							<Tooltip title="Sign Out">
+								<IconButton onClick={this.signout}>
+									<ExitToAppIcon />
+								</IconButton>
+							</Tooltip>
+						</React.Fragment>
+					}
+				</div>
 				{this.state.mobile ?
 					<Drawer
 						anchor="left"
@@ -873,6 +914,12 @@ class Header extends React.Component {
 					>
 						{drawer}
 					</Drawer>
+				}
+				{this.state.account &&
+					<Account
+						onCancel={this.accountToggle}
+						user={this.state.user}
+					/>
 				}
 			</div>
 		);
@@ -986,67 +1033,89 @@ class Header extends React.Component {
 
 	viewedAdd(number, name) {
 
-		// Find the index of the customer
-		let iIndex = Tools.afindi(this.state.viewed, 'customerPhone', number);
+		// Does it already exist in the claimed?
+		let iClaimed = Tools.afindi(this.state.claimed, 'customerPhone', number);
 
-		// If we found one
-		if(iIndex > -1) {
+		// If it does
+		if(iClaimed > -1) {
 
 			// Generate the path
-			let sPath = Utils.viewedPath(number, this.state.viewed[iIndex].customerId);
+			let sPath = Utils.customerPath(number, this.state.claimed[iClaimed].customerId);
 
 			// Set the new state
-			this.setState({path: sPath});
+			this.setState({
+				path: sPath
+			});
 
 			// Push the history
 			this.props.history.push(sPath);
 		}
 
-		// Else, add it
+		// Else, add it to the viewed
 		else {
 
-			// Send the claim  to the server
-			Rest.read('monolith', 'customer/id/byPhone', {
-				phoneNumber: number
-			}).done(res => {
+			// Find the index of the customer
+			let iViewed = Tools.afindi(this.state.viewed, 'customerPhone', number);
 
-				// If there's an error
-				if(res.error && !Utils.restError(res.error)) {
-					Events.trigger('error', JSON.stringify(res.error));
-				}
+			// If we found one
+			if(iViewed > -1) {
 
-				// If there's a warning
-				if(res.warning) {
-					Events.trigger('warning', JSON.stringify(res.warning));
-				}
+				// Generate the path
+				let sPath = Utils.viewedPath(number, this.state.viewed[iViewed].customerId);
 
-				// If there's data
-				if(res.data) {
+				// Set the new state
+				this.setState({path: sPath});
 
-					// Clone the viewed state
-					let lView = Tools.clone(this.state.viewed);
+				// Push the history
+				this.props.history.push(sPath);
+			}
 
-					// Add the record to the end
-					lView.push({
-						customerId: res.data.customerId,
-						customerName: res.data.customerName,
-						customerPhone: number,
-						claimedUser: res.data.claimedUser
-					});
+			// Else, add it
+			else {
 
-					// Generate the path
-					let sPath = Utils.viewedPath(number, res.data.customerId);
+				// Send the claim  to the server
+				Rest.read('monolith', 'customer/id/byPhone', {
+					phoneNumber: number
+				}).done(res => {
 
-					// Set the new state
-					this.setState({
-						viewed: lView,
-						path: sPath
-					});
+					// If there's an error
+					if(res.error && !Utils.restError(res.error)) {
+						Events.trigger('error', JSON.stringify(res.error));
+					}
 
-					// Push the history
-					this.props.history.push(sPath);
-				}
-			});
+					// If there's a warning
+					if(res.warning) {
+						Events.trigger('warning', JSON.stringify(res.warning));
+					}
+
+					// If there's data
+					if(res.data) {
+
+						// Clone the viewed state
+						let lView = Tools.clone(this.state.viewed);
+
+						// Add the record to the end
+						lView.push({
+							customerId: res.data.customerId,
+							customerName: res.data.customerName,
+							customerPhone: number,
+							claimedUser: res.data.claimedUser
+						});
+
+						// Generate the path
+						let sPath = Utils.viewedPath(number, res.data.customerId);
+
+						// Set the new state
+						this.setState({
+							viewed: lView,
+							path: sPath
+						});
+
+						// Push the history
+						this.props.history.push(sPath);
+					}
+				});
+			}
 		}
 	}
 
@@ -1127,5 +1196,3 @@ class Header extends React.Component {
 		}
 	}
 }
-
-export default Header;

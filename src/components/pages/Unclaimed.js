@@ -20,8 +20,8 @@ import Grid from '@material-ui/core/Grid';
 // Components
 import MsgSummary from '../composites/MsgSummary';
 
-// Component functions
-import claimed from '../functions/claimed';
+// Data modules
+import claimed from '../../data/claimed';
 
 // Generic modules
 import Events from '../../generic/events';
@@ -95,7 +95,6 @@ export default class Unclaimed extends React.Component {
 
 		// Get the claimed add promise
 		claimed.add(number).then(res => {
-			console.log('received: ' + res.customerId);
 			Events.trigger('claimedAdd', number, name, res.customerId);
 		}, error => {
 			// If we got a duplicate

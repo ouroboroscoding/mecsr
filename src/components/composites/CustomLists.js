@@ -374,7 +374,7 @@ export function CustomListsDialog(props) {
 	function itemCreate(list) {
 		customLists.createItem(list, {
 			"customer": props.customer,
-			"name": props.name,
+			"name": props.name || '',
 			"number": props.number
 		}, _id => {
 			props.onClose();

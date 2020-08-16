@@ -27,8 +27,6 @@ import Utils from '../utils';
  */
 export function add(number) {
 
-	console.log('claimed.add(' + number + ')');
-
 	// Return promise
 	return new Promise((resolve, reject) => {
 

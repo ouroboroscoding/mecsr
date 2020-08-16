@@ -1,0 +1,35 @@
+#custom_lists {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	width: 250px;
+
+	.create {
+		flex-basis: 0;
+		flex-grow: 0;
+		flex-shrink: 0;
+	}
+
+	.accordion {
+		flex-basis: 0;
+		flex-grow: 1;
+		flex-shrink: 1;
+
+		.MuiExpansionPanelSummary-root {
+
+			.MuiIconButton-root {
+				padding: 0;
+				position: absolute;
+				right: 8px;
+				top: 8px;
+			}
+		}
+
+		.MuiExpansionPanelDetails-root {
+
+			.MuiList-root {
+				width: 100%;
+			}
+		}
+	}
+}

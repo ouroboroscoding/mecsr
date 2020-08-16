@@ -1,0 +1,42 @@
+#footer {
+	background-color: #5362b5;
+	color: #fff;
+	display: flex;
+	flex-grow: 0;
+	flex-shrink: 0;
+	flex-type: row;
+	height: 34px;
+	margin-left: $menu-width;
+	width: calc(100% - #{$menu-width});
+
+	.version {
+		flex-basis: 0;
+		flex-grow: 1;
+		flex-shrink: 1;
+		font-size: 1rem;
+		padding: 5px 10px;
+	}
+
+	.lists {
+		flex-basis: 0;
+		flex-grow: 0;
+		flex-shrink: 0;
+		padding: 5px 5px 0 0;
+
+		.MuiIconButton-root {
+			padding: 0;
+		}
+
+		.MuiSvgIcon-root {
+			color: #fff;
+		}
+	}
+}
+
+@media (max-width: 600px) {
+
+	#footer {
+		width: 100%;
+		margin-left: 0;
+	}
+}

@@ -298,6 +298,24 @@ export function safeLocalStorageJSON(name, default_) {
 }
 
 /**
+ * Sort By Key
+ *
+ * Returns a callback function that will compare two objects by the key name
+ * pass
+ *
+ * @name sortByKey
+ * @access public
+ * @param string key The name of the key to sort by
+ * @return Function
+ */
+export function sortByKey(key) {
+	return (a, b) => {
+		if(a[key] === b[key]) return 0;
+		else return (a[key] < b[key]) ? -1 : 1;
+	}
+}
+
+/**
  * UCFirst
  *
  * Makes the first character of each word in the text upper case
@@ -343,6 +361,7 @@ export default {
 	omap: omap,
 	safeLocalStorage: safeLocalStorage,
 	safeLocalStorageJSON: safeLocalStorageJSON,
+	sortByKey: sortByKey,
 	ucfirst: ucfirst,
 	uuidv4: uuidv4
 }

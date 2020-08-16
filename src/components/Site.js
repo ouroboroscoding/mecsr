@@ -22,6 +22,7 @@ import { useSignedIn, useSignedOut } from '../hooks/user';
 
 // Composite component modules
 import Alerts from './composites/Alerts';
+import Footer from './composites/Footer';
 import Header from './composites/Header';
 import Signin from './composites/Signin';
 // Page component modules
@@ -149,6 +150,10 @@ function Site(props) {
 						/>
 					</Switch>
 				</div>
+				<Footer
+					history={history}
+					user={user}
+				/>
 			</div>
 		</SnackbarProvider>
 	);

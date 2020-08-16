@@ -9,11 +9,11 @@
  */
 
 // Generic modules
-import Events from '../../generic/events';
-import Rest from '../../generic/rest';
+import Events from '../generic/events';
+import Rest from '../generic/rest';
 
 // Local modules
-import Utils from '../../utils';
+import Utils from '../utils';
 
 /**
  * Add

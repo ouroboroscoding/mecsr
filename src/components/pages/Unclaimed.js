@@ -20,8 +20,8 @@ import Grid from '@material-ui/core/Grid';
 // Components
 import MsgSummary from '../composites/MsgSummary';
 
-// Component functions
-import claimed from '../functions/claimed';
+// Data modules
+import claimed from '../../data/claimed';
 
 // Generic modules
 import Events from '../../generic/events';

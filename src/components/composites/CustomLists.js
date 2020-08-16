@@ -294,6 +294,7 @@ export default function CustomLists(props) {
 								<CloseIcon />
 							</Button>
 							<TextField
+								autoFocus
 								inputRef={titleRef}
 								onKeyPress={keyPressed}
 								style={{width: "100%"}}

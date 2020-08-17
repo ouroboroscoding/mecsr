@@ -504,6 +504,7 @@ export default class Customer extends React.Component {
 					<SMS
 						ref={el => this.smsRef = el}
 						customer={this.state.customer}
+						mobile={this.props.mobile}
 						phoneNumber={this.props.phoneNumber}
 						readOnly={this.props.readOnly}
 						templates={this.state.sms_tpls}

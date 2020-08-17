@@ -47,7 +47,7 @@ function Trigger(props) {
 	}
 
 	return (
-		<Paper className="paper">
+		<Paper className="padded">
 			<Grid container spacing={2}>
 				<Grid item xs={12} md={4}><strong>KNK Order: </strong><span>{props.crm_order}</span></Grid>
 				<Grid item xs={12} md={4}><strong>DoseSpot ID: </strong><span>{props.rx_id}</span></Grid>
@@ -150,7 +150,7 @@ export default function RX(props) {
 			<React.Fragment>
 				<div className="title">Pharmacy Fill Errors</div>
 				{props.fillErrors.map(o =>
-					<Paper key={o._id} className="paper">
+					<Paper key={o._id} className="padded">
 						<Grid container spacing={2}>
 							<Grid item xs={12} md={4}><strong>KNK Order: </strong><span>{o.crm_order}</span></Grid>
 							<Grid item xs={12} md={4}><strong>Type: </strong><span>{o.list}</span></Grid>
@@ -204,7 +204,7 @@ export default function RX(props) {
 		prescriptions = (
 			<React.Fragment>
 				{props.prescriptions.map(o =>
-					<Paper key={o.PrescriptionId} className="paper">
+					<Paper key={o.PrescriptionId} className="padded">
 						<Grid container spacing={2}>
 							<Grid item xs={12} md={4}><strong>ID: </strong><span>{o.PrescriptionId}</span></Grid>
 							<Grid item xs={12} md={4}><strong>Pharmacy: </strong><span>{o.PharmacyName}</span></Grid>

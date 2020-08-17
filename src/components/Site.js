@@ -77,7 +77,7 @@ window.Events = Events;
 LoaderHide();
 
 // Site
-function Site(props) {
+export default function Site(props) {
 
 	// State
 	let [user, setUser] = useState(false);
@@ -162,6 +162,3 @@ function Site(props) {
 		</SnackbarProvider>
 	);
 }
-
-// Export the app
-export default Site;

@@ -12,11 +12,10 @@
 import React from 'react';
 
 // Material UI
-import { makeStyles } from '@material-ui/core/styles';
+import Box from '@material-ui/core/Box';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import Typography from '@material-ui/core/Typography';
 
 const VERSION = [
 	['1.9.0', 'August 16th, 2020', [
@@ -32,22 +31,6 @@ const VERSION = [
 	]]
 ]
 
-const useStyles = makeStyles((theme) => ({
-	root: {
-		width: '100%',
-		backgroundColor: theme.palette.background.paper,
-
-		'& ul': {
-			marginLeft: '20px',
-			listStyleType: 'disc'
-		}
-	},
-	inline: {
-		display: 'inline',
-	},
-
-}));
-
 /**
  * Version History
  *
@@ -58,24 +41,23 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function VersionHistory(props) {
 
-	// Styles
-	const classes = useStyles();
-
 	// Render
 	return (
-		<List className={classes.root}>
-			{VERSION.map(v =>
-				<ListItem>
-					<ListItemText
-						primary={"Version " + v[0] + ' - ' + v[1]}
-						secondary={
-							<ul>{v[2].map(s => <li>{s}</li>)}</ul>
-						}
-					>
-					</ListItemText>
-				</ListItem>
-			)}
-		</List>
+		<Box id="version">
+			<List>
+				{VERSION.map(v =>
+					<ListItem>
+						<ListItemText
+							primary={"Version " + v[0] + ' - ' + v[1]}
+							secondary={
+								<ul>{v[2].map(s => <li>{s}</li>)}</ul>
+							}
+						>
+						</ListItemText>
+					</ListItem>
+				)}
+			</List>
+		</Box>
 	);
 }
 

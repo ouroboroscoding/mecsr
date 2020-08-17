@@ -1,4 +1,8 @@
 #header {
+	flex-basis: 0;
+	flex-grow: 0;
+	flex-shrink: 0;
+	min-height: 48px;
 
 	.bar {
 		background-color: #3f51b5;
@@ -6,10 +10,8 @@
 		color: #fff;
 		display: flex;
 		flex-direction: row;
-		flex-shrink: 0;
 		margin-left: $menu-width;
-			min-height: 48px;
-			padding: 0 10px;
+		padding: 0 10px;
 		width: calc(100% - #{$menu-width});
 
 		.title {
@@ -83,16 +85,19 @@
 @media (max-width: 600px) {
 
 	#header {
-		width: 100%;
-		margin-left: 0;
 
-		.MuiIconButton-root {
-			padding: 5px;
-			padding-left: 10px;
-		}
+		.bar {
+			width: 100%;
+			margin-left: 0;
 
-		.MuiToolbar-gutters {
-			padding-right: 5px;
+			.MuiIconButton-root {
+				padding: 5px;
+				padding-left: 10px;
+			}
+
+			.MuiToolbar-gutters {
+				padding-right: 5px;
+			}
 		}
 	}
 }

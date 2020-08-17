@@ -19,6 +19,7 @@ import Rest from '../generic/rest';
 
 // Hooks
 import { useSignedIn, useSignedOut } from '../hooks/user';
+import { useResize } from '../hooks/resize';
 
 // Composite component modules
 import Alerts from './composites/Alerts';
@@ -80,14 +81,18 @@ LoaderHide();
 function Site(props) {
 
 	// State
-	let [user, setUser] = useState(false);
+	let [mobile, mobileSet] = useState(document.documentElement.clientWidth < 600 ? true : false);
+	let [user, userSet] = useState(false);
 
 	// Hooks
 	let history = useHistory();
 
 	// User hooks
-	useSignedIn(user => setUser(user));
-	useSignedOut(() => setUser(false));
+	useSignedIn(user => userSet(user));
+	useSignedOut(() => userSet(false));
+
+	// Resize hooks
+	useResize(() => mobileSet(document.documentElement.clientWidth < 600 ? true : false));
 
 	// Return the Site
 	return (
@@ -99,6 +104,7 @@ function Site(props) {
 				}
 				<Header
 					history={history}
+					mobile={mobile}
 					path={window.location.pathname}
 					user={user}
 				/>
@@ -131,6 +137,7 @@ function Site(props) {
 								<Customer
 									key={phoneNumber}
 									customerId={parseInt(customerId)}
+									mobile={mobile}
 									phoneNumber={phoneNumber}
 									readOnly={false}
 									user={user}
@@ -143,6 +150,7 @@ function Site(props) {
 								<Customer
 									key={phoneNumber}
 									customerId={parseInt(customerId)}
+									mobile={mobile}
 									phoneNumber={phoneNumber}
 									readOnly={true}
 									user={user}

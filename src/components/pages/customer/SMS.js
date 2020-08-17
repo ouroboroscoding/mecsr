@@ -266,7 +266,7 @@ export default class SMS extends React.Component {
 		return (
 			<React.Fragment>
 				<div className="info">
-					<span className="title">Phone Number: </span>
+					<span className="title">{this.props.mobile ? '#' : 'Phone Number'}: </span>
 					<span className="right20">
 						<a href="tel:{this.props.phoneNumber}">
 							{Utils.nicePhone(this.props.phoneNumber)}
@@ -321,13 +321,13 @@ export default class SMS extends React.Component {
 								inputRef={el => this.text = el}
 								multiline
 								onKeyPress={this.textPress}
-								rows={3}
+								rows={this.props.mobile ? 1 : 3}
 								variant="outlined"
 							/>
 							<Button
 								color="primary"
 								disabled={this.state.stop}
-								size="large"
+								size={this.props.mobile ? "small" : "large"}
 								onClick={this.send}
 								variant="contained"
 							>

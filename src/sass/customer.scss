@@ -285,3 +285,19 @@
 		}
 	}
 }
+
+@media (max-width: 600px) {
+
+	#customer {
+
+		.messaging {
+
+			.send {
+
+				button {
+					width: 50px;
+				}
+			}
+		}
+	}
+}

@@ -435,7 +435,6 @@ export default class Header extends React.Component {
 		this.state = {
 			"account": false,
 			"claimed": [],
-			"mobile": document.documentElement.clientWidth < 600,
 			"menu": false,
 			"newMsgs": Tools.safeLocalStorageJSON('newMsgs', {}),
 			"overwrite": props.user ? Utils.hasRight(props.user, 'csr_overwrite', 'create') : false,
@@ -458,7 +457,6 @@ export default class Header extends React.Component {
 		this.menuItem = this.menuItem.bind(this);
 		this.menuToggle = this.menuToggle.bind(this);
 		this.newMessages = this.newMessages.bind(this);
-		this.resize = this.resize.bind(this);
 		this.signedIn = this.signedIn.bind(this);
 		this.signedOut = this.signedOut.bind(this);
 		this.signout = this.signout.bind(this);
@@ -483,8 +481,11 @@ export default class Header extends React.Component {
 		// Track document visibility
 		PageVisibility.add(this.visibilityChange);
 
-		// Capture resizes
-		window.addEventListener("resize", this.resize);
+		// Check for a direct view
+		let lPath = Utils.parsePath(this.state.path);
+		if(lPath[0] === 'view' && !this.state.viewed.length) {
+			this.viewedAdd(lPath[1], '');
+		}
 	}
 
 	componentWillUnmount() {
@@ -500,9 +501,6 @@ export default class Header extends React.Component {
 
 		// Track document visibility
 		PageVisibility.remove(this.visibilityChange);
-
-		// Stop capturing resizes
-		window.removeEventListener("resize", this.resize);
 
 		// Stop checking for new messages and unclaimed counts
 		if(this.iUpdates) {
@@ -648,7 +646,7 @@ export default class Header extends React.Component {
 		};
 
 		// If we're in mobile, hide the menu
-		if(this.state.mobile) {
+		if(this.props.mobile) {
 			state.menu = false;
 		}
 
@@ -869,13 +867,13 @@ export default class Header extends React.Component {
 		return (
 			<div id="header">
 				<div className="bar">
-					{this.state.mobile &&
+					{this.props.mobile &&
 						<IconButton edge="start" color="inherit" aria-label="menu" onClick={this.menuToggle}>
 							<MenuIcon />
 						</IconButton>
 					}
 					<div><Typography className="title">
-						<Link to="/" onClick={this.menuClick}>{this.state.mobile ? 'ME CS' : 'ME Customer Service'}</Link>
+						<Link to="/" onClick={this.menuClick}>{this.props.mobile ? 'ME CS' : 'ME Customer Service'}</Link>
 					</Typography></div>
 					<div id="loaderWrapper">
 						<Loader />
@@ -895,7 +893,7 @@ export default class Header extends React.Component {
 						</React.Fragment>
 					}
 				</div>
-				{this.state.mobile ?
+				{this.props.mobile ?
 					<Drawer
 						anchor="left"
 						id="menu"
@@ -923,16 +921,6 @@ export default class Header extends React.Component {
 				}
 			</div>
 		);
-	}
-
-	resize() {
-
-		// If the size is less than 600px
-		if(document.documentElement.clientWidth < 600) {
-			this.setState({"mobile": true});
-		} else {
-			this.setState({"mobile": false});
-		}
 	}
 
 	signedIn(user) {

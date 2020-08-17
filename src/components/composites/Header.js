@@ -800,7 +800,7 @@ export default class Header extends React.Component {
 						<Divider />
 					</React.Fragment>
 				}
-				{(Utils.hasRight(this.state.user, 'pharmacy_fill', 'read') ||
+				{(Utils.hasRight(this.state.user, 'pharmacy_fill', 'update') ||
 					Utils.hasRight(this.state.user, 'welldyne_adhoc', 'read') ||
 					Utils.hasRight(this.state.user, 'welldyne_outbound', 'read')) &&
 					<React.Fragment>

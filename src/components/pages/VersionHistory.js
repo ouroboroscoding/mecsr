@@ -44,20 +44,21 @@ export default function VersionHistory(props) {
 	// Render
 	return (
 		<Box id="version">
-			<List>
-				{VERSION.map(v =>
-					<ListItem>
-						<ListItemText
-							primary={"Version " + v[0] + ' - ' + v[1]}
-							secondary={
-								<ul>{v[2].map(s => <li>{s}</li>)}</ul>
-							}
-						>
-						</ListItemText>
-					</ListItem>
-				)}
-			</List>
+			<Box className="content">
+				<List>
+					{VERSION.map(v =>
+						<ListItem key={v[0]}>
+							<ListItemText
+								primary={"Version " + v[0] + ' - ' + v[1]}
+								secondary={
+									<ul>{v[2].map((s,i) => <li key={i}>{s}</li>)}</ul>
+								}
+							>
+							</ListItemText>
+						</ListItem>
+					)}
+				</List>
+			</Box>
 		</Box>
 	);
 }
-

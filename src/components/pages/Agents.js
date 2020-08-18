@@ -21,11 +21,13 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
+import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 
 // Material UI Icons
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import HttpsIcon from '@material-ui/icons/Https';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
 // Composites
 import Permissions from '../composites/Permissions';
@@ -51,8 +53,8 @@ const AgentTree = new Tree(AgentDef);
 /**
  * Agents
  *
- * Lists all agents in the system with the ability to edit their permissions
- * and add new agents
+ * Lists all agents in the system with the ability to edit their permissions and
+ * password as well as add new agents
  *
  * @name Agents
  * @extends React.Component
@@ -62,9 +64,11 @@ export default function Agents(props) {
 	// State
 	let [agents, agentsSet] = useState(null);
 	let [create, createSet] = useState(false);
+	let [password, passwordSet] = useState(false);
 	let [permissions, permissionsSet] = useState(false);
 
 	// Refs
+	let passwdRef = useRef();
 	let permsRef = useRef();
 
 	// Effects
@@ -118,6 +122,38 @@ export default function Agents(props) {
 		});
 	}
 
+	function passwordCancel() {
+		passwordSet(false);
+	}
+
+	function passwordShow(agent_id) {
+		passwordSet(agent_id);
+	}
+
+	function passwordUpdate() {
+
+		// Update the agent's password
+		Rest.update('csr', 'agent/passwd', {
+			"agent_id": password,
+			"passwd": passwdRef.current.value
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+				Events.trigger('success', 'Password updated');
+				passwordSet(false);
+			}
+		})
+	}
+
 	function permissionsCancel() {
 		permissionsSet(false);
 	}
@@ -129,12 +165,10 @@ export default function Agents(props) {
 			"agent_id": agent_id
 		}).done(res => {
 
-			// If there's an error
+			// If there's an error or warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -153,18 +187,16 @@ export default function Agents(props) {
 
 	function permissionsUpdate() {
 
-		// Fetch the agent's permissions
+		// Update the agent's permissions
 		Rest.update('csr', 'agent/permissions', {
 			"agent_id": permissions._id,
 			"permissions": permsRef.current.value
 		}).done(res => {
 
-			// If there's an error
+			// If there's an error or warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -240,7 +272,8 @@ export default function Agents(props) {
 				:
 					<ResultsComponent
 						actions={[
-							{"tooltip": "Edit Agent's permissions", "icon": HttpsIcon, "callback": permissionsShow}
+							{"tooltip": "Edit Agent's permissions", "icon": HttpsIcon, "callback": permissionsShow},
+							{"tooltip": "Change Agent's password", "icon": VpnKeyIcon, "callback": passwordShow}
 						]}
 						data={agents}
 						errors={{
@@ -273,6 +306,30 @@ export default function Agents(props) {
 								Cancel
 							</Button>
 							<Button variant="contained" color="primary" onClick={permissionsUpdate}>
+								Update
+							</Button>
+						</DialogActions>
+					</Dialog>
+				}
+				{password &&
+					<Dialog
+						aria-labelledby="confirmation-dialog-title"
+						maxWidth="lg"
+						onClose={passwordCancel}
+						open={true}
+					>
+						<DialogTitle id="password-dialog-title">Update Permissions</DialogTitle>
+						<DialogContent dividers>
+							<TextField
+								label="New Password"
+								inputRef={passwdRef}
+							/>
+						</DialogContent>
+						<DialogActions>
+							<Button variant="contained" color="secondary" onClick={passwordCancel}>
+								Cancel
+							</Button>
+							<Button variant="contained" color="primary" onClick={passwordUpdate}>
 								Update
 							</Button>
 						</DialogActions>

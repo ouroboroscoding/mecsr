@@ -67,6 +67,9 @@ export default function FillError(props) {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [props.user]); // React to user changes
 
+	// Update rights
+	let bUpdate = Utils.hasRight(props.user, 'pharmacy_fill', 'update')
+
 	// Fetch all the records from the server
 	function fetchRecords() {
 
@@ -93,7 +96,7 @@ export default function FillError(props) {
 	}
 
 	function readyRender(record) {
-		if(record.crm_order && record.crm_order !== '') {
+		if(bUpdate && record.crm_order && record.crm_order !== '') {
 			return (
 				<Checkbox
 					color="primary"
@@ -193,7 +196,7 @@ export default function FillError(props) {
 					remove={Utils.hasRight(props.user, 'pharmacy_fill', 'delete') ? removeRecord : false}
 					service="prescriptions"
 					tree={FillErrorTree}
-					update={true}
+					update={bUpdate}
 				/>
 	}
 

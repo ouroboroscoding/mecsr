@@ -8,14 +8,14 @@
 		flex-shrink: 0;
 	}
 
-	.messaging, .konnektive, .mip, .notes, .prescriptions {
+	.messaging, .konnektive, .mip, .notes, .prescriptions, .misc {
 		flex-basis: 0;
 		flex-grow: 1;
 		flex-shrink: 1;
 		overflow: auto;
 	}
 
-	.konnektive, .mip, .prescriptions {
+	.konnektive, .mip, .prescriptions, .misc {
 		padding: 10px;
 	}
 
@@ -276,14 +276,6 @@
 			}
 		}
 	}
-
-	.prescriptions {
-
-		.paper {
-			margin-bottom: 10px;
-			padding: 10px;
-		}
-	}
 }
 
 @media (max-width: 600px) {
@@ -298,6 +290,10 @@
 					width: 50px;
 				}
 			}
+		}
+
+		.MuiTab-root {
+			min-width: 0;
 		}
 	}
 }

@@ -22,10 +22,11 @@ import { useSignedIn, useSignedOut } from '../hooks/user';
 import { useResize } from '../hooks/resize';
 
 // Composite component modules
-import Alerts from './composites/Alerts';
-import Footer from './composites/Footer';
-import Header from './composites/Header';
-import Signin from './composites/Signin';
+import Alerts from './Alerts';
+import Footer from './Footer';
+import Header from './Header';
+import Signin from './Signin';
+
 // Page component modules
 import Agents from './pages/Agents';
 import Customer from './pages/Customer';
@@ -38,7 +39,7 @@ import Unclaimed from './pages/Unclaimed';
 import VersionHistory from './pages/VersionHistory';
 
 // Local modules
-import { LoaderHide, LoaderShow } from './composites/Loader';
+import { LoaderHide, LoaderShow } from './Loader';
 
 // css
 import '../sass/site.scss';
@@ -78,7 +79,7 @@ window.Events = Events;
 LoaderHide();
 
 // Site
-function Site(props) {
+export default function Site(props) {
 
 	// State
 	let [mobile, mobileSet] = useState(document.documentElement.clientWidth < 600 ? true : false);
@@ -170,6 +171,3 @@ function Site(props) {
 		</SnackbarProvider>
 	);
 }
-
-// Export the app
-export default Site;

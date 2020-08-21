@@ -20,7 +20,7 @@ import Typography from '@material-ui/core/Typography';
 import ViewListIcon from '@material-ui/icons/ViewList';
 
 // Local components
-import CustomLists from './CustomLists';
+import CustomLists from './composites/CustomLists';
 
 // Header component
 export default function Footer(props) {

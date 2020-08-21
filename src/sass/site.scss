@@ -101,52 +101,14 @@ td {
 	}
 }
 
-.fakeAnchor {
-	cursor: pointer;
-}
-
-.form, .search {
-
-	.actions {
-		flex: 0 0 auto;
-		display: flex;
-		padding: 8px;
-		align-items: center;
-		justify-content: flex-end;
-
-		.MuiButtonBase-root {
-			margin-left: 10px;
-		}
-	}
-}
-
 .MuiPaper-root.padded {
 	margin-bottom: 20px;
 	padding: 10px;
 }
 
-.MuiTableContainer-root.results {
-	.MuiTableCell-root.actions {
-		.MuiSvgIcon-root {
-			margin-left: 10px;
-		}
-	}
-}
-
 .MuiTypography-h1, .MuiTypography-h2, .MuiTypography-h3,
 .MuiTypography-h4, .MuiTypography-h5, .MuiTypography-h6 {
 	margin-bottom: 5px;
-}
-
-.permissions {
-
-	.title {
-		font-weight: bold;
-	}
-
-	.name {
-		padding-top: 22px !important;
-	}
 }
 
 .pageHeader {

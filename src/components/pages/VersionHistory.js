@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.10.0', 'August 21st, 2020', [
+		'Customer page (claimed & viewed) has a new "Misc" tab which shows Calendly appointments.'
+	]],
 	['1.9.0', 'August 16th, 2020', [
 		'New message notifications will now persist across page reloads and closing/opening the app. However only for the device they were triggered on.',
 		'New message notifications will now be based on all time rather than your current login session. This means you will be notified in the morning of any messages that came in overnight if the app was closed.',

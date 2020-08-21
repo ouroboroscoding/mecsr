@@ -18,7 +18,7 @@ import Paper from '@material-ui/core/Paper';
 import Switch from '@material-ui/core/Switch';
 
 // Generic
-import Tools from '../../generic/tools';
+import Tools from '../../../generic/tools';
 
 // defines
 const CREATE = 4;
@@ -37,6 +37,7 @@ const TYPES = [
 	{title: "CRM", rights: [
 		{name: "crm_customers", title: "CRM Data", allowed: READ}]},
 	{title: "Memo", rights: [
+		{name: "calendly", title: "Calendly Appointment", allowed: READ},
 		{name: "memo_mips", title: "Memo MIP", allowed: READ | UPDATE},
 		{name: "memo_notes", title: "Memo Notes", allowed: READ | CREATE}]},
 	{title: "Pharmacy", rights: [

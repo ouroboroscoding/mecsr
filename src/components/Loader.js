@@ -12,7 +12,7 @@
 import React from 'react';
 
 // Generic modules
-import Events from  '../../generic/events';
+import Events from  '../generic/events';
 
 // Local variables
 let _count = 1;

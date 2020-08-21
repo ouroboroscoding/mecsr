@@ -17,9 +17,18 @@ import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
+// Material UI Icons
+import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
+import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
+import LocalPharmacyIcon from '@material-ui/icons/LocalPharmacy';
+import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
+import NotesIcon from '@material-ui/icons/Notes';
+import SmsIcon from '@material-ui/icons/Sms';
+
 // Customer components
 import KNK from './customer/KNK';
 import MIP from './customer/MIP';
+import Misc from './customer/Misc';
 import Notes from './customer/Notes';
 import RX from './customer/RX';
 import SMS from './customer/SMS';
@@ -42,6 +51,7 @@ export default class Customer extends React.Component {
 
 		// Initial state
 		this.state = {
+			calendly: null,
 			customer: null,
 			fill_errors: null,
 			mips: null,
@@ -88,6 +98,9 @@ export default class Customer extends React.Component {
 				this.fetchPatientId();
 				this.fetchShipping();
 				this.fetchTriggers();
+				if(Utils.hasRight(this.props.user, 'calendly', 'read')) {
+					this.fetchCalendly();
+				}
 			} else {
 				this.setState({
 					customer: 0,
@@ -157,6 +170,37 @@ export default class Customer extends React.Component {
 					// Update the state
 					this.setState({"triggers": triggers});
 				}
+			}
+		});
+	}
+
+	fetchCalendly() {
+
+		// Request the appointments
+		Rest.read('monolith', 'customer/calendly', {
+			"customerId": this.props.customerId
+		}).done(res => {
+
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// If there's an error or warning
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+
+				// Set the state
+				this.setState({
+					calendly: res.data
+				});
 			}
 		});
 	}
@@ -488,17 +532,33 @@ export default class Customer extends React.Component {
 		return (
 			<div id="customer">
 				<AppBar position="static" color="default">
-					<Tabs
-						onChange={this.tabChange}
-						value={this.state.tab}
-						variant="fullWidth"
-					>
-						<Tab label="SMS" />
-						<Tab label="KNK" />
-						<Tab label="MIP" />
-						<Tab label="Notes" />
-						<Tab label="Rx" />
-					</Tabs>
+					{this.props.mobile ?
+						<Tabs
+							onChange={this.tabChange}
+							value={this.state.tab}
+							variant="fullWidth"
+						>
+							<Tab icon={<SmsIcon />} />
+							<Tab icon={<MonetizationOnIcon />} />
+							<Tab icon={<LocalHospitalIcon />} />
+							<Tab icon={<NotesIcon />} />
+							<Tab icon={<LocalPharmacyIcon />} />
+							<Tab icon={<CalendarTodayIcon />} />
+						</Tabs>
+					:
+						<Tabs
+							onChange={this.tabChange}
+							value={this.state.tab}
+							variant="fullWidth"
+						>
+							<Tab label="SMS" />
+							<Tab label="KNK" />
+							<Tab label="MIP" />
+							<Tab label="Notes" />
+							<Tab label="Rx" />
+							<Tab label="Misc" />
+						</Tabs>
+					}
 				</AppBar>
 				<div className="messaging" style={{display: this.state.tab === 0 ? 'flex' : 'none'}}>
 					<SMS
@@ -547,6 +607,12 @@ export default class Customer extends React.Component {
 						prescriptions={this.state.prescriptions}
 						readOnly={this.props.readOnly}
 						triggers={this.state.triggers}
+						user={this.props.user}
+					/>
+				</div>
+				<div className="misc" style={{display: this.state.tab === 5 ? 'block' : 'none'}}>
+					<Misc
+						calendly={this.state.calendly}
 						user={this.props.user}
 					/>
 				</div>

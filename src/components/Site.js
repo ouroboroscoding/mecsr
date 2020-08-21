@@ -22,10 +22,11 @@ import { useSignedIn, useSignedOut } from '../hooks/user';
 import { useResize } from '../hooks/resize';
 
 // Composite component modules
-import Alerts from './composites/Alerts';
-import Footer from './composites/Footer';
-import Header from './composites/Header';
-import Signin from './composites/Signin';
+import Alerts from './Alerts';
+import Footer from './Footer';
+import Header from './Header';
+import Signin from './Signin';
+
 // Page component modules
 import Agents from './pages/Agents';
 import Customer from './pages/Customer';
@@ -38,7 +39,7 @@ import Unclaimed from './pages/Unclaimed';
 import VersionHistory from './pages/VersionHistory';
 
 // Local modules
-import { LoaderHide, LoaderShow } from './composites/Loader';
+import { LoaderHide, LoaderShow } from './Loader';
 
 // css
 import '../sass/site.scss';

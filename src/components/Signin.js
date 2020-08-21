@@ -20,12 +20,12 @@ import Dialog from '@material-ui/core/Dialog';
 import TextField from '@material-ui/core/TextField';
 
 // Generic modules
-import Events from '../../generic/events';
-import Hash from '../../generic/hash';
-import Rest from '../../generic/rest';
+import Events from '../generic/events';
+import Hash from '../generic/hash';
+import Rest from '../generic/rest';
 
 // Local modules
-import Utils from '../../utils';
+import Utils from '../utils';
 
 // Sign In
 class Signin extends React.Component {

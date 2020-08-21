@@ -44,24 +44,26 @@ import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import SearchIcon from '@material-ui/icons/Search';
 import ViewListIcon from '@material-ui/icons/ViewList';
 
-// Local components
-import Account from './Account';
-import Transfer from './Transfer';
+// Composite components
+import Account from './composites/Account';
+import Transfer from './composites/Transfer';
+import Resolve from './composites/Resolve';
+import { CustomListsDialog } from './composites/CustomLists';
+
+// Site components
 import Loader from './Loader';
-import Resolve from './Resolve';
-import { CustomListsDialog } from './CustomLists';
 
 // Data modules
-import claimed from '../../data/claimed';
+import claimed from '../data/claimed';
 
 // Generic modules
-import Events from '../../generic/events';
-import PageVisibility from '../../generic/pageVisibility';
-import Rest from '../../generic/rest';
-import Tools from '../../generic/tools';
+import Events from '../generic/events';
+import PageVisibility from '../generic/pageVisibility';
+import Rest from '../generic/rest';
+import Tools from '../generic/tools';
 
 // Local modules
-import Utils from '../../utils';
+import Utils from '../utils';
 
 // Customer Item component
 function CustomerItem(props) {

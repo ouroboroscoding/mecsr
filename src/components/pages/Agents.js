@@ -30,7 +30,7 @@ import HttpsIcon from '@material-ui/icons/Https';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
 // Composites
-import Permissions from '../composites/Permissions';
+import Permissions from './agents/Permissions';
 
 // Format Components
 import ResultsComponent from '../format/Results';

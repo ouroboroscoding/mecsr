@@ -3,10 +3,8 @@ Male Excel CSR Portal
 
 ## Clone this repository
 
-Make sure to create a new entry in your hosts file for github-me to github.com
-
 If you have not already, clone this repository to your computer. The --recursive param is necessary in order to have git fetch the submodules the project needs alongside the primary code.
-> git clone --recursive git@github-me:bastmaleexcel/mecsr.git
+> git clone --recursive git@github.com:bastmaleexcel/mecsr.git
 
 If you already cloned the repo and didn't add the --recursive command, you can run the following to get the submodules.
 > git submodule update --init --recursive

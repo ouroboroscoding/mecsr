@@ -52,10 +52,10 @@ function clear() {
  * @param string method			The method used to send the request
  * @param string url			The full URL to the service/noun
  * @param object data			The data to send to the service
- * @param string auth			Optional Authorization token
+ * @param bool session			Send the session if one exists
  * @return xhr
  */
-function request(method, url, data) {
+function request(method, url, data, session) {
 
 	// If we have a before callback
 	if(_before) {
@@ -72,7 +72,7 @@ function request(method, url, data) {
 			xhr._url = url;
 
 			// If we have a session, add the authorization token
-			if('_session' in localStorage) {
+			if(session && '_session' in localStorage) {
 				xhr.setRequestHeader('Authorization', localStorage['_session']);
 			}
 		},
@@ -208,9 +208,10 @@ function init(domain, error=null, before=null, after=null) {
  * @param string service		The name of the service to call
  * @param string noun			The noun to call on the service
  * @param object data			The data to send to the service
+ * @param bool session			Send the session if one exists
  * @return xhr
  */
-function create(service, noun, data) {
+function create(service, noun, data, session=true) {
 	return request('post', _domain + service + '/' + noun, data);
 }
 
@@ -224,9 +225,10 @@ function create(service, noun, data) {
  * @param string service		The name of the service to call
  * @param string noun			The noun to call on the service
  * @param object data			The data to send to the service
+ * @param bool session			Send the session if one exists
  * @return xhr
  */
-function delete_(service, noun, data) {
+function delete_(service, noun, data, session=true) {
 	return request('delete', _domain + service + '/' + noun, data);
 }
 
@@ -240,9 +242,10 @@ function delete_(service, noun, data) {
  * @param string service		The name of the service to call
  * @param string noun			The noun to call on the service
  * @param object data			The data to send to the service
+ * @param bool session			Send the session if one exists
  * @return xhr
  */
-function read(service, noun, data) {
+function read(service, noun, data, session=true) {
 	return request('get', _domain + service + '/' + noun, data);
 }
 
@@ -290,9 +293,10 @@ function session(token) {
  * @param string service		The name of the service to call
  * @param string noun			The noun to call on the service
  * @param object data			The data to send to the service
+ * @param bool session			Send the session if one exists
  * @return xhr
  */
-function update(service, noun, data) {
+function update(service, noun, data, session=true) {
 	return request('put', _domain + service + '/' + noun, data);
 }
 

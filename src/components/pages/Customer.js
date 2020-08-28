@@ -98,9 +98,6 @@ export default class Customer extends React.Component {
 				this.fetchPatientId();
 				this.fetchShipping();
 				this.fetchTriggers();
-				if(Utils.hasRight(this.props.user, 'calendly', 'read')) {
-					this.fetchCalendly();
-				}
 			} else {
 				this.setState({
 					customer: 0,
@@ -170,37 +167,6 @@ export default class Customer extends React.Component {
 					// Update the state
 					this.setState({"triggers": triggers});
 				}
-			}
-		});
-	}
-
-	fetchCalendly() {
-
-		// Request the appointments
-		Rest.read('monolith', 'customer/calendly', {
-			"customerId": this.props.customerId
-		}).done(res => {
-
-			// If not mounted
-			if(!this.mounted) {
-				return;
-			}
-
-			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if('data' in res) {
-
-				// Set the state
-				this.setState({
-					calendly: res.data
-				});
 			}
 		});
 	}
@@ -612,7 +578,9 @@ export default class Customer extends React.Component {
 				</div>
 				<div className="misc" style={{display: this.state.tab === 5 ? 'block' : 'none'}}>
 					<Misc
-						calendly={this.state.calendly}
+						crm_id={this.props.customerId}
+						patient_id={this.props.patient_id}
+						readOnly={this.props.readOnly}
 						user={this.props.user}
 					/>
 				</div>

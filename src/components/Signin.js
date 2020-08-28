@@ -136,7 +136,7 @@ class Signin extends React.Component {
 		Rest.create('monolith', 'signin', {
 			"userName": this.fields.userName.value,
 			"passwd": this.fields.passwd.value
-		}).done(res => {
+		}, false).done(res => {
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {

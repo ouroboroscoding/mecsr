@@ -36,6 +36,8 @@ const TYPES = [
 		{name: "csr_stats", title: "Stats: Allowed to view stats", allowed: READ}]},
 	{title: "CRM", rights: [
 		{name: "customers", title: "CRM Data", allowed: READ}]},
+	{title: "Patient Portal", rights: [
+		{name: "patient_account", title: "Account", allowed: CREATE | READ}]},
 	{title: "Memo", rights: [
 		{name: "calendly", title: "Calendly Appointment", allowed: READ},
 		{name: "memo_mips", title: "Memo MIP", allowed: READ | UPDATE},

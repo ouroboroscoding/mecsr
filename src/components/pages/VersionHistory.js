@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.11.0', 'August 28th, 2020', [
+		'Customer Misc tab now shows customer\'s Patient Portal access and allows, with proper rights, sending the setup email for those customer who don\'t have access.'
+	]]
 	['1.10.0', 'August 21st, 2020', [
 		'Customer page (claimed & viewed) has a new "Misc" tab which shows Calendly appointments.'
 	]],

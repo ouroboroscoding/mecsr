@@ -212,7 +212,7 @@ export default function Misc(props) {
 			inner = (
 				<p>
 					Customer has no patient portal access.
-					{!props.readOnly &&
+					{(!props.readOnly && Utils.hasRight(props.user, 'patient_account', 'create')) &&
 						<span> <Button color="primary" onClick={patientCreate} variant="contained">Send Setup Email</Button></span>
 					}
 				</p>

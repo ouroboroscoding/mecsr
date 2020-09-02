@@ -225,6 +225,51 @@ export default function RX(props) {
 		);
 	}
 
+	//HRTLabs
+	let hrtLabs = null;
+  if (props.hrtLabs === null) {
+    hrtLabs = <p>Loading...</p>;
+  } else if (props.hrtLabs === 0 || props.hrtLabs.length === 0) {
+    hrtLabs = <p>No HRT Lab Results found for this customer</p>;
+  } else {
+    hrtLabs = (
+      <>
+        {props.hrtLabs.map((o) => (
+          <Paper key={o.id} className='padded'>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={4}>
+                <strong>Sample Collection Date: </strong>
+                <span>{new Date(o.sampleCollection).toLocaleString()}</span>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <strong>Name: </strong>
+                <span>{o.name}</span>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <strong>Code: </strong>
+                <span>{o.code}</span>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <strong>Result: </strong>
+                <span>
+                  {o.result} {o.unitOfMeasure}
+                </span>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <strong>Range: </strong>
+                <span>{o.range}</span>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <strong>Result Level: </strong>
+                <span>{o.resultLevel}</span>
+              </Grid>
+            </Grid>
+          </Paper>
+        ))}
+      </>
+    );
+  }
+
 	// DoseSpot SSO
 	let bSSO = (props.patientId && (props.user.dsClinicianId !== '') && !props.readOnly) ? true : false;
 
@@ -234,13 +279,7 @@ export default function RX(props) {
 			{fill}
 			{triggers}
 			<div className="pageHeader">
-				<div ref={rxTitle} className="title">Prescriptions
-					<Tooltip title="Refresh Prescriptions">
-						<IconButton onClick={props.onRefresh}>
-							<RefreshIcon />
-						</IconButton>
-					</Tooltip>
-				</div>
+			<RxItem name={'Prescriptions'} {...props}/>
 				{bSSO &&
 					<Tooltip title="Toggle DoseSpot SSO">
 						<IconButton onClick={toggleSSO}>
@@ -258,6 +297,26 @@ export default function RX(props) {
 				/>
 			}
 			{prescriptions}
+				<hr/>
+			<RxItem name={'HRT Lab Results'} {...props}/>
+			{hrtLabs}
+		
 		</React.Fragment>
 	);
 }
+
+
+export const RxItem = (props) => {
+	return (
+    <>
+      <div ref={props.rxTitle} className='title'>
+        {props.name}
+        <Tooltip title={`Refresh ${props.name}`}>
+          <IconButton onClick={() => props.onRefresh(`${props.name}`)}>
+            <RefreshIcon />
+          </IconButton>
+        </Tooltip>
+      </div>
+    </>
+  );
+} 

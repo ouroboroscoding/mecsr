@@ -54,6 +54,7 @@ export default class Customer extends React.Component {
 			calendly: null,
 			customer: null,
 			fill_errors: null,
+			hrtLabs: null,
 			mips: null,
 			orders: [],
 			patient_id: null,
@@ -93,6 +94,7 @@ export default class Customer extends React.Component {
 			// If we have a customer ID
 			if(this.props.customerId) {
 				this.fetchFillErrors();
+				this.fetchHrtLabs();
 				this.fetchKnkCustomer();
 				this.fetchMips();
 				this.fetchPatientId();
@@ -101,6 +103,7 @@ export default class Customer extends React.Component {
 			} else {
 				this.setState({
 					customer: 0,
+					hrtLabs: 0,
 					mips: 0,
 					prescriptions: 0,
 					triggers: 0
@@ -202,6 +205,35 @@ export default class Customer extends React.Component {
 			}
 		});
 	}
+
+	fetchHrtLabs() {
+    //Find the HRT Lab Test Resutls using the customerId
+    Rest.read('monolith', 'customer/hrtLabs', {
+      customerId: this.props.customerId.toString(),
+    }).done((res) => {
+
+     // If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// If there's an error or warning
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+        //Set the HRT Lab Resutls
+        this.setState({
+          hrtLabs: res.data
+        });
+      }
+    });
+  }
 
 	fetchKnkCustomer() {
 
@@ -566,6 +598,7 @@ export default class Customer extends React.Component {
 				<div className="prescriptions" style={{display: this.state.tab === 4 ? 'block' : 'none'}}>
 					<RX
 						fillErrors={this.state.fill_errors}
+						hrtLabs={this.state.hrtLabs}
 						onAdhocAdd={this.adhocAdd}
 						onRefresh={this.rxRefresh}
 						orders={this.state.orders}
@@ -588,15 +621,29 @@ export default class Customer extends React.Component {
 		);
 	}
 
-	rxRefresh() {
-
-		// Set the state to null
-		this.setState({
-			patient_id: null,
-			prescriptions: null
-		}, () => {
-			this.fetchPatientId();
-		});
+	rxRefresh(value) {
+		if (value === 'HRT Lab Results') {
+      this.setState(
+        {
+          patient_id: null,
+          hrtLabs: null,
+        },
+        () => {
+          this.fetchHrtLabs();
+        }
+      );
+    } else {
+      // Set the state to null
+      this.setState(
+        {
+          patient_id: null,
+          prescriptions: null,
+        },
+        () => {
+          this.fetchPatientId();
+        }
+      );
+		}
 	}
 
 	tabChange(event, tab) {

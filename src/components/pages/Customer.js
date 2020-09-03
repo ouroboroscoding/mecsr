@@ -207,12 +207,13 @@ export default class Customer extends React.Component {
 	}
 
 	fetchHrtLabs() {
-    //Find the HRT Lab Test Resutls using the customerId
-    Rest.read('monolith', 'customer/hrtLabs', {
-      customerId: this.props.customerId.toString(),
-    }).done((res) => {
 
-     // If not mounted
+		//Find the HRT Lab Test Resutls using the customerId
+		Rest.read('monolith', 'customer/hrtLabs', {
+			customerId: this.props.customerId.toString()
+		}).done(res => {
+
+			// If not mounted
 			if(!this.mounted) {
 				return;
 			}
@@ -227,13 +228,14 @@ export default class Customer extends React.Component {
 
 			// If there's data
 			if('data' in res) {
-        //Set the HRT Lab Resutls
-        this.setState({
-          hrtLabs: res.data
-        });
-      }
-    });
-  }
+
+				// Set the HRT Lab Resutls
+				this.setState({
+					hrtLabs: res.data
+				});
+			}
+		});
+	}
 
 	fetchKnkCustomer() {
 
@@ -622,27 +624,24 @@ export default class Customer extends React.Component {
 	}
 
 	rxRefresh(value) {
-		if (value === 'HRT Lab Results') {
-      this.setState(
-        {
-          patient_id: null,
-          hrtLabs: null,
-        },
-        () => {
-          this.fetchHrtLabs();
-        }
-      );
-    } else {
-      // Set the state to null
-      this.setState(
-        {
-          patient_id: null,
-          prescriptions: null,
-        },
-        () => {
-          this.fetchPatientId();
-        }
-      );
+
+		// Refresh HRT
+		if(value === 'hrt') {
+			this.setState({
+				hrtLabs: null,
+			}, () => {
+				this.fetchHrtLabs();
+			});
+		}
+
+		// Refresh DoseSpot RX
+		else if(value === 'rx') {
+			this.setState({
+				patient_id: null,
+				prescriptions: null,
+			}, () => {
+				this.fetchPatientId();
+			});
 		}
 	}
 

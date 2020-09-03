@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.12.0', 'September 3rd, 2020', [
+		'HRT Lab results are now available from the customer RX tab.'
+	]],
 	['1.11.0', 'August 28th, 2020', [
 		'Customer Misc tab now shows customer\'s Patient Portal access and allows, with proper rights, sending the setup email for those customer who don\'t have access.'
 	]],

@@ -276,6 +276,12 @@
 			}
 		}
 	}
+
+	.prescriptions {
+		hr {
+			border-top:1px solid #ff0000;
+		}
+	}
 }
 
 @media (max-width: 600px) {

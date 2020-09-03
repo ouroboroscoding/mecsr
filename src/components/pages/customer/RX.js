@@ -225,6 +225,49 @@ export default function RX(props) {
 		);
 	}
 
+	// HRTLabs
+	let hrtLabs = null;
+	if (props.hrtLabs === null) {
+		hrtLabs = <p>Loading...</p>;
+	} else if (props.hrtLabs === 0 || props.hrtLabs.length === 0) {
+		hrtLabs = <p>No HRT Lab Results found for this customer</p>;
+	} else {
+		hrtLabs = (
+			<React.Fragment>
+				{props.hrtLabs.map((o) => (
+					<Paper key={o.id} className='padded'>
+						<Grid container spacing={2}>
+							<Grid item xs={12} md={4}>
+								<strong>Sample Collection Date: </strong>
+								<span>{new Date(o.sampleCollection).toLocaleString()}</span>
+							</Grid>
+							<Grid item xs={12} md={4}>
+								<strong>Name: </strong>
+								<span>{o.name}</span>
+							</Grid>
+							<Grid item xs={12} md={4}>
+								<strong>Code: </strong>
+								<span>{o.code}</span>
+							</Grid>
+							<Grid item xs={12} md={4}>
+								<strong>Result: </strong>
+								<span>{o.result} {o.unitOfMeasure}</span>
+							</Grid>
+							<Grid item xs={12} md={4}>
+								<strong>Range: </strong>
+								<span>{o.range}</span>
+							</Grid>
+							<Grid item xs={12} md={4}>
+								<strong>Result Level: </strong>
+								<span>{o.resultLevel}</span>
+							</Grid>
+						</Grid>
+					</Paper>
+				))}
+			</React.Fragment>
+		);
+	}
+
 	// DoseSpot SSO
 	let bSSO = (props.patientId && (props.user.dsClinicianId !== '') && !props.readOnly) ? true : false;
 
@@ -236,7 +279,7 @@ export default function RX(props) {
 			<div className="pageHeader">
 				<div ref={rxTitle} className="title">Prescriptions
 					<Tooltip title="Refresh Prescriptions">
-						<IconButton onClick={props.onRefresh}>
+						<IconButton onClick={() => props.onRefresh('rx')}>
 							<RefreshIcon />
 						</IconButton>
 					</Tooltip>
@@ -258,6 +301,17 @@ export default function RX(props) {
 				/>
 			}
 			{prescriptions}
+			<hr/>
+			<div className="pageHeader">
+				<div className="title">HRT Lab Results
+					<Tooltip title="Refresh HRT Lab Results">
+						<IconButton onClick={() => props.onRefresh('hrt')}>
+							<RefreshIcon />
+						</IconButton>
+					</Tooltip>
+				</div>
+			</div>
+			{hrtLabs}
 		</React.Fragment>
 	);
 }

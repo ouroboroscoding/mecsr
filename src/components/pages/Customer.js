@@ -53,11 +53,11 @@ export default class Customer extends React.Component {
 		this.state = {
 			calendly: null,
 			customer: null,
-			fill_errors: null,
 			hrtLabs: null,
 			mips: null,
-			orders: [],
+			orders: null,
 			patient_id: null,
+			pharmacy_fill: null,
 			prescriptions: null,
 			shipping: [],
 			sms_tpls: [],
@@ -76,6 +76,7 @@ export default class Customer extends React.Component {
 		this.knkCustomerRefresh = this.knkCustomerRefresh.bind(this);
 		this.knkOrdersRefresh = this.knkOrdersRefresh.bind(this);
 		this.newMessage = this.newMessage.bind(this);
+		this.pharmacyFill = this.pharmacyFill.bind(this);
 		this.rxRefresh = this.rxRefresh.bind(this);
 		this.tabChange = this.tabChange.bind(this);
 	}
@@ -93,11 +94,11 @@ export default class Customer extends React.Component {
 
 			// If we have a customer ID
 			if(this.props.customerId) {
-				this.fetchFillErrors();
 				this.fetchHrtLabs();
 				this.fetchKnkCustomer();
 				this.fetchMips();
 				this.fetchPatientId();
+				this.fetchPharmacyFill();
 				this.fetchShipping();
 				this.fetchTriggers();
 			} else {
@@ -170,38 +171,6 @@ export default class Customer extends React.Component {
 					// Update the state
 					this.setState({"triggers": triggers});
 				}
-			}
-		});
-	}
-
-	fetchFillErrors() {
-
-		// Request the fill errors
-		Rest.read('prescriptions', 'pharmacy/fill/errors', {
-			"crm_type": 'knk',
-			"crm_id": this.props.customerId.toString()
-		}).done(res => {
-
-			// If not mounted
-			if(!this.mounted) {
-				return;
-			}
-
-			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if('data' in res) {
-
-				// Set the state
-				this.setState({
-					fill_errors: res.data
-				});
 			}
 		});
 	}
@@ -381,6 +350,38 @@ export default class Customer extends React.Component {
 		});
 	}
 
+	fetchPharmacyFill() {
+
+		// Request the fill errors
+		Rest.read('prescriptions', 'pharmacy/fill/byCustomer', {
+			"crm_type": 'knk',
+			"crm_id": this.props.customerId.toString()
+		}).done(res => {
+
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// If there's an error or warning
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+
+				// Set the state
+				this.setState({
+					pharmacy_fill: res.data
+				});
+			}
+		});
+	}
+
 	fetchPrescriptions(id, clinician) {
 
 		// Find the MIP using the phone number
@@ -528,6 +529,40 @@ export default class Customer extends React.Component {
 		this.smsRef.fetch("smooth");
 	}
 
+	pharmacyFill(order_id) {
+
+		// Send the request to the server
+		Rest.create('prescriptions', 'pharmacy/fill', {
+			crm_type: 'knk',
+			crm_id: this.props.customerId.toString(),
+			crm_order: order_id
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+
+				// Clone the current pharmacy fill
+				let oPharmacyFill = Tools.clone(this.state.pharmacy_fill);
+
+				// Add the new record to the fills
+				oPharmacyFill['fills'].push(res.data);
+
+				// Set the new state
+				this.setState({
+					pharmacy_fill: oPharmacyFill
+				});
+			}
+		});
+	}
+
 	render() {
 		return (
 			<div id="customer">
@@ -599,12 +634,13 @@ export default class Customer extends React.Component {
 				</div>
 				<div className="prescriptions" style={{display: this.state.tab === 4 ? 'block' : 'none'}}>
 					<RX
-						fillErrors={this.state.fill_errors}
 						hrtLabs={this.state.hrtLabs}
 						onAdhocAdd={this.adhocAdd}
+						onPharmacyFill={this.pharmacyFill}
 						onRefresh={this.rxRefresh}
 						orders={this.state.orders}
 						patientId={this.state.patient_id}
+						pharmacyFill={this.state.pharmacy_fill}
 						prescriptions={this.state.prescriptions}
 						readOnly={this.props.readOnly}
 						triggers={this.state.triggers}

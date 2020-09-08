@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.13.0', 'September 8th, 2020', [
+		'Orders can now be manually added to the pharmacy fill process for those with the rights to do so.'
+	]],
 	['1.12.0', 'September 3rd, 2020', [
 		'HRT Lab results are now available from the customer RX tab.'
 	]],

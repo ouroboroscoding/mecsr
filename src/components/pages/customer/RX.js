@@ -254,7 +254,7 @@ export default function RX(props) {
 	if(props.triggers === null) {
 		triggers = <p>Loading...</p>
 	}
-	else if(props.triggers === 0) {
+	else if(props.triggers.length === 0) {
 		triggers = null;
 	}
 	else {

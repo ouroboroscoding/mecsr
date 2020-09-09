@@ -198,7 +198,7 @@ export default function NeverStarted(props) {
 		})
 	}
 
-	// Remove a template
+	// Remove a record
 	function removeRecord(_id) {
 
 		// Use the current records to set the new records

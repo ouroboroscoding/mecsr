@@ -36,7 +36,7 @@ import Utils from '../../../utils';
 // Definitions
 import NeverStartedDef from '../../../definitions/welldyne/never_started';
 NeverStartedDef['__react__'] = {
-	"results": ["crm_id", "customer_name", "crm_order", "triggered", "reason", "ready"]
+	"results": ["crm_id", "customer_name", "crm_order", "triggered", "medication", "reason", "ready"]
 }
 NeverStartedDef['customer_name'] = {"__type__": "string", "__react__": {"title": "Name"}}
 NeverStartedDef['triggered'] = {"__type__": "date"}

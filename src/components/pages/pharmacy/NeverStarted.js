@@ -38,8 +38,11 @@ import NeverStartedDef from '../../../definitions/welldyne/never_started';
 NeverStartedDef['__react__'] = {
 	"results": ["crm_id", "customer_name", "crm_order", "triggered", "medication", "reason", "ready"]
 }
+NeverStartedDef['crm_id'] = {"__type__": "string", "__react__": {"title": "ID"}}
 NeverStartedDef['customer_name'] = {"__type__": "string", "__react__": {"title": "Name"}}
+NeverStartedDef['crm_order'] = {"__type__": "string", "__react__": {"title": "Order"}}
 NeverStartedDef['triggered'] = {"__type__": "date"}
+NeverStartedDef['medication'] = {"__type__": "string"}
 
 // Generate the Tree
 const NeverStartedTree = new Tree(NeverStartedDef);

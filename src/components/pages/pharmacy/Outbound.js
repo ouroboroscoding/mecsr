@@ -132,12 +132,10 @@ export default function Outbound(props) {
 		// Fetch all records
 		Rest.read('welldyne', 'outbounds', {}).done(res => {
 
-			// If there's an error
+			// If there's an error or a warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -180,12 +178,10 @@ export default function Outbound(props) {
 			"ready": bReady
 		}).done(res => {
 
-			// If there's an error
+			// If there's an error or a warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -232,7 +228,7 @@ export default function Outbound(props) {
 					custom={{"ready": readyRender}}
 					data={records}
 					noun="outbound"
-					orderBy="title"
+					orderBy="triggered"
 					remove={false}
 					service="welldyne"
 					tree={OutboundTree}

@@ -88,7 +88,7 @@ function Line(props) {
 /**
  * ManualAdHoc
  *
- * Page for pharmacy related info, errors, outreach, adhoc
+ * Page for pharmacy related info, errors, outbound, adhoc
  *
  * @name ManualAdHoc
  * @extends React.Component

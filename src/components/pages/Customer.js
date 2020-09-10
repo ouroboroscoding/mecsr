@@ -659,26 +659,13 @@ export default class Customer extends React.Component {
 		);
 	}
 
-	rxRefresh(value) {
-
-		// Refresh HRT
-		if(value === 'hrt') {
-			this.setState({
-				hrtLabs: null,
-			}, () => {
-				this.fetchHrtLabs();
-			});
-		}
-
-		// Refresh DoseSpot RX
-		else if(value === 'rx') {
-			this.setState({
-				patient_id: null,
-				prescriptions: null
-			}, () => {
-				this.fetchPatientId();
-			});
-		}
+	rxRefresh() {
+		this.setState({
+			patient_id: null,
+			prescriptions: null
+		}, () => {
+			this.fetchPatientId();
+		});
 	}
 
 	tabChange(event, tab) {

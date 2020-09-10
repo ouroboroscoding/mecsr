@@ -33,19 +33,26 @@ const TYPES = [
 		{name: "csr_overwrite", title: "Claim Overwrite", allowed: CREATE},
 		{name: "csr_messaging", title: "Messaging", allowed: CREATE | READ},
 		{name: "csr_templates", title: "Templates: Ability to create and modify templates", allowed: ALL},
-		{name: "csr_stats", title: "Stats: Allowed to view stats", allowed: READ}]},
+		{name: "csr_stats", title: "Stats: Allowed to view stats", allowed: READ}
+	]},
 	{title: "CRM", rights: [
-		{name: "customers", title: "CRM Data", allowed: READ}]},
+		{name: "customers", title: "CRM Data", allowed: READ}
+	]},
 	{title: "Patient Portal", rights: [
-		{name: "patient_account", title: "Account", allowed: CREATE | READ}]},
+		{name: "patient_account", title: "Account", allowed: CREATE | READ}
+	]},
 	{title: "Memo", rights: [
 		{name: "calendly", title: "Calendly Appointment", allowed: READ},
 		{name: "memo_mips", title: "Memo MIP", allowed: READ | UPDATE},
-		{name: "memo_notes", title: "Memo Notes", allowed: READ | CREATE}]},
+		{name: "memo_notes", title: "Memo Notes", allowed: READ | CREATE}
+	]},
 	{title: "Pharmacy", rights: [
 		{name: "pharmacy_fill", title: "Pharmacy Fill", allowed: ALL},
 		{name: "welldyne_adhoc", title: "Adhoc", allowed: CREATE | READ | DELETE},
-		{name: "welldyne_outbound", title: "Outbound Failed", allowed: READ | UPDATE}]}]
+		{name: "welldyne_never_started", title: "Never Started", allowed: READ | UPDATE | DELETE},
+		{name: "welldyne_outbound", title: "Outbound Failed", allowed: READ | UPDATE}
+	]}
+];
 
 // Permission
 function Permission(props) {

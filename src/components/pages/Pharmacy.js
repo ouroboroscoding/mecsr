@@ -19,12 +19,13 @@ import Tabs from '@material-ui/core/Tabs';
 // Pharmacy components
 import AdHoc from './pharmacy/AdHoc';
 import FillError from './pharmacy/FillError';
+import NeverStarted from './pharmacy/NeverStarted';
 import Outbound from './pharmacy/Outbound';
 
 /**
  * Pharmacy
  *
- * Page for pharmacy related info, errors, outreach, adhoc
+ * Page for pharmacy related info, errors, outbound, adhoc
  *
  * @name Pharmacy
  * @extends React.Component
@@ -50,6 +51,7 @@ export default function Pharmacy(props) {
 				>
 					<Tab label="Fill Errors" />
 					<Tab label="WDRx AdHoc" />
+					<Tab label="WDRx Never Started" />
 					<Tab label="WDRx Outbound Failures" />
 				</Tabs>
 			</AppBar>
@@ -59,7 +61,10 @@ export default function Pharmacy(props) {
 			<div className="adhoc" style={{display: tab === 1 ? 'block' : 'none'}}>
 				<AdHoc user={props.user} />
 			</div>
-			<div className="outreach" style={{display: tab === 2 ? 'block' : 'none'}}>
+			<div className="adhoc" style={{display: tab === 2 ? 'block' : 'none'}}>
+				<NeverStarted user={props.user} />
+			</div>
+			<div className="outbound" style={{display: tab === 3 ? 'block' : 'none'}}>
 				<Outbound user={props.user} />
 			</div>
 		</div>

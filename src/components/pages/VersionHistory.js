@@ -18,6 +18,11 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.14.0', 'September 10th, 2020', [
+		'Added WellDyneRX Never Started list to Pharmacy page.',
+		'Added Never Started reason to Triggers in Customer\'s RX tab.',
+		'Added Cancelled date and Opened State to Triggers in Customer\'s RX tab if data is available.'
+	]],
 	['1.13.0', 'September 8th, 2020', [
 		'Orders can now be manually added to the pharmacy fill process for those with the rights to do so.'
 	]],

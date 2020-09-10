@@ -47,15 +47,48 @@ function Trigger(props) {
 		);
 	}
 
+	let dates = null;
+
+	// If the order has been cancelled
+	if(props.cancelled) {
+
+		// If it was somehow shipped anyway
+		if(props.shipped) {
+			dates = [
+				<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{Utils.date(props.triggered, '-')}</span></Grid>,
+				<Grid item xs={12} md={4}><strong>Cancelled: </strong><span>{props.cancelled.split(' ')[0]}</span></Grid>,
+				<Grid item xs={12} md={4}><strong>Shipped: </strong><span>{props.shipped.split(' ')[0]}</span></Grid>
+			];
+		} else {
+			dates = [
+				<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{Utils.date(props.triggered, '-')}</span></Grid>,
+				<Grid item xs={12} md={8}><strong>Cancelled: </strong><span>{props.cancelled.split(' ')[0]}</span></Grid>
+			];
+		}
+	} else if(props.shipped) {
+		dates = [
+			<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{Utils.date(props.triggered, '-')}</span></Grid>,
+			<Grid item xs={12} md={4}><strong>Opened: </strong><span>{props.opened.split(' ')[0]}</span></Grid>,
+			<Grid item xs={12} md={4}><strong>Shipped: </strong><span>{props.shipped.split(' ')[0]}</span></Grid>
+		]
+	} else if(props.opened) {
+		dates = [
+			<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{Utils.date(props.triggered, '-')}</span></Grid>,
+			<Grid item xs={12} md={4}><strong>Opened: </strong><span>{props.opened.split(' ')[0]}</span></Grid>,
+			<Grid item xs={12} md={4}><strong>Opened Stage: </strong><span>{props.opened_state}</span></Grid>
+		]
+	} else {
+		dates = <Grid item xs={12} md={12}><strong>Triggered: </strong><span>{Utils.date(props.triggered, '-')}</span></Grid>
+	}
+
 	return (
 		<Paper className="padded">
 			<Grid container spacing={2}>
 				<Grid item xs={12} md={4}><strong>KNK Order: </strong><span>{props.crm_order}</span></Grid>
 				<Grid item xs={12} md={4}><strong>DoseSpot ID: </strong><span>{props.rx_id}</span></Grid>
 				<Grid item xs={12} md={4}><strong>Medication: </strong><span>{props.medication}</span></Grid>
-				<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{Utils.date(props.triggered, '-')}</span></Grid>
-				<Grid item xs={12} md={4}><strong>Opened: </strong><span>{props.opened ? props.opened.split(' ')[0] : ''}</span></Grid>
-				<Grid item xs={12} md={4}><strong>Shipped: </strong><span>{props.shipped ? props.shipped.split(' ')[0] : ''}</span></Grid>
+
+				{dates}
 				<Grid item xs={12} md={4}><strong>Eligible Since: </strong><span>{props.elig_since ? props.elig_since.split(' ')[0] : ''}</span></Grid>
 				<Grid item xs={12} md={8}><strong>Eligible Through: </strong><span>{props.elig_thru ? props.elig_thru.split(' ')[0] : ''}</span></Grid>
 				<Grid item xs={12}><strong>Raw: </strong><span>{props.raw}</span></Grid>
@@ -64,8 +97,10 @@ function Trigger(props) {
 						<Grid item xs={12}><strong>Outbound: </strong><span>{props.outbound_queue} ({props.outbound_reason})</span></Grid>
 					</React.Fragment>
 				}
+				{props.never_started &&
+					<Grid item xs={12}><strong>Never Started: </strong><span>{props.never_started}</span></Grid>
+				}
 				{props.adhoc_type &&
-
 					<Grid item xs={12}><strong>AdHoc: </strong><span>{props.adhoc_type}</span></Grid>
 				}
 				{(props.adhoc_type === null && Utils.hasRight(props.user, 'welldyne_adhoc', 'create') && !props.readOnly) &&
@@ -360,11 +395,13 @@ export default function RX(props) {
 			{triggers}
 			<div className="pageHeader">
 				<div ref={rxTitle} className="title">Prescriptions
-					<Tooltip title="Refresh Prescriptions">
-						<IconButton onClick={() => props.onRefresh('rx')}>
-							<RefreshIcon />
-						</IconButton>
-					</Tooltip>
+					{bSSO &&
+						<Tooltip title="Refresh Prescriptions">
+							<IconButton onClick={props.onRefresh}>
+								<RefreshIcon />
+							</IconButton>
+						</Tooltip>
+					}
 				</div>
 				{bSSO &&
 					<Tooltip title="Toggle DoseSpot SSO">
@@ -385,13 +422,7 @@ export default function RX(props) {
 			{prescriptions}
 			<hr/>
 			<div className="pageHeader">
-				<div className="title">HRT Lab Results
-					<Tooltip title="Refresh HRT Lab Results">
-						<IconButton onClick={() => props.onRefresh('hrt')}>
-							<RefreshIcon />
-						</IconButton>
-					</Tooltip>
-				</div>
+				<div className="title">HRT Lab Results</div>
 			</div>
 			{hrtLabs}
 		</React.Fragment>

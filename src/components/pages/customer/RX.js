@@ -27,6 +27,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 // Generic modules
 import Events from '../../../generic/events';
 import Rest from '../../../generic/rest';
+import Tools from '../../../generic/tools';
 
 // Local modules
 import Utils from '../../../utils';
@@ -128,6 +129,51 @@ export default function RX(props) {
 
 	// Refs
 	let rxTitle = useRef();
+	let fillOrder = useRef();
+
+	// Find valid orders for manual fill if the user has rights and we're not
+	//	in read-only mode
+	let lManualOrders = [];
+	if(Utils.hasRight(props.user, 'pharmacy_fill', 'create') && !props.readOnly) {
+
+		// If we have orders, pharmacy fill, and triggers
+		if(props.orders && props.pharmacyFill && props.triggers) {
+
+			// Go through the orders
+			for(let o of props.orders) {
+
+				// If the order exists in manual fills
+				if( props.pharmacyFill &&
+					props.pharmacyFill['fills'].length > 0 &&
+					Tools.afindi(props.pharmacyFill['fills'], 'crm_order', o.orderId) > -1) {
+					continue;
+				}
+
+				// If the order exists in fill errors
+				if( props.pharmacyFill &&
+					props.pharmacyFill['errors'].length > 0 &&
+					Tools.afindi(props.pharmacyFill['errors'], 'crm_order', o.orderId) > -1) {
+					continue;
+				}
+
+				// If the order exists in triggers
+				if( props.triggers &&
+					props.triggers.length > 0 &&
+					Tools.afindi(props.triggers, 'crm_order', o.orderId) > -1) {
+					continue;
+				}
+
+				// If we didn't find it yet, add it to the list
+				lManualOrders.push(o.orderId);
+			}
+		}
+	}
+
+	function fillAdd() {
+
+		// Let the parent know
+		props.onPharmacyFill(fillOrder.current.value);
+	}
 
 	// Toggle the SSO iframe
 	function toggleSSO() {
@@ -173,33 +219,69 @@ export default function RX(props) {
 		}
 	}
 
-
 	// Pharmacy Fill
-	let fill = null;
-	if(props.fillErrors === null) {
-		fill = <p>Loading...</p>
-	} else if(props.fillErrors.length === 0) {
-		fill = null;
+	let pharmacyFill = null;
+	if(props.pharmacyFill === null) {
+		pharmacyFill = <p>Loading...</p>
 	} else {
-		fill = (
-			<React.Fragment>
-				<div className="title">Pharmacy Fill Errors</div>
-				{props.fillErrors.map(o =>
-					<Paper key={o._id} className="padded">
-						<Grid container spacing={2}>
-							<Grid item xs={12} md={4}><strong>KNK Order: </strong><span>{o.crm_order}</span></Grid>
-							<Grid item xs={12} md={4}><strong>Type: </strong><span>{o.list}</span></Grid>
-							<Grid item xs={12} md={4}><strong>Reason: </strong><span>{o.reason}</span></Grid>
-							<Grid item xs={12} md={4}><strong>Fail Count: </strong><span>{o.fail_count}</span></Grid>
-							<Grid item xs={12} md={4}><strong>{o._created === o._updated ? 'Failed' : 'First Failure'}: </strong><span>{Utils.date(o._created, '-')}</span></Grid>
-							{o._created !== o._updated &&
-								<Grid item xs={12} md={4}><strong>Most Recent: </strong><span>{Utils.date(o._updated, '-')}</span></Grid>
-							}
-						</Grid>
-					</Paper>
-				)}
-			</React.Fragment>
-		)
+
+		// If we have fill and can create
+		let fill = null;
+		if(props.pharmacyFill['fills'].length > 0 || lManualOrders.length > 0) {
+			fill = (
+				<React.Fragment>
+					<div className="title">Manual Pharmacy Fill</div>
+					{props.pharmacyFill['fills'].map(o =>
+						<Paper key={o._id} className="padded">
+							<Grid container spacing={2}>
+								<Grid item xs={12} md={4}><strong>KNK Order: </strong><span>{o.crm_order}</span></Grid>
+								<Grid item xs={12} md={4}><strong>Agent: </strong><span>{o.user_name}</span></Grid>
+								<Grid item xs={12} md={4}><strong>Created: </strong><span>{Utils.date(o._created, '-')}</span></Grid>
+							</Grid>
+						</Paper>
+					)}
+					{lManualOrders.length > 0 &&
+						<Paper className="padded">
+							<strong>Add Order: </strong>
+							<Select
+								inputRef={fillOrder}
+								native
+							>
+								{lManualOrders.map(s =>
+									<option>{s}</option>
+								)}
+							</Select>
+							<Button variant="contained" color="primary" onClick={fillAdd} style={{height: '32px', marginLeft: '10px'}}>Add Manual Fill</Button>
+						</Paper>
+					}
+				</React.Fragment>
+			);
+		}
+
+		let errors = null;
+		if(props.pharmacyFill['errors'].length > 0) {
+			errors = (
+				<React.Fragment>
+					<div className="title">Pharmacy Fill Errors</div>
+					{props.pharmacyFill['errors'].map(o =>
+						<Paper key={o._id} className="padded">
+							<Grid container spacing={2}>
+								<Grid item xs={12} md={4}><strong>KNK Order: </strong><span>{o.crm_order}</span></Grid>
+								<Grid item xs={12} md={4}><strong>Type: </strong><span>{o.list}</span></Grid>
+								<Grid item xs={12} md={4}><strong>Reason: </strong><span>{o.reason}</span></Grid>
+								<Grid item xs={12} md={4}><strong>Fail Count: </strong><span>{o.fail_count}</span></Grid>
+								<Grid item xs={12} md={4}><strong>{o._created === o._updated ? 'Failed' : 'First Failure'}: </strong><span>{Utils.date(o._created, '-')}</span></Grid>
+								{o._created !== o._updated &&
+									<Grid item xs={12} md={4}><strong>Most Recent: </strong><span>{Utils.date(o._updated, '-')}</span></Grid>
+								}
+							</Grid>
+						</Paper>
+					)}
+				</React.Fragment>
+			);
+		}
+
+		pharmacyFill = [fill, errors];
 	}
 
 	// Trigger
@@ -207,7 +289,7 @@ export default function RX(props) {
 	if(props.triggers === null) {
 		triggers = <p>Loading...</p>
 	}
-	else if(props.triggers === 0) {
+	else if(props.triggers.length === 0) {
 		triggers = null;
 	}
 	else {
@@ -309,7 +391,7 @@ export default function RX(props) {
 	// Render
 	return (
 		<React.Fragment>
-			{fill}
+			{pharmacyFill}
 			{triggers}
 			<div className="pageHeader">
 				<div ref={rxTitle} className="title">Prescriptions

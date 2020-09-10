@@ -81,6 +81,8 @@ export default function Outbound(props) {
 			if(res.error && !Utils.restError(res.error)) {
 				if(res.error.code === 1802) {
 					Events.trigger('error', 'No associated trigger can be found for this error, you will need to manually inform WellDyneRx to remove this.');
+				} else if(res.error.code === 1101) {
+					Events.trigger('error', 'The trigger associated with this Outbound Failed Claim already has an AdHoc, a second can not be made until the first is processed.');
 				} else {
 					Events.trigger('error', JSON.stringify(res.error));
 				}

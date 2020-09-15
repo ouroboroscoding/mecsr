@@ -39,7 +39,7 @@ function clear() {
 	delete localStorage['_session'];
 
 	// Delete the cookie
-	Cookies.remove('_session', '.' + window.location.hostname, '/');
+	Cookies.remove('_session', process.env.REACT_APP_MEMS_DOMAIN, '/');
 }
 
 /**
@@ -146,7 +146,7 @@ function store(token) {
 	localStorage['_session'] = token
 
 	// Set the session in a cookie
-	Cookies.set('_session', token, 86400, '.' + window.location.hostname, '/');
+	Cookies.set('_session', token, 86400, process.env.REACT_APP_MEMS_DOMAIN, '/');
 }
 
 /**

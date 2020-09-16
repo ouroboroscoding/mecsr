@@ -50,8 +50,6 @@ export default function Misc(props) {
 
 		// If we have a user
 		if(props.user) {
-			console.log(process.env);
-
 			if(Utils.hasRight(props.user, 'patient_account', 'read')) {
 				patientFetch();
 			}

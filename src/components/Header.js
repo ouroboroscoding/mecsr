@@ -50,7 +50,7 @@ import Transfer from './composites/Transfer';
 import Resolve from './composites/Resolve';
 import { CustomListsDialog } from './composites/CustomLists';
 
-// Site components
+// Composite components
 import Loader from './Loader';
 
 // Data modules
@@ -63,6 +63,7 @@ import Rest from '../generic/rest';
 import Tools from '../generic/tools';
 
 // Local modules
+import TwoWay from '../twoway';
 import Utils from '../utils';
 
 // Customer Item component
@@ -88,6 +89,8 @@ function CustomerItem(props) {
 			Utils.customerPath(props.phone, props.id),
 			props.phone
 		)
+
+
 	}
 
 	// X click
@@ -176,7 +179,7 @@ function CustomerItem(props) {
 	return (
 		<React.Fragment>
 			<Link to={Utils.customerPath(props.phone, props.id)} onClick={click}>
-				<ListItem button selected={props.selected}>
+				<ListItem button selected={props.selected} className={props.transfer ? 'transferred' : ''}>
 					<ListItemAvatar>
 						{props.newMsgs ?
 							<Avatar style={{backgroundColor: 'red'}}><NewReleasesIcon /></Avatar> :
@@ -467,6 +470,7 @@ export default class Header extends React.Component {
 		this.viewedDuplicate = this.viewedDuplicate.bind(this);
 		this.viewedRemove = this.viewedRemove.bind(this);
 		this.visibilityChange = this.visibilityChange.bind(this);
+		this.wsMessage = this.wsMessage.bind(this);
 	}
 
 	componentDidMount() {
@@ -511,7 +515,7 @@ export default class Header extends React.Component {
 		}
 		if(this.iUnclaimed) {
 			clearInterval(this.iUnclaimed);
-			this.iUpdates = null;
+			this.iUnclaimed = null;
 		}
 	}
 
@@ -642,6 +646,8 @@ export default class Header extends React.Component {
 
 	menuItem(pathname, number) {
 
+		console.log(pathname);
+
 		// New state
 		let state = {
 			path: pathname
@@ -653,7 +659,7 @@ export default class Header extends React.Component {
 		}
 
 		// If we clicked on a claimed phone number
-		if(pathname.indexOf('/'+number+'/') > -1) {
+		if(pathname.indexOf('customer/'+number+'/') > -1) {
 
 			// Do we have a new messages flag for this number?
 			if(number in this.state.newMsgs) {
@@ -669,6 +675,35 @@ export default class Header extends React.Component {
 
 				// Store the new messages in local storage
 				localStorage.setItem('newMsgs', JSON.stringify(dNewMsgs))
+			}
+
+			// Look for it in claimed
+			let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', number);
+
+			// If we have it, and it's a transfer
+			if(iIndex > -1 && this.state.claimed[iIndex].transferredBy) {
+
+				// Clone the claims
+				let lClaimed = Tools.clone(this.state.claimed);
+
+				// Remove the transferredBy
+				lClaimed[iIndex].transferredBy = null;
+
+				// Update the state
+				state.claimed = lClaimed;
+
+				// Tell the server
+				Rest.update('monolith', 'customer/claim/clear', {
+					phoneNumber: number
+				}).done(res => {
+					// If there's an error or warning
+					if(res.error && !Utils.restError(res.error)) {
+						Events.trigger('error', JSON.stringify(res.error));
+					}
+					if(res.warning) {
+						Events.trigger('warning', JSON.stringify(res.warning));
+					}
+				});
 			}
 		}
 
@@ -697,12 +732,10 @@ export default class Header extends React.Component {
 			numbers: lNumbers
 		}).done(res => {
 
-			// If there's an error
+			// If there's an error or warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -745,7 +778,7 @@ export default class Header extends React.Component {
 					}
 
 					// Notify
-					Events.trigger('success', 'New messages!');
+					Events.trigger('info', 'New messages!');
 				}
 			}
 		});
@@ -838,6 +871,7 @@ export default class Header extends React.Component {
 								onClick={this.menuItem}
 								phone={o.customerPhone}
 								selected={this.state.path === Utils.customerPath(o.customerPhone, o.customerId)}
+								transfer={o.transferredBy}
 								user={this.state.user}
 							/>
 						)}
@@ -927,11 +961,16 @@ export default class Header extends React.Component {
 
 	signedIn(user) {
 
+		console.log(user);
+
 		// Hide any modals and set the user
 		this.setState({
 			"overwrite": Utils.hasRight(user, 'csr_overwrite', 'create'),
 			"user": user
 		}, () => {
+
+			// Track user websocket messages
+			TwoWay.track('monolith', 'user-' + user.id, this.wsMessage);
 
 			// Fetch the claimed conversations
 			this.claimedFetch();
@@ -974,7 +1013,11 @@ export default class Header extends React.Component {
 		});
 	}
 
+	// Called when the user signs out
 	signedOut() {
+
+		// Stop tracking user websocket messages
+		TwoWay.untrack('monolith', 'user-' + this.state.user.id, this.wsMessage);
 
 		// Hide and modals and set the user to false
 		this.setState({
@@ -990,21 +1033,20 @@ export default class Header extends React.Component {
 		}
 		if(this.iUnclaimed) {
 			clearInterval(this.iUnclaimed);
-			this.iUpdates = null;
+			this.iUnclaimed = null;
 		}
 	}
 
+	// Gets the number of unclaimed messages
 	unclaimedCount() {
 
 		// Fetch the unclaimed count from the service
 		Rest.read('monolith', 'msgs/unclaimed/count', {}).done(res => {
 
-			// If there's an error
+			// If there's an error or warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -1018,9 +1060,9 @@ export default class Header extends React.Component {
 
 	update() {
 		this.newMessages();
-		this.claimedFetch();
 	}
 
+	// A viewed conversation was added
 	viewedAdd(number, name) {
 
 		// Does it already exist in the claimed?
@@ -1068,12 +1110,10 @@ export default class Header extends React.Component {
 					phoneNumber: number
 				}).done(res => {
 
-					// If there's an error
+					// If there's an error or warning
 					if(res.error && !Utils.restError(res.error)) {
 						Events.trigger('error', JSON.stringify(res.error));
 					}
-
-					// If there's a warning
 					if(res.warning) {
 						Events.trigger('warning', JSON.stringify(res.warning));
 					}
@@ -1109,6 +1149,7 @@ export default class Header extends React.Component {
 		}
 	}
 
+	// A viewed conversation matches a claimed conversation
 	viewedDuplicate(number, user_id) {
 
 		// Find the index of the viewed
@@ -1128,6 +1169,7 @@ export default class Header extends React.Component {
 		}
 	}
 
+	// A viewed conversation was removed
 	viewedRemove(number, switch_path) {
 
 		// Find the index of the remove viewed
@@ -1151,6 +1193,7 @@ export default class Header extends React.Component {
 		}
 	}
 
+	// Current tab changed state from hidden/visible
 	visibilityChange(property, state) {
 
 		// If we've become visible
@@ -1181,8 +1224,62 @@ export default class Header extends React.Component {
 			}
 			if(this.iUnclaimed) {
 				clearInterval(this.iUnclaimed);
-				this.iUpdates = null;
+				this.iUnclaimed = null;
 			}
+		}
+	}
+
+	// WebSocket message
+	wsMessage(data) {
+
+		// Move forward based on the type
+		switch(data.type) {
+
+			// If someone transferred a claim to us
+			case 'transfer':
+
+				// Get the ID and name from the phone number
+				Rest.read('monolith', 'customer/id/byPhone', {
+					phoneNumber: data.phoneNumber
+				}).done(res => {
+
+					// If there's an error or warning
+					if(res.error && !Utils.restError(res.error)) {
+						Events.trigger('error', JSON.stringify(res.error));
+					}
+					if(res.warning) {
+						Events.trigger('warning', JSON.stringify(res.warning));
+					}
+
+					// If there's data
+					if(res.data) {
+
+						// Clone the claims
+						let lClaimed = Tools.clone(this.state.claimed);
+
+						// Add the number and transferred by to the data
+						res.data['customerPhone'] = data.phoneNumber;
+						res.data['transferredBy'] = data.transferredBy;
+
+						// Push the transfer to the top
+						lClaimed.unshift(res.data);
+
+						// Save the state
+						this.setState({
+							claimed: lClaimed
+						});
+
+						// Notify the agent
+						Events.trigger('info', 'A conversation claim has been transferred to you');
+					}
+				})
+
+				break;
+
+			// Unknown type
+			default:
+				console.error('Unknown websocket message:', data);
+				break;
 		}
 	}
 }

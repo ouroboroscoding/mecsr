@@ -31,9 +31,6 @@ export default function(url, conf) {
 	// Create the WebSocket
 	let oSock = new WebSocket(url);
 
-	// Add the URL to the instance
-	oSock.url = url;
-
 	// Set the open callback
 	oSock.onopen = function() {
 

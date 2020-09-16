@@ -18,6 +18,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.15.0', 'September 16th, 2020', [
+		'Agents will now be notified of transferred claims immediately upon transfer.',
+		'Transferred claims will have a light blue background until they are selected for the first time.'
+	]],
 	['1.14.0', 'September 10th, 2020', [
 		'Added WellDyneRX Never Started list to Pharmacy page.',
 		'Added Never Started reason to Triggers in Customer\'s RX tab.',

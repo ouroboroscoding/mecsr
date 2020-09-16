@@ -25,6 +25,7 @@ class LibraryWritersAreOftenIdiots extends React.Component {
 		// Bind methods to this instance
 		this.error = this.error.bind(this);
 		this.popup = this.popup.bind(this);
+		this.success = this.success.bind(this);
 		this.warning = this.warning.bind(this);
 	}
 
@@ -32,8 +33,9 @@ class LibraryWritersAreOftenIdiots extends React.Component {
 
 		// Track any popup events
 		Events.add('error', this.error);
+		Events.add('info', this.popup);
 		Events.add('popup', this.popup);
-		Events.add('success', this.popup);
+		Events.add('success', this.success);
 		Events.add('warning', this.warning);
 	}
 
@@ -41,8 +43,9 @@ class LibraryWritersAreOftenIdiots extends React.Component {
 
 		// Stop tracking any popup events
 		Events.remove('error', this.error);
+		Events.remove('info', this.popup);
 		Events.remove('popup', this.popup);
-		Events.remove('success', this.popup);
+		Events.remove('success', this.success);
 		Events.remove('warning', this.warning);
 	}
 
@@ -50,7 +53,7 @@ class LibraryWritersAreOftenIdiots extends React.Component {
 		this.popup(msg, 'error');
 	}
 
-	popup(text, type='success') {
+	popup(text, type='info') {
 
 		// Add the popup
 		this.props.enqueueSnackbar(text, {variant: type});
@@ -58,6 +61,10 @@ class LibraryWritersAreOftenIdiots extends React.Component {
 
 	render() {
 		return <div />
+	}
+
+	success(msg) {
+		this.popup(msg, 'success');
 	}
 
 	warning(msg) {

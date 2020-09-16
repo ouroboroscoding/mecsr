@@ -515,7 +515,7 @@ export default class Header extends React.Component {
 		}
 		if(this.iUnclaimed) {
 			clearInterval(this.iUnclaimed);
-			this.iUpdates = null;
+			this.iUnclaimed = null;
 		}
 	}
 
@@ -732,12 +732,10 @@ export default class Header extends React.Component {
 			numbers: lNumbers
 		}).done(res => {
 
-			// If there's an error
+			// If there's an error or warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -780,7 +778,7 @@ export default class Header extends React.Component {
 					}
 
 					// Notify
-					Events.trigger('success', 'New messages!');
+					Events.trigger('info', 'New messages!');
 				}
 			}
 		});
@@ -1035,7 +1033,7 @@ export default class Header extends React.Component {
 		}
 		if(this.iUnclaimed) {
 			clearInterval(this.iUnclaimed);
-			this.iUpdates = null;
+			this.iUnclaimed = null;
 		}
 	}
 
@@ -1062,7 +1060,6 @@ export default class Header extends React.Component {
 
 	update() {
 		this.newMessages();
-		this.claimedFetch();
 	}
 
 	// A viewed conversation was added
@@ -1113,12 +1110,10 @@ export default class Header extends React.Component {
 					phoneNumber: number
 				}).done(res => {
 
-					// If there's an error
+					// If there's an error or warning
 					if(res.error && !Utils.restError(res.error)) {
 						Events.trigger('error', JSON.stringify(res.error));
 					}
-
-					// If there's a warning
 					if(res.warning) {
 						Events.trigger('warning', JSON.stringify(res.warning));
 					}
@@ -1229,7 +1224,7 @@ export default class Header extends React.Component {
 			}
 			if(this.iUnclaimed) {
 				clearInterval(this.iUnclaimed);
-				this.iUpdates = null;
+				this.iUnclaimed = null;
 			}
 		}
 	}
@@ -1237,5 +1232,54 @@ export default class Header extends React.Component {
 	// WebSocket message
 	wsMessage(data) {
 
+		// Move forward based on the type
+		switch(data.type) {
+
+			// If someone transferred a claim to us
+			case 'transfer':
+
+				// Get the ID and name from the phone number
+				Rest.read('monolith', 'customer/id/byPhone', {
+					phoneNumber: data.phoneNumber
+				}).done(res => {
+
+					// If there's an error or warning
+					if(res.error && !Utils.restError(res.error)) {
+						Events.trigger('error', JSON.stringify(res.error));
+					}
+					if(res.warning) {
+						Events.trigger('warning', JSON.stringify(res.warning));
+					}
+
+					// If there's data
+					if(res.data) {
+
+						// Clone the claims
+						let lClaimed = Tools.clone(this.state.claimed);
+
+						// Add the number and transferred by to the data
+						res.data['customerPhone'] = data.phoneNumber;
+						res.data['transferredBy'] = data.transferredBy;
+
+						// Push the transfer to the top
+						lClaimed.unshift(res.data);
+
+						// Save the state
+						this.setState({
+							claimed: lClaimed
+						});
+
+						// Notify the agent
+						Events.trigger('info', 'A conversation claim has been transferred to you');
+					}
+				})
+
+				break;
+
+			// Unknown type
+			default:
+				console.error('Unknown websocket message:', data);
+				break;
+		}
 	}
 }

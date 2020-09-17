@@ -16,6 +16,7 @@ import Box from '@material-ui/core/Box';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Grid from '@material-ui/core/Grid';
+import Select from '@material-ui/core/Select';
 
 // Components
 import MsgSummary from '../composites/MsgSummary';
@@ -42,6 +43,7 @@ export default class Unclaimed extends React.Component {
 		// Initial state
 		this.state = {
 			filtered: [],
+			order: Tools.safeLocalStorage('unclaimed_order', 'ASC'),
 			records: [],
 			sales: Tools.safeLocalStorage('unclaimed_sales', 'Y') === 'Y',
 			salesNoSent: Tools.safeLocalStorage('unclaimed_sales_no_sent', 'Y') === 'Y',
@@ -53,6 +55,7 @@ export default class Unclaimed extends React.Component {
 		this.claim = this.claim.bind(this);
 		this.filter = this.filter.bind(this);
 		this.hide = this.hide.bind(this);
+		this.orderChanged = this.orderChanged.bind(this);
 		this.refresh = this.refresh.bind(this);
 		this.signedIn = this.signedIn.bind(this);
 		this.signedOut = this.signedOut.bind(this);
@@ -152,7 +155,9 @@ export default class Unclaimed extends React.Component {
 	fetch() {
 
 		// Fetch the unclaimed
-		Rest.read('monolith', 'msgs/unclaimed', {}).done(res => {
+		Rest.read('monolith', 'msgs/unclaimed', {
+			order: this.state.order
+		}).done(res => {
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
@@ -207,6 +212,18 @@ export default class Unclaimed extends React.Component {
 		return filtered;
 	}
 
+	orderChanged(event) {
+
+		// Get the new value
+		let sOrder = event.target.value;
+
+		// Set the new state
+		this.setState({order: sOrder}, () => {
+			localStorage.setItem('unclaimed_order', sOrder);
+			this.fetch();
+		});
+	}
+
 	refresh() {
 		this.fetch();
 	}
@@ -215,8 +232,7 @@ export default class Unclaimed extends React.Component {
 		return (
 			<Box id="unclaimed">
 				<Grid container spacing={0} className="header">
-					<Grid item xs={12} sm={6} md={4} className="filters">
-						<span className="title">Filters: </span>
+					<Grid item xs={12} md={6} lg={4} className="filters">
 						<FormControlLabel
 							control={<Checkbox color="primary" checked={this.state.support} onChange={this.supportChanged} name="supportFilter" />}
 							label="Support"
@@ -233,7 +249,18 @@ export default class Unclaimed extends React.Component {
 						/>
 						<span>)</span>
 					</Grid>
-					<Grid item xs={12} sm={6} md={4} className="count">
+					<Grid item xs={6} lg={4} className="order">
+						<Select
+							native
+							onChange={this.orderChanged}
+							value={this.state.order}
+							variant="outlined"
+						>
+							<option value="DESC">Newest to Oldest</option>
+							<option value="ASC">Oldest to Newest</option>
+						</Select>
+					</Grid>
+					<Grid item xs={6} lg={4} className="count">
 						<span className="title">Count: </span><span>{this.state.filtered.length}</span>
 					</Grid>
 				</Grid>

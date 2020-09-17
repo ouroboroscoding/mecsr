@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.15.2', 'September 17th, 2020', [
+		'Can now select the order of unclaimed conversations, newest to oldest, or oldest to newest.'
+	]],
 	['1.15.0', 'September 16th, 2020', [
 		'Agents will now be notified of transferred claims immediately upon transfer.',
 		'Transferred claims will have a light blue background until they are selected for the first time.'

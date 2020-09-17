@@ -1236,7 +1236,7 @@ export default class Header extends React.Component {
 		switch(data.type) {
 
 			// If someone transferred a claim to us
-			case 'transfer':
+			case 'claim_transfered':
 
 				// Get the ID and name from the phone number
 				Rest.read('monolith', 'customer/id/byPhone', {
@@ -1273,8 +1273,42 @@ export default class Header extends React.Component {
 						Events.trigger('info', 'A conversation claim has been transferred to you');
 					}
 				})
-
 				break;
+
+			// If a claim was removed
+			case 'claim_removed':
+
+				// Look for the claim
+				let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
+
+				// If we found one
+				if(iIndex > -1) {
+
+					// Clone the claims
+					let lClaimed = Tools.clone(this.state.claimed);
+
+					// Delete the claim
+					lClaimed.splice(iIndex, 1);
+
+					// Set the new state
+					this.setState({
+						claimed: lClaimed
+					});
+
+					// If we're on a customer
+					let lPath = Utils.parsePath(this.state.path);
+					if(lPath[0] === 'customer') {
+
+						// If it's the one removed
+						if(lPath[1] === data.phoneNumber) {
+
+							// Switch to view
+							Events.trigger('viewedAdd', lPath[1], lPath[2]);
+							Events.trigger('error', 'This customer is not claimed, switching to view only.');
+						}
+					}
+				}
+				break
 
 			// Unknown type
 			default:

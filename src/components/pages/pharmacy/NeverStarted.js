@@ -123,6 +123,8 @@ export default function NeverStarted(props) {
 			if(res.error && !Utils.restError(res.error)) {
 				if(res.error.code === 1803) {
 					Events.trigger('error', "Can't find the file " + res.error.msg + ' on the FTP server');
+				} else if(res.error.code === 1804) {
+					Events.trigger('error', 'File contains invalid data, contact WellDyneRX');
 				} else {
 					Events.trigger('error', JSON.stringify(res.error));
 				}

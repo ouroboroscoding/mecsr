@@ -106,8 +106,9 @@ export default class Customer extends React.Component {
 					customer: 0,
 					hrtLabs: 0,
 					mips: 0,
+					pharmacy_fill: {fills: [], errors: []},
 					prescriptions: 0,
-					triggers: 0
+					triggers: []
 				});
 			}
 

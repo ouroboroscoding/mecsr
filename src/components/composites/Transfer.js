@@ -22,6 +22,9 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 
+// Composite components
+import { CustomListsForm } from './CustomLists';
+
 // Generic modules
 import Events from '../../generic/events';
 import Rest from '../../generic/rest';
@@ -39,6 +42,7 @@ export default function Transfer(props) {
 
 	// Refs
 	let noteRef = useRef();
+	let listRef = useRef();
 
 	// Effects
 	useEffect(() => {
@@ -92,6 +96,9 @@ export default function Transfer(props) {
 
 		// Check for notes
 		let content = noteRef.current.value;
+
+		// Add to the list
+		listRef.current.run();
 
 		// If we got text
 		if(content.trim() !== '') {
@@ -162,6 +169,13 @@ export default function Transfer(props) {
 						)}
 					</Select>
 				</FormControl></p>
+				<p><CustomListsForm
+					customer={props.customerId}
+					name={props.name}
+					number={props.number}
+					optional={true}
+					ref={listRef}
+				/></p>
 			</DialogContent>
 			<DialogActions>
 				<Button variant="contained" color="secondary" onClick={props.onClose}>

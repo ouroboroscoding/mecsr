@@ -333,6 +333,143 @@ CustomLists.propTypes = {
 }
 
 /**
+ * Custom Lists Form
+ *
+ * Displays a form for added a conversation to a list
+ *
+ * @name CustomListsForm
+ * @access public
+ * @extends React.Component
+ */
+export class CustomListsForm extends React.Component {
+
+	constructor(props) {
+
+		// Call the parent constructor
+		super(props);
+
+		// Get the lists
+		let lLists = customLists.fetch();
+		let sList = Tools.safeLocalStorage('customListAdd', '-1');
+
+		// If the list is optional
+		if(props.optional) {
+			sList = '0';
+		}
+
+		// Else, ff the list is not in the available ones
+		else if(sList !== '-1' && Tools.afindi(lLists, '_id', sList) === -1) {
+			sList = '-1';
+		}
+
+		// Initial state
+		this.state = {
+			list: sList,
+			lists: lLists
+		};
+
+		// Refs
+		this.listRef = null;
+		this.titleRef = null;
+
+		// Bind methods
+		this.listsChanged = this.listsChanged.bind(this);
+		this.selectChanged = this.selectChanged.bind(this);
+	}
+
+	componentDidMount() {
+		customLists.track(this.listsChanged);
+	}
+
+	componentWillUnmount() {
+		customLists.track(this.listsChanged, true);
+	}
+
+	listsChanged(lists) {
+		this.setState({lists: lists});
+	}
+
+	selectChanged(event) {
+		this.setState({list: this.listRef.value});
+	}
+
+	itemCreate(list, callback) {
+		customLists.createItem(list, {
+			customer: this.props.customer,
+			name: this.props.name || '(empty)',
+			number: this.props.number
+		}, _id => {
+			if(callback) {
+				callback();
+			}
+			localStorage.setItem('customListAdd', list);
+		});
+	}
+
+	render() {
+		return (
+			<React.Fragment>
+				<Select
+					inputRef={ref => this.listRef = ref}
+					native
+					onChange={this.selectChanged}
+					value={this.state.list}
+					variant="outlined"
+				>
+					{this.props.optional &&
+						<option value="0">Add conversation to list...</option>
+					}
+					<option value="-1">New list</option>
+					{this.state.lists.map(o =>
+						<option
+							key={o._id}
+							value={o._id}
+						>
+							{o.title}
+						</option>
+					)}
+				</Select>
+				{this.state.list === '-1' &&
+					<TextField
+						inputRef={ref => this.titleRef = ref}
+						variant="outlined"
+					/>
+				}
+			</React.Fragment>
+		);
+	}
+
+	run(callback=null) {
+
+		// If nothing was selected
+		if(this.state.list === '0') {
+			return;
+		}
+
+		// If we need a new list
+		if(this.state.list === '-1') {
+
+			// Store the new title minus any useless spacing
+			let sTitle = this.titleRef.value.trim();
+
+			// Return if we have no value
+			if(sTitle.length === 0) {
+				return;
+			}
+
+			// Create the list
+			customLists.createList(sTitle, _id => {
+
+				// Create the item
+				this.itemCreate(_id, callback);
+			});
+		} else {
+			this.itemCreate(this.state.list, callback);
+		}
+	}
+}
+
+/**
  * Custom Lists Dialog
  *
  * Displays a dialog for adding a conversation to a list
@@ -344,73 +481,15 @@ CustomLists.propTypes = {
  */
 export function CustomListsDialog(props) {
 
-	// State
-	let [list, listSet] = useState(Tools.safeLocalStorage('customListAdd', '-1'));
-	let [lists, listsSet] = useState(customLists.fetch());
-
 	// Refs
-	let listRef = useRef();
-	let titleRef = useRef();
+	let formRef = useRef();
 
-	// Track list data effect
-	useEffect(() => {
-
-		// Track custom lists changes
-		customLists.track(listsChanged);
-
-		// Remove the tracking when we're done
-		return () => customLists.track(listsChanged, true);
-
-	}, []);
-
-	function listsChanged(lists) {
-		listsSet(lists);
+	// Dialog submit
+	function submit() {
+		formRef.current.run(props.onClose);
 	}
 
-	function selectChanged(event) {
-		listSet(listRef.current.value);
-	}
-
-	function itemCreate(list) {
-		customLists.createItem(list, {
-			"customer": props.customer,
-			"name": props.name || '(empty)',
-			"number": props.number
-		}, _id => {
-			props.onClose();
-			localStorage.setItem('customListAdd', list);
-		});
-	}
-
-	function submit(event) {
-
-		// If we need a new list
-		if(list === '-1') {
-
-			// Store the new title minus any useless spacing
-			let sTitle = titleRef.current.value.trim();
-
-			// Return if we have no value
-			if(sTitle.length === 0) {
-				return;
-			}
-
-			// Create the list
-			customLists.createList(sTitle, _id => {
-
-				// Create the item
-				itemCreate(_id);
-			});
-		} else {
-			itemCreate(list);
-		}
-	}
-
-	// If the list is not in the available ones
-	if(list !== '-1' && Tools.afindi(lists, '_id', list) === -1) {
-		listSet('-1');
-	}
-
+	// Render
 	return (
 		<Dialog
 			maxWidth="lg"
@@ -425,29 +504,12 @@ export function CustomListsDialog(props) {
 				<Typography type="p">
 					Add {props.name} {Utils.nicePhone(props.number)} to which Custom List<br /><br />
 				</Typography>
-				<Select
-					inputRef={listRef}
-					native
-					onChange={selectChanged}
-					value={list}
-					variant="outlined"
-				>
-					<option value="-1">New list</option>
-					{lists.map(o =>
-						<option
-							key={o._id}
-							value={o._id}
-						>
-							{o.title}
-						</option>
-					)}
-				</Select>
-				{list === '-1' &&
-					<TextField
-						inputRef={titleRef}
-						variant="outlined"
-					/>
-				}
+				<CustomListsForm
+					customer={props.customer}
+					name={props.name}
+					number={props.number}
+					ref={formRef}
+				/>
 			</DialogContent>
 			<DialogActions>
 				<Button variant="contained" color="secondary" onClick={props.onClose}>

@@ -233,6 +233,8 @@ function CustomerItem(props) {
 				<Transfer
 					customerId={props.id}
 					ignore={transfer}
+					name={props.name}
+					number={props.phone}
 					onClose={e => transferSet(false)}
 					onSubmit={transferSubmit}
 				/>
@@ -412,6 +414,8 @@ function ViewItem(props) {
 				<Transfer
 					customerId={props.id}
 					ignore={transfer}
+					name={props.name}
+					number={props.phone}
 					onClose={e => transferSet(false)}
 					onSubmit={transferSubmit}
 				/>

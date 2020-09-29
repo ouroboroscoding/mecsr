@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.15.5', 'September 29th, 2020', [
+		'Can now select a custom list for a conversation at the same time as transfering.'
+	]],
 	['1.15.2', 'September 17th, 2020', [
 		'Can now select the order of unclaimed conversations, newest to oldest, or oldest to newest.'
 	]],

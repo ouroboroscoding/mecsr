@@ -277,6 +277,10 @@ export default function Templates(props) {
 							<TableCell>{"{shipping_last}"}</TableCell>
 							<TableCell>Kent</TableCell>
 						</TableRow>
+						<TableRow>
+							<TableCell>{"{chrt_link}"}</TableCell>
+							<TableCell>https://www.maleexcelmip.com/mip/form/CHRT?landing_id=Kent-ckent@domain.com-2020-07-12-MIP-H1&formId=MIP-H1</TableCell>
+						</TableRow>
 					</TableBody>
 				</Table>
 			</div>

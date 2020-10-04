@@ -470,6 +470,32 @@ export default class SMS extends React.Component {
 					}
 					sReplacement = this.props.customer.billing.lastName;
 					break;
+				case 'chrt_link':
+					if(!this.props.mips) {
+						Event.trigger('error', 'Can not use template without MIP data');
+						return;
+					}
+
+					// Existing landing ID
+					let sLandingId = false;
+
+					// Go through each mip available
+					for(let o of this.props.mips) {
+
+						// If it's an H1
+						if(o.form == 'MIP-H1') {
+							sLandingId = o.id;
+							break;
+						}
+					}
+
+					// If we have an ID
+					if(sLandingId) {
+						sReplacement = `https://www.maleexcelmip.com/mip/form/CHRT?landing_id=${sLandingId}&formId=MIP-H1`
+					} else {
+						sReplacement = 'https://www.maleexcelmip.com/mip/form/hsymp?formId=MIP-H1';
+					}
+					break;
 				case 'email':
 					if(!this.props.customer) {
 						Event.trigger('error', 'Can not use template without customer data');

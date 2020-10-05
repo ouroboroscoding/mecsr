@@ -483,7 +483,7 @@ export default class SMS extends React.Component {
 					for(let o of this.props.mips) {
 
 						// If it's an H1
-						if(o.form == 'MIP-H1' && o.complete === 'Y') {
+						if(o.form === 'MIP-H1' && o.complete === 'Y') {
 							sLandingId = o.id;
 							break;
 						}

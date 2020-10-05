@@ -219,7 +219,7 @@ export default function Misc(props) {
 			inner = (
 				<Paper className="padded">
 					<Grid container spacing={2}>
-						<Grid item xs={12} md={6}><strong>Activated: </strong><span>{patient.active ? 'Yes' : 'No'}</span></Grid>
+						<Grid item xs={12} md={6}><strong>Activated: </strong><span>{patient.activated ? 'Yes' : 'No'}</span></Grid>
 						<Grid item xs={12} md={6}><strong>Email: </strong><span>{patient.email}</span></Grid>
 						<Grid item xs={12} md={6}><strong>CRM: </strong><span>{_CRM_TYPE[patient.crm_type]} / {patient.crm_id}</span></Grid>
 						{patient.rx_type &&

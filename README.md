@@ -1,5 +1,5 @@
 # MeCSR
-Male Excel CSR Portal
+Male Excel Customer Support
 
 ## Clone this repository
 
@@ -20,7 +20,7 @@ In the project directory, you can run:
 ### `npm start`
 
 Runs the app in the development mode.<br />
-Open [https://mecsr.local:3003](https://mecsr.local:3003) to view it in the browser.
+Open [https://cs.mems.local:3003](https://cs.mems.local:3003) to view it in the browser.
 
 The page will reload if you make edits.<br />
 You will also see any lint errors in the console.

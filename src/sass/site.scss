@@ -101,25 +101,62 @@ td {
 	}
 }
 
+/* classes */
 .MuiPaper-root.padded {
 	margin-bottom: 20px;
 	padding: 10px;
 }
 
+.MuiTextField-root {
+	width: 100%;
+}
+
 .MuiTypography-h1, .MuiTypography-h2, .MuiTypography-h3,
 .MuiTypography-h4, .MuiTypography-h5, .MuiTypography-h6 {
-	margin-bottom: 5px;
+	font-weight: 400 !important;
+	margin-bottom: 10px !important;
+}
+
+.MuiTypography-h1, .MuiTypography-h2, .MuiTypography-h3,
+.MuiTypography-h4, .MuiTypography-h5, .MuiTypography-h6 {
+	font-weight: 400 !important;
+	margin-bottom: 10px !important;
+}
+
+.MuiTypography-root.title {
+	font-size: 110%;
+	font-weight: bold;
+}
+
+.MuiBox-root.rounded {
+	border: 1px solid #cecece;
+	border-radius: 5px;
+	margin-bottom: 15px;
+	padding: 10px;
+}
+
+.MuiBox-root.actions {
+	text-align: right;
+
+	button {
+		margin-left: 10px;
+	}
 }
 
 .pageHeader {
 	display: flex;
 
-	.title {
+	.MuiTypography-root {
 		flex-grow: 1
 	}
 
-	.icon {
-		font-size: 3.5rem;
+	button {
+		position: relative;
+		top: -15px;
+
+		.MuiSvgIcon-root {
+			font-size: 2.5rem;
+		}
 	}
 }
 

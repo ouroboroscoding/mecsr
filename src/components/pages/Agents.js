@@ -23,6 +23,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
 import AddCircleIcon from '@material-ui/icons/AddCircle';
@@ -232,7 +233,7 @@ export default function Agents(props) {
 		<div id="agents">
 			<div className="agents">
 				<Box className="pageHeader">
-					<div className="title">Agents</div>
+					<Typography variant="h4">Agents</Typography>
 					{Utils.hasRight(props.user, 'csr_agents', 'create') &&
 						<Tooltip title="Create new agent">
 							<IconButton onClick={createToggle}>

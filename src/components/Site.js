@@ -65,7 +65,7 @@ Rest.init(process.env.REACT_APP_MEMS_DOMAIN, xhr => {
 
 // If we have a session, fetch the user
 if(Rest.session()) {
-	Rest.read('monolith', 'session', {}).done(res => {
+	Rest.read('csr', 'session', {}).done(res => {
 		Rest.read('monolith', 'user', {}).done(res => {
 			Events.trigger('signedIn', res.data);
 		});

@@ -993,7 +993,7 @@ export default class Header extends React.Component {
 	signout(ev) {
 
 		// Call the signout
-		Rest.create('auth', 'signout', {}).done(res => {
+		Rest.create('csr', 'signout', {}).done(res => {
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {

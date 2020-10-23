@@ -56,21 +56,12 @@ export default class Unclaimed extends React.Component {
 		this.filter = this.filter.bind(this);
 		this.hide = this.hide.bind(this);
 		this.orderChanged = this.orderChanged.bind(this);
-		this.refresh = this.refresh.bind(this);
+		this.fetch = this.fetch.bind(this);
 		this.signedIn = this.signedIn.bind(this);
 		this.signedOut = this.signedOut.bind(this);
 		this.supportChanged = this.supportChanged.bind(this);
 		this.salesChanged = this.salesChanged.bind(this);
 		this.salesNoSentChanged = this.salesNoSentChanged.bind(this);
-	}
-
-	checkLocalStorage(name) {
-		let value = localStorage.getItem(name);
-		if(!value) {
-			return true;
-		} else {
-			return value === 'Y';
-		}
 	}
 
 	componentDidMount() {
@@ -222,10 +213,6 @@ export default class Unclaimed extends React.Component {
 			localStorage.setItem('unclaimed_order', sOrder);
 			this.fetch();
 		});
-	}
-
-	refresh() {
-		this.fetch();
 	}
 
 	render() {

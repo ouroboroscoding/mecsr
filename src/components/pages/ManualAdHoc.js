@@ -190,7 +190,7 @@ export default function ManualAdHoc(props) {
 
 	// Return the rendered component
 	return (
-		<div id="manual_adhoc">
+		<div id="manual_adhoc" className="page">
 			<Box className="pageHeader">
 				<div className="title">Manual AdHoc Records</div>
 			</Box>

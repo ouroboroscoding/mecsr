@@ -5,22 +5,25 @@
 $menu-width: 250px;
 
 /* components */
-@import 'custom_lists';
-@import 'dialogs';
 @import 'footer';
 @import 'format';
 @import 'header';
-@import 'msg_summary';
+
+/* composites */
+@import 'composites/custom_lists';
+@import 'composites/dialogs';
+@import 'composites/msg_summary';
 
 /* pages */
-@import 'agents';
-@import 'customer';
-@import 'pharmacy';
-@import 'search';
-@import 'stats';
-@import 'templates';
-@import 'unclaimed';
-@import 'version';
+@import 'pages/agents';
+@import 'pages/customer';
+@import 'pages/pending';
+@import 'pages/pharmacy';
+@import 'pages/search';
+@import 'pages/stats';
+@import 'pages/templates';
+@import 'pages/unclaimed';
+@import 'pages/version';
 
 html, body, #root, #site, #content {
 	height: 100%;
@@ -99,6 +102,12 @@ td {
 		width: 100%;
 		margin-left: 0;
 	}
+}
+
+.page {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
 }
 
 .MuiPaper-root.padded {

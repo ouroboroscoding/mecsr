@@ -122,14 +122,6 @@ export default function Agents(props) {
 		});
 	}
 
-	function passwordCancel() {
-		passwordSet(false);
-	}
-
-	function passwordShow(agent_id) {
-		passwordSet(agent_id);
-	}
-
 	function passwordUpdate() {
 
 		// Update the agent's password
@@ -237,7 +229,7 @@ export default function Agents(props) {
 
 	// Return the rendered component
 	return (
-		<div id="agents">
+		<div id="agents" className="page">
 			<div className="agents">
 				<Box className="pageHeader">
 					<div className="title">Agents</div>
@@ -273,7 +265,7 @@ export default function Agents(props) {
 					<ResultsComponent
 						actions={[
 							{"tooltip": "Edit Agent's permissions", "icon": HttpsIcon, "callback": permissionsShow},
-							{"tooltip": "Change Agent's password", "icon": VpnKeyIcon, "callback": passwordShow}
+							{"tooltip": "Change Agent's password", "icon": VpnKeyIcon, "callback": agent_id => passwordSet(agent_id)}
 						]}
 						data={agents}
 						errors={{
@@ -315,10 +307,10 @@ export default function Agents(props) {
 					<Dialog
 						aria-labelledby="confirmation-dialog-title"
 						maxWidth="lg"
-						onClose={passwordCancel}
+						onClose={() => passwordSet(false)}
 						open={true}
 					>
-						<DialogTitle id="password-dialog-title">Update Permissions</DialogTitle>
+						<DialogTitle id="password-dialog-title">Update Password</DialogTitle>
 						<DialogContent dividers>
 							<TextField
 								label="New Password"
@@ -326,7 +318,7 @@ export default function Agents(props) {
 							/>
 						</DialogContent>
 						<DialogActions>
-							<Button variant="contained" color="secondary" onClick={passwordCancel}>
+							<Button variant="contained" color="secondary" onClick={() => passwordSet(false)}>
 								Cancel
 							</Button>
 							<Button variant="contained" color="primary" onClick={passwordUpdate}>

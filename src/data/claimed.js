@@ -23,16 +23,20 @@ import Utils from '../utils';
  * @name add
  * @public
  * @param String number The conversation phone number
+ * @param String order The orderId associated
+ * @param Number provider The ID of the provider associated
  * @return Promise
  */
-export function add(number) {
+export function add(number, order=null, provider=null) {
 
 	// Return promise
 	return new Promise((resolve, reject) => {
 
 		// Send the claim  to the server
 		Rest.create('monolith', 'customer/claim', {
-			phoneNumber: number
+			phoneNumber: number,
+			orderId: order,
+			provider: provider
 		}).done(res => {
 
 			// If there's an error
@@ -90,7 +94,6 @@ export function fetch(number) {
 				resolve(res.data);
 			}
 		});
-
 	});
 }
 

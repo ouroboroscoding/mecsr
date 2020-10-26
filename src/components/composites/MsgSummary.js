@@ -80,7 +80,7 @@ function Message(props) {
 export default function MsgSummary(props) {
 
 	function claim() {
-		props.onClaim(props.customerPhone, props.customerName);
+		props.onClaim(props.customerPhone, props.customerName, props.customerId);
 	}
 
 	function hide() {
@@ -88,7 +88,7 @@ export default function MsgSummary(props) {
 	}
 
 	function view() {
-		Events.trigger('viewedAdd', props.customerPhone, props.customerName);
+		Events.trigger('viewedAdd', props.customerPhone, props.customerName, props.customerId);
 	}
 
 	// If we're the one who claimed it
@@ -135,7 +135,10 @@ export default function MsgSummary(props) {
 
 // Force props
 MsgSummary.propTypes = {
-	"onClaim": PropTypes.func.isRequired
+	customerId: PropTypes.number.isRequired,
+	customerName: PropTypes.string.isRequired,
+	customerPhone: PropTypes.string.isRequired,
+	onClaim: PropTypes.func.isRequired
 }
 
 // Default props

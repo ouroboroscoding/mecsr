@@ -245,6 +245,36 @@ export function isObject(m) {
 }
 
 /**
+ * Is Today
+ *
+ * Returns true if the passed date corresponds to the current date
+ *
+ * @name isToday
+ * @access public
+ * @param Date|String|Number d A date object or a string/int that can be
+ *                             converted to a Date
+ * @return bool
+ */
+export function isToday(d) {
+
+	// Today's date
+	const oToday = new Date();
+
+	// Convert if not a date
+	if(typeof d === 'number') {
+		d = new Date(d*1000);
+	}
+	else if(typeof d === 'string') {
+		d = new Date(d);
+	}
+
+	// Compare date, month, and year
+	return d.getDate() === oToday.getDate() &&
+			d.getMonth() === oToday.getMonth() &&
+			d.getFullYear() === oToday.getFullYear();
+}
+
+/**
  * Object Map
  *
  * Works like map for arrays, but iterates over an object
@@ -359,6 +389,7 @@ export default {
 	isDecimal: isDecimal,
 	isInteger: isInteger,
 	isObject: isObject,
+	isToday: isToday,
 	omap: omap,
 	safeLocalStorage: safeLocalStorage,
 	safeLocalStorageJSON: safeLocalStorageJSON,

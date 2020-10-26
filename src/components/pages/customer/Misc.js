@@ -187,7 +187,7 @@ export default function Misc(props) {
 
 		// Header + content
 		calendlyElement = (
-			<React.Fragment>
+			<React.Fragment key="calendly">
 				<div className="pageHeader">
 					<div className="title">Calendly Appointments</div>
 				</div>
@@ -232,7 +232,7 @@ export default function Misc(props) {
 
 		// Header + content
 		patientElement = (
-			<React.Fragment>
+			<React.Fragment key="patient">
 				<div className="pageHeader">
 					<div className="title">Patient Portal</div>
 				</div>

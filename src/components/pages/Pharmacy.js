@@ -42,7 +42,7 @@ export default function Pharmacy(props) {
 
 	// Return the rendered component
 	return (
-		<div id="pharmacy">
+		<div id="pharmacy" className="page">
 			<AppBar position="static" color="default">
 				<Tabs
 					onChange={tabChange}

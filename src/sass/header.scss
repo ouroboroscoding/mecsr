@@ -2,7 +2,6 @@
 	flex-basis: 0;
 	flex-grow: 0;
 	flex-shrink: 0;
-	min-height: 48px;
 
 	.bar {
 		background-color: #3f51b5;
@@ -29,7 +28,7 @@
 			flex-basis: 0;
 			flex-grow: 1;
 			flex-shrink: 1;
-			padding: 15px;
+			padding-top: 15px;
 			text-align: center;
 		}
 
@@ -40,6 +39,36 @@
 }
 
 #menu {
+	height: 100%;
+
+	.MuiDrawer-paper {
+
+		.pages {
+			flex-basis: 0;
+			flex-shrink: 0;
+			flex-grow: 0;
+			padding: 0;
+		}
+
+		.claims {
+			flex-basis: 0;
+			flex-shrink: 1;
+			flex-grow: 1;
+			display: flex;
+			flex-direction: column;
+			overflow-y: auto;
+			padding: 0;
+
+			.menuHeader {
+				background-color: rgba(0, 0, 0, .03);
+				cursor: pointer;
+			}
+
+			.menuHeader:hover {
+				background-color: rgba(0, 0, 0, .3);
+			}
+		}
+	}
 
 	.MuiListItemAvatar-root {
 		height: 100px;
@@ -74,7 +103,7 @@
 			color: yellow;
 		}
 
-		.resolve:hover {
+		.provider:hover, .resolve:hover {
 			color: green;
 		}
 	}

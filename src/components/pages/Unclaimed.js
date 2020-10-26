@@ -85,11 +85,11 @@ export default class Unclaimed extends React.Component {
 		Events.remove('Unclaimed', this.refresh);
 	}
 
-	claim(number, name) {
+	claim(number, name, customer_id) {
 
 		// Get the claimed add promise
 		claimed.add(number).then(res => {
-			Events.trigger('claimedAdd', number, name, res.customerId);
+			Events.trigger('claimedAdd', number, name, customer_id);
 		}, error => {
 			// If we got a duplicate
 			if(error.code === 1101) {
@@ -217,7 +217,7 @@ export default class Unclaimed extends React.Component {
 
 	render() {
 		return (
-			<Box id="unclaimed">
+			<Box id="unclaimed" className="page">
 				<Grid container spacing={0} className="header">
 					<Grid item xs={12} md={6} lg={4} className="filters">
 						<FormControlLabel
@@ -349,4 +349,3 @@ export default class Unclaimed extends React.Component {
 		});
 	}
 }
-

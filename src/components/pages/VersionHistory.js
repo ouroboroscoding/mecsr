@@ -70,7 +70,7 @@ export default function VersionHistory(props) {
 
 	// Render
 	return (
-		<Box id="version">
+		<Box id="version" className="page">
 			<Box className="content">
 				<List>
 					{VERSION.map(v =>

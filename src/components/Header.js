@@ -14,6 +14,7 @@ import { Link, useHistory } from 'react-router-dom';
 
 // Material UI
 import Avatar from '@material-ui/core/Avatar';
+import Box from '@material-ui/core/Box';
 import Drawer from '@material-ui/core/Drawer';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
@@ -28,6 +29,8 @@ import Typography from '@material-ui/core/Typography';
 // Material UI Icons
 import AddIcon from '@material-ui/icons/Add';
 import AllInboxIcon from '@material-ui/icons/AllInbox';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 import AssessmentIcon from '@material-ui/icons/Assessment';
 import CloseIcon from '@material-ui/icons/Close';
 import CheckIcon from '@material-ui/icons/Check';
@@ -35,6 +38,7 @@ import CommentIcon from '@material-ui/icons/Comment';
 import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ForumIcon from '@material-ui/icons/Forum';
+import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import LocalPharmacyIcon from '@material-ui/icons/LocalPharmacy';
 import MenuIcon from '@material-ui/icons/Menu';
 import MergeTypeIcon from '@material-ui/icons/MergeType';
@@ -46,8 +50,9 @@ import ViewListIcon from '@material-ui/icons/ViewList';
 
 // Composite components
 import Account from './composites/Account';
-import Transfer from './composites/Transfer';
+import Provider from './composites/Provider';
 import Resolve from './composites/Resolve';
+import Transfer from './composites/Transfer';
 import { CustomListsDialog } from './composites/CustomLists';
 
 // Composite components
@@ -71,6 +76,7 @@ function CustomerItem(props) {
 
 	// State
 	let [list, listSet] = useState(false);
+	let [provider, providerSet] = useState(false);
 	let [resolve, resolveSet] = useState(false);
 	let [transfer, transferSet] = useState(false);
 
@@ -86,11 +92,15 @@ function CustomerItem(props) {
 	// Click event
 	function click(event) {
 		props.onClick(
-			Utils.customerPath(props.phone, props.id),
-			props.phone
+			Utils.customerPath(props.customerPhone, props.customerId),
+			props.customerPhone
 		)
+	}
 
-
+	function providerClick(event) {
+		event.stopPropagation();
+		event.preventDefault();
+		providerSet(props.user.id);
 	}
 
 	// X click
@@ -110,7 +120,7 @@ function CustomerItem(props) {
 
 			// Mark the conversation as hidden on the server side
 			Rest.update('monolith', 'customer/hide', {
-				customerPhone: props.phone
+				customerPhone: props.customerPhone
 			}).done(res => {
 
 				// If there's an error
@@ -127,13 +137,13 @@ function CustomerItem(props) {
 
 		// If we're currently selected, change the page
 		if(props.selected) {
-			history.push('/unclaimed');
+			history.push(props.provider !== null ? '/pending' : '/unclaimed');
 		}
 
 		// Send the request to the server
-		claimed.remove(props.phone).then(() => {
+		claimed.remove(props.customerPhone).then(() => {
 			// Trigger the claimed being removed
-			Events.trigger('claimedRemove', props.phone, props.selected);
+			Events.trigger('claimedRemove', props.customerPhone, props.selected);
 		}, error => {
 			Events.trigger('error', JSON.stringify(error));
 		});
@@ -157,18 +167,18 @@ function CustomerItem(props) {
 	function transferSubmit(agent) {
 
 		// Call the request
-		claimed.transfer(props.phone, agent).then(res => {
+		claimed.transfer(props.customerPhone, agent).then(res => {
 
 			// Remove transfer dialog
 			transferSet(false);
 
 			// If we're currently selected, change the page
 			if(props.selected) {
-				history.push('/unclaimed');
+				history.push(props.provider !== null ? '/pending' : '/unclaimed');
 			}
 
 			// Trigger the claimed being removed
-			Events.trigger('claimedRemove', props.phone, props.selected);
+			Events.trigger('claimedRemove', props.customerPhone, props.selected);
 
 		}, error => {
 			Events.trigger('error', JSON.stringify(error));
@@ -178,8 +188,8 @@ function CustomerItem(props) {
 	// Render
 	return (
 		<React.Fragment>
-			<Link to={Utils.customerPath(props.phone, props.id)} onClick={click}>
-				<ListItem button selected={props.selected} className={props.transfer ? 'transferred' : ''}>
+			<Link to={Utils.customerPath(props.customerPhone, props.customerId)} onClick={click}>
+				<ListItem button selected={props.selected} className={props.transferredBy ? 'transferred' : ''}>
 					<ListItemAvatar>
 						{props.newMsgs ?
 							<Avatar style={{backgroundColor: 'red'}}><NewReleasesIcon /></Avatar> :
@@ -187,21 +197,23 @@ function CustomerItem(props) {
 						}
 					</ListItemAvatar>
 					<ListItemText
-						primary={props.name}
+						primary={props.customerName}
 						secondary={
 							<React.Fragment>
 								<span>
-									ID: {props.id}<br/>
-									#: {Utils.nicePhone(props.phone)}
+									ID: {props.customerId}<br/>
+									#: {Utils.nicePhone(props.customerPhone)}
 								</span>
 								<span className="customerActions">
-									<span className="tooltip">
-										<Tooltip title="Remove Claim">
-											<IconButton className="close" onClick={remove}>
-												<CloseIcon />
-											</IconButton>
-										</Tooltip>
-									</span>
+									{!props.provider &&
+										<span className="tooltip">
+											<Tooltip title="Remove Claim">
+												<IconButton className="close" onClick={remove}>
+													<CloseIcon />
+												</IconButton>
+											</Tooltip>
+										</span>
+									}
 									<span className="tooltip">
 										<Tooltip title="Add to List">
 											<IconButton className="list" onClick={addToListClick}>
@@ -217,11 +229,19 @@ function CustomerItem(props) {
 										</Tooltip>
 									</span>
 									<span className="tooltip">
-										<Tooltip title="Resolve">
-											<IconButton className="resolve" onClick={resolveClick}>
-												<CheckIcon />
-											</IconButton>
-										</Tooltip>
+										{props.provider !== null ?
+											<Tooltip title="Send to Provider">
+												<IconButton className="provider" onClick={providerClick}>
+													<LocalHospitalIcon />
+												</IconButton>
+											</Tooltip>
+										:
+											<Tooltip title="Resolve">
+												<IconButton className="resolve" onClick={resolveClick}>
+													<CheckIcon />
+												</IconButton>
+											</Tooltip>
+										}
 									</span>
 								</span>
 							</React.Fragment>
@@ -231,27 +251,34 @@ function CustomerItem(props) {
 			</Link>
 			{transfer !== false &&
 				<Transfer
-					customerId={props.id}
+					customerId={props.customerId}
 					ignore={transfer}
-					name={props.name}
-					number={props.phone}
+					name={props.customerName}
+					number={props.customerPhone}
 					onClose={e => transferSet(false)}
 					onSubmit={transferSubmit}
 				/>
 			}
+			{list &&
+				<CustomListsDialog
+					customer={props.customerId}
+					name={props.customerName}
+					number={props.customerPhone}
+					onClose={() => listSet(false)}
+				/>
+			}
 			{resolve &&
 				<Resolve
-					customerId={props.id}
+					customerId={props.customerId}
 					onClose={e => resolveSet(false)}
 					onSubmit={remove}
 				/>
 			}
-			{list &&
-				<CustomListsDialog
-					customer={props.id}
-					name={props.name}
-					number={props.phone}
-					onClose={() => listSet(false)}
+			{provider &&
+				<Provider
+					onClose={e => providerSet(false)}
+					onSubmit={remove}
+					{...props}
 				/>
 			}
 		</React.Fragment>
@@ -313,7 +340,7 @@ function ViewItem(props) {
 
 		// If we're currently selected, change the page
 		if(props.selected) {
-			history.push('/unclaimed');
+			history.push(props.provider !== null ? '/pending' : '/unclaimed');
 		}
 
 		// Trigger the viewed being removed
@@ -346,7 +373,7 @@ function ViewItem(props) {
 
 			// Else if it's selected
 			else if(props.selected) {
-				history.push( '/unclaimed');
+				history.push(props.provider !== null ? '/pending' : '/unclaimed');
 			}
 
 		}, error => {
@@ -444,13 +471,16 @@ export default class Header extends React.Component {
 		this.state = {
 			"account": false,
 			"claimed": [],
+			"claimed_open": true,
 			"menu": false,
 			"newMsgs": Tools.safeLocalStorageJSON('newMsgs', {}),
 			"overwrite": props.user ? Utils.hasRight(props.user, 'csr_overwrite', 'create') : false,
 			"path": window.location.pathname,
+			"pending": 0,
 			"unclaimed": 0,
 			"user": props.user || false,
-			"viewed": []
+			"viewed": [],
+			"viewed_open": true
 		}
 
 		// Timers
@@ -527,20 +557,22 @@ export default class Header extends React.Component {
 		this.setState({"account": !this.state.account});
 	}
 
-	claimedAdd(number, name, id) {
+	claimedAdd(number, name, customer_id, order_id, provider=null) {
 
 		// Clone the claimed state
 		let lClaimed = Tools.clone(this.state.claimed);
 
 		// Add the record to the end
 		lClaimed.push({
-			customerId: id,
+			customerId: customer_id,
 			customerName: name,
-			customerPhone: number
+			customerPhone: number,
+			orderId: order_id,
+			provider: provider
 		});
 
 		// Generate the path
-		let sPath = Utils.customerPath(number, id);
+		let sPath = Utils.customerPath(number, customer_id);
 
 		// Create the new state
 		let oState = {
@@ -610,6 +642,9 @@ export default class Header extends React.Component {
 			// Clone the claimed state
 			let lClaimed = Tools.clone(this.state.claimed);
 
+			// Store the claim
+			let oClaim = this.state.claimed[iClaimed];
+
 			// Remove the element
 			lClaimed.splice(iClaimed, 1);
 
@@ -618,7 +653,9 @@ export default class Header extends React.Component {
 
 			// If the path has switch
 			if(switch_path) {
-				oState.path = '/unclaimed';
+				oState.path = oClaim.provider !== null ?
+					'/pending' :
+					'/unclaimed';
 			}
 
 			// If it's in the new messages
@@ -633,7 +670,11 @@ export default class Header extends React.Component {
 			this.setState(oState);
 
 			// Trigger the event that a customer was unclaimed
-			Events.trigger('Unclaimed', number);
+			if(oClaim.provider !== null) {
+				Events.trigger('Pending', oClaim.customerId);
+			} else {
+				Events.trigger('Unclaimed', number);
+			}
 		}
 	}
 
@@ -792,116 +833,149 @@ export default class Header extends React.Component {
 
 		// Create the drawer items
 		let drawer = (
-			<List style={{padding: 0}}>
-				{Utils.hasRight(this.state.user, 'csr_agents', 'read') &&
+			<React.Fragment>
+				<List className="pages">
+					{Utils.hasRight(this.state.user, 'csr_agents', 'read') &&
+						<React.Fragment>
+							<Link to="/agents" onClick={this.menuClick}>
+								<ListItem button selected={this.state.path === "/agents"}>
+									<ListItemIcon><PeopleIcon /></ListItemIcon>
+									<ListItemText primary="Agents" />
+								</ListItem>
+							</Link>
+							<Divider />
+						</React.Fragment>
+					}
+					{Utils.hasRight(this.state.user, 'manual_adhoc', 'read') &&
+						<React.Fragment>
+							<Link to="/manualad" onClick={this.menuClick}>
+								<ListItem button selected={this.state.path === "/manualad"}>
+									<ListItemIcon><DeveloperModeIcon /></ListItemIcon>
+									<ListItemText primary="Manual AdHoc" />
+								</ListItem>
+							</Link>
+							<Divider />
+						</React.Fragment>
+					}
+					{Utils.hasRight(this.state.user, 'csr_stats', 'read') &&
+						<React.Fragment>
+							<Link to="/stats" onClick={this.menuClick}>
+								<ListItem button selected={this.state.path === "/stats"}>
+									<ListItemIcon><AssessmentIcon /></ListItemIcon>
+									<ListItemText primary="Stats" />
+								</ListItem>
+							</Link>
+							<Divider />
+						</React.Fragment>
+					}
+					{Utils.hasRight(this.state.user, 'csr_templates', 'read') &&
+						<React.Fragment>
+							<Link to="/templates" onClick={this.menuClick}>
+								<ListItem button selected={this.state.path === "/templates"}>
+									<ListItemIcon><CommentIcon /></ListItemIcon>
+									<ListItemText primary="Templates" />
+								</ListItem>
+							</Link>
+							<Divider />
+						</React.Fragment>
+					}
+					{(Utils.hasRight(this.state.user, 'pharmacy_fill', 'update') ||
+						Utils.hasRight(this.state.user, 'welldyne_adhoc', 'read') ||
+						Utils.hasRight(this.state.user, 'welldyne_outbound', 'read')) &&
+						<React.Fragment>
+							<Link to="/pharmacy" onClick={this.menuClick}>
+								<ListItem button selected={this.state.path === "/pharmacy"}>
+									<ListItemIcon><LocalPharmacyIcon /></ListItemIcon>
+									<ListItemText primary="Pharmacy" />
+								</ListItem>
+							</Link>
+							<Divider />
+						</React.Fragment>
+					}
 					<React.Fragment>
-						<Link to="/agents" onClick={this.menuClick}>
-							<ListItem button selected={this.state.path === "/agents"}>
-								<ListItemIcon><PeopleIcon /></ListItemIcon>
-								<ListItemText primary="Agents" />
+						<Link to="/pending" onClick={this.menuClick}>
+							<ListItem button selected={this.state.path === "/pending"}>
+								<ListItemIcon><AllInboxIcon /></ListItemIcon>
+								<ListItemText primary={'Pending Orders (' + this.state.pending + ')'} />
 							</ListItem>
 						</Link>
 						<Divider />
 					</React.Fragment>
-				}
-				{Utils.hasRight(this.state.user, 'manual_adhoc', 'read') &&
-					<React.Fragment>
-						<Link to="/manualad" onClick={this.menuClick}>
-							<ListItem button selected={this.state.path === "/manualad"}>
-								<ListItemIcon><DeveloperModeIcon /></ListItemIcon>
-								<ListItemText primary="Manual AdHoc" />
+					<Link to="/unclaimed" onClick={this.menuClick}>
+						<ListItem button selected={this.state.path === "/unclaimed"}>
+							<ListItemIcon><AllInboxIcon /></ListItemIcon>
+							<ListItemText primary={'Incoming SMS (' + this.state.unclaimed + ')'} />
+						</ListItem>
+					</Link>
+					<Divider />
+					<Link to="/search" onClick={this.menuClick}>
+						<ListItem button selected={this.state.path === "/search"}>
+							<ListItemIcon><SearchIcon /></ListItemIcon>
+							<ListItemText primary="Search" />
+						</ListItem>
+					</Link>
+				</List>
+				<List className="claims">
+					{this.state.claimed.length > 0 &&
+						<Box className="type">
+							<Divider />
+							<ListItem className="menuHeader" onClick={() => this.toggleClaims('claimed')}>
+								<Typography>Claimed ({this.state.claimed.length})</Typography>
+								{this.state.claimed_open ?
+									<ArrowDropDownIcon />
+								:
+									<ArrowDropUpIcon />
+								}
 							</ListItem>
-						</Link>
-						<Divider />
-					</React.Fragment>
-				}
-				{Utils.hasRight(this.state.user, 'csr_stats', 'read') &&
-					<React.Fragment>
-						<Link to="/stats" onClick={this.menuClick}>
-							<ListItem button selected={this.state.path === "/stats"}>
-								<ListItemIcon><AssessmentIcon /></ListItemIcon>
-								<ListItemText primary="Stats" />
+							{this.state.claimed_open &&
+								<Box className="items">
+									{this.state.claimed.map((o,i) =>
+										<CustomerItem
+											key={i}
+											newMsgs={o.customerPhone in this.state.newMsgs}
+											onClick={this.menuItem}
+											selected={this.state.path === Utils.customerPath(o.customerPhone, o.customerId)}
+											user={this.state.user}
+											{...o}
+										/>
+									)}
+								</Box>
+							}
+						</Box>
+					}
+					{this.state.viewed.length > 0 &&
+						<Box className="type">
+							<Divider />
+							<ListItem className="menuHeader" onClick={() => this.toggleClaims('viewed')}>
+								<Typography>Viewing ({this.state.viewed.length})</Typography>
+								{this.state.viewed_open ?
+									<ArrowDropDownIcon />
+								:
+									<ArrowDropUpIcon />
+								}
 							</ListItem>
-						</Link>
-						<Divider />
-					</React.Fragment>
-				}
-				{Utils.hasRight(this.state.user, 'csr_templates', 'read') &&
-					<React.Fragment>
-						<Link to="/templates" onClick={this.menuClick}>
-							<ListItem button selected={this.state.path === "/templates"}>
-								<ListItemIcon><CommentIcon /></ListItemIcon>
-								<ListItemText primary="Templates" />
-							</ListItem>
-						</Link>
-						<Divider />
-					</React.Fragment>
-				}
-				{(Utils.hasRight(this.state.user, 'pharmacy_fill', 'update') ||
-					Utils.hasRight(this.state.user, 'welldyne_adhoc', 'read') ||
-					Utils.hasRight(this.state.user, 'welldyne_outbound', 'read')) &&
-					<React.Fragment>
-						<Link to="/pharmacy" onClick={this.menuClick}>
-							<ListItem button selected={this.state.path === "/pharmacy"}>
-								<ListItemIcon><LocalPharmacyIcon /></ListItemIcon>
-								<ListItemText primary="Pharmacy" />
-							</ListItem>
-						</Link>
-						<Divider />
-					</React.Fragment>
-				}
-				<Link to="/unclaimed" onClick={this.menuClick}>
-					<ListItem button selected={this.state.path === "/unclaimed"}>
-						<ListItemIcon><AllInboxIcon /></ListItemIcon>
-						<ListItemText primary={'Unclaimed (' + this.state.unclaimed + ')'} />
-					</ListItem>
-				</Link>
-				<Link to="/search" onClick={this.menuClick}>
-					<ListItem button selected={this.state.path === "/search"}>
-						<ListItemIcon><SearchIcon /></ListItemIcon>
-						<ListItemText primary="Search" />
-					</ListItem>
-				</Link>
-				{this.state.claimed.length > 0 &&
-					<React.Fragment>
-						<Divider />
-						<ListItem><Typography>Claimed</Typography></ListItem>
-						{this.state.claimed.map((o,i) =>
-							<CustomerItem
-								key={i}
-								id={o.customerId}
-								name={o.customerName}
-								newMsgs={o.customerPhone in this.state.newMsgs}
-								onClick={this.menuItem}
-								phone={o.customerPhone}
-								selected={this.state.path === Utils.customerPath(o.customerPhone, o.customerId)}
-								transfer={o.transferredBy}
-								user={this.state.user}
-							/>
-						)}
-					</React.Fragment>
-				}
-				{this.state.viewed.length > 0 &&
-					<React.Fragment>
-						<Divider />
-						<ListItem><Typography>Viewing</Typography></ListItem>
-						{this.state.viewed.map((o,i) =>
-							<ViewItem
-								claimed={o.claimedUser}
-								key={i}
-								id={o.customerId}
-								name={o.customerName}
-								newMsgs={o.customerPhone in this.state.newMsgs}
-								onClick={this.menuItem}
-								overwrite={this.state.overwrite}
-								phone={o.customerPhone}
-								selected={this.state.path === Utils.viewedPath(o.customerPhone, o.customerId)}
-								user={this.state.user}
-							/>
-						)}
-					</React.Fragment>
-				}
-			</List>
+							{this.state.viewed_open &&
+								<Box className="items">
+									{this.state.viewed.map((o,i) =>
+										<ViewItem
+											claimed={o.claimedUser}
+											key={i}
+											id={o.customerId}
+											name={o.customerName}
+											newMsgs={o.customerPhone in this.state.newMsgs}
+											onClick={this.menuItem}
+											overwrite={this.state.overwrite}
+											phone={o.customerPhone}
+											selected={this.state.path === Utils.viewedPath(o.customerPhone, o.customerId)}
+											user={this.state.user}
+										/>
+									)}
+								</Box>
+							}
+						</Box>
+					}
+				</List>
+			</React.Fragment>
 		);
 
 		return (
@@ -979,7 +1053,7 @@ export default class Header extends React.Component {
 			// Fetch the claimed conversations
 			this.claimedFetch();
 
-			// Fetch the unclaimed count
+			// Fetch the unclaimed counts
 			this.unclaimedCount();
 
 			// Start checking for new messages
@@ -1041,10 +1115,15 @@ export default class Header extends React.Component {
 		}
 	}
 
+	toggleClaims(type) {
+		let state = type + '_open';
+		this.setState({[state]: !this.state[state]});
+	}
+
 	// Gets the number of unclaimed messages
 	unclaimedCount() {
 
-		// Fetch the unclaimed count from the service
+		// Fetch the unclaimed conversations count from the service
 		Rest.read('monolith', 'msgs/unclaimed/count', {}).done(res => {
 
 			// If there's an error or warning
@@ -1057,7 +1136,24 @@ export default class Header extends React.Component {
 
 			// If there's data
 			if(res.data) {
-				this.setState({"unclaimed": res.data});
+				this.setState({unclaimed: res.data});
+			}
+		});
+
+		// Fetch the unclaimed pending count from the service
+		Rest.read('monolith', 'orders/pending/csr/count', {}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+				this.setState({pending: res.data});
 			}
 		});
 	}
@@ -1264,6 +1360,8 @@ export default class Header extends React.Component {
 						// Add the number and transferred by to the data
 						res.data['customerPhone'] = data.phoneNumber;
 						res.data['transferredBy'] = data.transferredBy;
+						res.data['orderBy'] = data.orderBy;
+						res.data['provider'] = data.provider;
 
 						// Push the transfer to the top
 						lClaimed.unshift(res.data);

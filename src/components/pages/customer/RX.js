@@ -229,7 +229,7 @@ export default function RX(props) {
 		let fill = null;
 		if(props.pharmacyFill['fills'].length > 0 || lManualOrders.length > 0) {
 			fill = (
-				<React.Fragment>
+				<React.Fragment key="fills">
 					<div className="title">Manual Pharmacy Fill</div>
 					{props.pharmacyFill['fills'].map(o =>
 						<Paper key={o._id} className="padded">
@@ -248,7 +248,7 @@ export default function RX(props) {
 								native
 							>
 								{lManualOrders.map(s =>
-									<option>{s}</option>
+									<option key={s}>{s}</option>
 								)}
 							</Select>
 							<Button variant="contained" color="primary" onClick={fillAdd} style={{height: '32px', marginLeft: '10px'}}>Add Manual Fill</Button>
@@ -294,7 +294,7 @@ export default function RX(props) {
 	}
 	else {
 		triggers = (
-			<React.Fragment>
+			<React.Fragment key="triggers">
 				<div className="title">WellDyneRX Triggers</div>
 				{props.triggers.map(o =>
 					<Trigger
@@ -319,7 +319,7 @@ export default function RX(props) {
 	}
 	else {
 		prescriptions = (
-			<React.Fragment>
+			<React.Fragment key="rx">
 				{props.prescriptions.map(o =>
 					<Paper key={o.PrescriptionId} className="padded">
 						<Grid container spacing={2}>
@@ -350,7 +350,7 @@ export default function RX(props) {
 		hrtLabs = <p>No HRT Lab Results found for this customer</p>;
 	} else {
 		hrtLabs = (
-			<React.Fragment>
+			<React.Fragment key="hrt">
 				{props.hrtLabs.map((o) => (
 					<Paper key={o.id} className='padded'>
 						<Grid container spacing={2}>

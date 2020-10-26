@@ -40,7 +40,7 @@ export default function Stats(props) {
 
 	// Return the rendered component
 	return (
-		<div id="stats">
+		<div id="stats" className="page">
 			<AppBar position="static" color="default">
 				<Tabs
 					onChange={tabChange}

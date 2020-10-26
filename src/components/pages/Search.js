@@ -223,7 +223,7 @@ export default class Search extends React.Component {
 
 	render() {
 		return (
-			<Box id="search">
+			<Box id="search" className="page">
 				<Grid container spacing={0} className="form">
 					<Grid item xs={12} sm={12} md={2}>
 						<FormControl variant="outlined">

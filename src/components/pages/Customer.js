@@ -566,7 +566,7 @@ export default class Customer extends React.Component {
 
 	render() {
 		return (
-			<div id="customer">
+			<div id="customer" className="page">
 				<AppBar position="static" color="default">
 					{this.props.mobile ?
 						<Tabs

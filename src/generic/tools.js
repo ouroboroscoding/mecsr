@@ -269,9 +269,9 @@ export function isToday(d) {
 	}
 
 	// Compare date, month, and year
-	return d.getDate() == oToday.getDate() &&
-			d.getMonth() == oToday.getMonth() &&
-			d.getFullYear() == oToday.getFullYear();
+	return d.getDate() === oToday.getDate() &&
+			d.getMonth() === oToday.getMonth() &&
+			d.getFullYear() === oToday.getFullYear();
 }
 
 /**

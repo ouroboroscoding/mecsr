@@ -1360,7 +1360,7 @@ export default class Header extends React.Component {
 						// Add the number and transferred by to the data
 						res.data['customerPhone'] = data.phoneNumber;
 						res.data['transferredBy'] = data.transferredBy;
-						res.data['orderBy'] = data.orderBy;
+						res.data['orderId'] = data.orderId;
 						res.data['provider'] = data.provider;
 
 						// Push the transfer to the top

@@ -84,11 +84,11 @@ export default class Search extends React.Component {
 		Events.remove('signedOut', this.signedOut);
 	}
 
-	claim(number, name) {
+	claim(number, name, customer_id) {
 
 		// Get the claimed add promise
 		claimed.add(number).then(res => {
-			Events.trigger('claimedAdd', number, name, res.customerId);
+			Events.trigger('claimedAdd', number, name, customer_id);
 		}, error => {
 			// If we got a duplicate
 			if(error.code === 1101) {

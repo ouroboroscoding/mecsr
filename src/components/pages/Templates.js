@@ -199,7 +199,7 @@ export default function Templates(props) {
 
 	// Return the rendered component
 	return (
-		<div id="templates">
+		<div id="templates" className="page">
 			{/*<AppBar position="static" color="default">
 				<Tabs
 					onChange={tabChange}

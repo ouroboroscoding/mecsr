@@ -56,21 +56,12 @@ export default class Unclaimed extends React.Component {
 		this.filter = this.filter.bind(this);
 		this.hide = this.hide.bind(this);
 		this.orderChanged = this.orderChanged.bind(this);
-		this.refresh = this.refresh.bind(this);
+		this.fetch = this.fetch.bind(this);
 		this.signedIn = this.signedIn.bind(this);
 		this.signedOut = this.signedOut.bind(this);
 		this.supportChanged = this.supportChanged.bind(this);
 		this.salesChanged = this.salesChanged.bind(this);
 		this.salesNoSentChanged = this.salesNoSentChanged.bind(this);
-	}
-
-	checkLocalStorage(name) {
-		let value = localStorage.getItem(name);
-		if(!value) {
-			return true;
-		} else {
-			return value === 'Y';
-		}
 	}
 
 	componentDidMount() {
@@ -94,11 +85,11 @@ export default class Unclaimed extends React.Component {
 		Events.remove('Unclaimed', this.refresh);
 	}
 
-	claim(number, name) {
+	claim(number, name, customer_id) {
 
 		// Get the claimed add promise
 		claimed.add(number).then(res => {
-			Events.trigger('claimedAdd', number, name, res.customerId);
+			Events.trigger('claimedAdd', number, name, customer_id);
 		}, error => {
 			// If we got a duplicate
 			if(error.code === 1101) {
@@ -224,13 +215,9 @@ export default class Unclaimed extends React.Component {
 		});
 	}
 
-	refresh() {
-		this.fetch();
-	}
-
 	render() {
 		return (
-			<Box id="unclaimed">
+			<Box id="unclaimed" className="page">
 				<Grid container spacing={0} className="header">
 					<Grid item xs={12} md={6} lg={4} className="filters">
 						<FormControlLabel
@@ -362,4 +349,3 @@ export default class Unclaimed extends React.Component {
 		});
 	}
 }
-

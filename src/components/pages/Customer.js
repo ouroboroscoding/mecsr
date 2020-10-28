@@ -566,7 +566,7 @@ export default class Customer extends React.Component {
 
 	render() {
 		return (
-			<div id="customer">
+			<div id="customer" className="page">
 				<AppBar position="static" color="default">
 					{this.props.mobile ?
 						<Tabs
@@ -649,14 +649,17 @@ export default class Customer extends React.Component {
 						user={this.props.user}
 					/>
 				</div>
-				<div className="misc" style={{display: this.state.tab === 5 ? 'block' : 'none'}}>
-					<Misc
-						crm_id={this.props.customerId}
-						patient_id={this.props.patient_id}
-						readOnly={this.props.readOnly}
-						user={this.props.user}
-					/>
-				</div>
+				{this.state.tab === 5 &&
+					<div className="misc">
+						<Misc
+							crm_id={this.props.customerId}
+							patient_id={this.props.patient_id}
+							phoneNumber={this.props.phoneNumber}
+							readOnly={this.props.readOnly}
+							user={this.props.user}
+						/>
+					</div>
+				}
 			</div>
 		);
 	}

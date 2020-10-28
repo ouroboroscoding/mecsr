@@ -230,7 +230,7 @@ export default function Agents(props) {
 
 	// Return the rendered component
 	return (
-		<div id="agents">
+		<div id="agents" className="page">
 			<div className="agents">
 				<Box className="pageHeader">
 					<Typography variant="h4">Agents</Typography>

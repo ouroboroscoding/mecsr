@@ -31,6 +31,7 @@ import Signin from './Signin';
 import Agents from './pages/Agents';
 import Customer from './pages/Customer';
 import ManualAdHoc from './pages/ManualAdHoc';
+import Pending from './pages/Pending';
 import Pharmacy from './pages/Pharmacy';
 import Search from './pages/Search';
 import Stats from './pages/Stats';
@@ -117,12 +118,6 @@ export default function Site(props) {
 						<Route path="/manualad">
 							<ManualAdHoc user={user} />
 						</Route>
-						<Route path="/unclaimed">
-							<Unclaimed user={user} />
-						</Route>
-						<Route path="/search">
-							<Search user={user} />
-						</Route>
 						<Route path="/stats">
 							<Stats user={user} />
 						</Route>
@@ -131,6 +126,15 @@ export default function Site(props) {
 						</Route>
 						<Route path="/pharmacy">
 							<Pharmacy user={user} />
+						</Route>
+						<Route path="/pending">
+							<Pending user={user} />
+						</Route>
+						<Route path="/unclaimed">
+							<Unclaimed user={user} />
+						</Route>
+						<Route path="/search">
+							<Search user={user} />
 						</Route>
 						<Route
 							path="/customer/:phoneNumber/:customerId"

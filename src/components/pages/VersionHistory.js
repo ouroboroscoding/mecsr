@@ -18,6 +18,14 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.16.2', 'October 27th, 2020', [
+		'Added ability to set STOP flags per service in the Misc tab of customer pages.'
+	]],
+	['1.16.0', 'October 26th, 2020', [
+		'Unclaimed page renamed to "Incoming SMS".',
+		'New page "Pending Orders" added which lists PENDING KNK orders with an attention role of CSR. These orders can be claimed like conversations, but will show a "Send to Provider" icon instead of "Resolve". Clicking it will automatically add a note to the order and change the attention to Provider.',
+		'Claimed and Viewed in the left-side menu now show the total of each, and can be minimized.'
+	]],
 	['1.15.5', 'September 29th, 2020', [
 		'Can now select a custom list for a conversation at the same time as transfering.'
 	]],
@@ -70,7 +78,7 @@ export default function VersionHistory(props) {
 
 	// Render
 	return (
-		<Box id="version">
+		<Box id="version" className="page">
 			<Box className="content">
 				<List>
 					{VERSION.map(v =>

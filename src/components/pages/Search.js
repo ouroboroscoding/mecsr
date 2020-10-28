@@ -84,11 +84,11 @@ export default class Search extends React.Component {
 		Events.remove('signedOut', this.signedOut);
 	}
 
-	claim(number, name) {
+	claim(number, name, customer_id) {
 
 		// Get the claimed add promise
 		claimed.add(number).then(res => {
-			Events.trigger('claimedAdd', number, name, res.customerId);
+			Events.trigger('claimedAdd', number, name, customer_id);
 		}, error => {
 			// If we got a duplicate
 			if(error.code === 1101) {
@@ -223,7 +223,7 @@ export default class Search extends React.Component {
 
 	render() {
 		return (
-			<Box id="search">
+			<Box id="search" className="page">
 				<Grid container spacing={0} className="form">
 					<Grid item xs={12} sm={12} md={2}>
 						<FormControl variant="outlined">

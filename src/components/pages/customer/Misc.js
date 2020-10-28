@@ -15,6 +15,7 @@ import React, { useEffect, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
+import Switch from '@material-ui/core/Switch';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -24,6 +25,7 @@ import TableRow from '@material-ui/core/TableRow';
 // Generic modules
 import Events from '../../../generic/events';
 import Rest from '../../../generic/rest';
+import { clone } from '../../../generic/tools';
 
 // Local modules
 import Utils from '../../../utils';
@@ -38,12 +40,21 @@ const _RX_TYPE = {
 	ana: 'Anazao'
 }
 
+// Stop flags
+const _STOP_FLAGS = [
+	{flag: 'sales', title: 'Sales'},
+	{flag: 'support', title: 'Support'},
+	{flag: 'batch', title: 'Batch Campaigns'},
+	{flag: 'doctor', title: 'Provider'}
+]
+
 // Misc component
 export default function Misc(props) {
 
 	// State
 	let [calendly, calendlySet] = useState(null);
 	let [patient, patientSet] = useState(null);
+	let [stops, stopsSet] = useState(null);
 
 	// Effects
 	useEffect(() => {
@@ -52,6 +63,9 @@ export default function Misc(props) {
 		if(props.user) {
 			if(Utils.hasRight(props.user, 'patient_account', 'read')) {
 				patientFetch();
+			}
+			if(Utils.hasRight(props.user, 'csr_messaging', 'create')) {
+				stopsFetch();
 			}
 			if(Utils.hasRight(props.user, 'calendly', 'read')) {
 				calendlyFetch();
@@ -148,6 +162,96 @@ export default function Misc(props) {
 		});
 	}
 
+	function stopChange(event, service) {
+
+		// Clone the stops
+		let oStops = clone(stops);
+
+		// If we are adding the stop flag to the service
+		if(event.target.checked) {
+
+			// Send the request to the server
+			Rest.create('monolith', 'customer/stop', {
+				phoneNumber: props.phoneNumber,
+				service: service
+			}).done(res => {
+
+				// If there's an error or warning
+				if(res.error && !Utils.restError(res.error)) {
+					Events.trigger('error', JSON.stringify(res.error));
+				}
+				if(res.warning) {
+					Events.trigger('warning', JSON.stringify(res.warning));
+				}
+
+				// If there's data, set the state
+				if(res.data) {
+
+					// Add the flag
+					oStops[service] = props.user.id;
+
+					// Set the new state
+					stopsSet(oStops);
+				}
+			});
+		}
+
+		// Else, we are removing the stop flag from the service
+		else {
+
+			// Send the request to the server
+			Rest.delete('monolith', 'customer/stop', {
+				phoneNumber: props.phoneNumber,
+				service: service
+			}).done(res => {
+
+				// If there's an error or warning
+				if(res.error && !Utils.restError(res.error)) {
+					if(res.error.code === 1509) {
+						Events.trigger('error', "Can't remove STOP set by customer");
+					} else {
+						Events.trigger('error', JSON.stringify(res.error));
+					}
+				}
+				if(res.warning) {
+					Events.trigger('warning', JSON.stringify(res.warning));
+				}
+
+				// If there's data, set the state
+				if(res.data) {
+
+					// Remove the flag
+					delete oStops[service];
+
+					// Set the new state
+					stopsSet(oStops);
+				}
+			});
+		}
+	}
+
+	function stopsFetch() {
+
+		// Request the account
+		Rest.read('monolith', 'customer/stops', {
+			phoneNumber: props.phoneNumber
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data, set the state
+			if('data' in res) {
+				stopsSet(res.data);
+			}
+		});
+	}
+
 	// Calendly elements
 	let calendlyElement = null;
 
@@ -187,13 +291,53 @@ export default function Misc(props) {
 
 		// Header + content
 		calendlyElement = (
-			<React.Fragment>
+			<React.Fragment key="calendly">
 				<div className="pageHeader">
 					<div className="title">Calendly Appointments</div>
 				</div>
 				{inner}
 			</React.Fragment>
 		)
+	}
+
+	// SMS Stop elements
+	let stopsElement = null;
+
+	// If the user has rights to view calendly
+	if(Utils.hasRight(props.user, 'csr_messaging', 'create')) {
+
+		// If we're still loading
+		let inner = null
+		if(stops === null) {
+			inner = <p>Loading...</p>
+		} else {
+			inner = (
+				<Grid container spacing={2}>
+					{_STOP_FLAGS.map(o =>
+						<Grid item xs={12} sm={6} md={3}>
+							<Switch
+								checked={o.flag in stops}
+								disabled={stops[o.flag] === null}
+								color="secondary"
+								onChange={ev => stopChange(ev, o.flag)}
+							/>
+							{o.title}
+						</Grid>
+					)}
+				</Grid>
+			);
+		}
+
+		// Header + content
+		stopsElement = (
+			<React.Fragment key="stops">
+				<div className="pageHeader">
+					<div className="title">SMS Stop flags (Twilio)</div>
+				</div>
+				{inner}
+			</React.Fragment>
+		)
+
 	}
 
 	// Patient Portal elements
@@ -232,7 +376,7 @@ export default function Misc(props) {
 
 		// Header + content
 		patientElement = (
-			<React.Fragment>
+			<React.Fragment key="patient">
 				<div className="pageHeader">
 					<div className="title">Patient Portal</div>
 				</div>
@@ -245,6 +389,9 @@ export default function Misc(props) {
 	return (
 		<React.Fragment>{[
 			calendlyElement,
+			<hr />,
+			stopsElement,
+			<hr />,
 			patientElement
 		]}
 		</React.Fragment>

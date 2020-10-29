@@ -52,6 +52,7 @@ const _STOP_FLAGS = [
 export default function Misc(props) {
 
 	// State
+	let [attempts, attemptsSet] = useState([]);
 	let [calendly, calendlySet] = useState(null);
 	let [patient, patientSet] = useState(null);
 	let [stops, stopsSet] = useState(null);
@@ -95,6 +96,29 @@ export default function Misc(props) {
 			// If there's data, set the state
 			if('data' in res) {
 				calendlySet(res.data);
+			}
+		});
+	}
+
+	// Fetch the failed attempts to setup the account
+	function patientAttempts(key) {
+
+		// Request the attempts
+		Rest.read('patient', 'setup/attempts', {
+			key: key
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data, set the state
+			if('data' in res) {
+				attemptsSet(res.data);
 			}
 		});
 	}
@@ -158,6 +182,11 @@ export default function Misc(props) {
 			// If there's data, set the state
 			if('data' in res) {
 				patientSet(res.data);
+
+				// If there are failed attempts
+				if(res.data.attempts) {
+					patientAttempts(res.data._id);
+				}
 			}
 		});
 	}
@@ -363,11 +392,23 @@ export default function Misc(props) {
 			inner = (
 				<Paper className="padded">
 					<Grid container spacing={2}>
-						<Grid item xs={12} md={6}><strong>Activated: </strong><span>{patient.activated ? 'Yes' : 'No'}</span></Grid>
+						<Grid item xs={12} md={6}><strong>Activated: </strong><span>{patient.activated ? 'Yes' : 'No / ' + patient.attempts + ' attempts'}</span></Grid>
 						<Grid item xs={12} md={6}><strong>Email: </strong><span>{patient.email}</span></Grid>
 						<Grid item xs={12} md={6}><strong>CRM: </strong><span>{_CRM_TYPE[patient.crm_type]} / {patient.crm_id}</span></Grid>
 						{patient.rx_type &&
 							<Grid item xs={12} md={6}><strong>RX: </strong><span>{_RX_TYPE[patient.rx_type]} / {patient.rx_id}</span></Grid>
+						}
+						{patient.attempts &&
+							<React.Fragment>
+								<Grid item xs={12}><strong>Failed Attempts:</strong></Grid>
+								{attempts.map(o =>
+									<React.Fragment>
+										<Grid item xs={12} md={4}><strong>Date:</strong> {Utils.datetime(o._created)}</Grid>
+										<Grid item xs={12} md={4}><strong>DOB:</strong> "{o.dob}"</Grid>
+										<Grid item xs={12} md={4}><strong>Last Name:</strong> "{o.lname}"</Grid>
+									</React.Fragment>
+								)}
+							</React.Fragment>
 						}
 					</Grid>
 				</Paper>

@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.16.3', 'October 29th, 2020', [
+		'Added displaying of failed Patient Portal setup attempts to Misc. tab of Customer page. Should help in figuring out customer\'s issues.'
+	]],
 	['1.16.2', 'October 27th, 2020', [
 		'Added ability to set STOP flags per service in the Misc tab of customer pages.'
 	]],

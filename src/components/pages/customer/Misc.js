@@ -398,7 +398,7 @@ export default function Misc(props) {
 						{patient.rx_type &&
 							<Grid item xs={12} md={6}><strong>RX: </strong><span>{_RX_TYPE[patient.rx_type]} / {patient.rx_id}</span></Grid>
 						}
-						{patient.attempts &&
+						{patient.attempts > 0 &&
 							<React.Fragment>
 								<Grid item xs={12}><strong>Failed Attempts:</strong></Grid>
 								{attempts.map(o =>

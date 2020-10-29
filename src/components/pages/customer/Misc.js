@@ -12,7 +12,9 @@
 import React, { useEffect, useState } from 'react';
 
 // Material UI
+import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Switch from '@material-ui/core/Switch';
@@ -21,6 +23,11 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import Tooltip from '@material-ui/core/Tooltip';
+
+// Material UI Icons
+import RefreshIcon from '@material-ui/icons/Refresh';
+import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 
 // Generic modules
 import Events from '../../../generic/events';
@@ -103,6 +110,9 @@ export default function Misc(props) {
 	// Fetch the failed attempts to setup the account
 	function patientAttempts(key) {
 
+		// Clear the current attempts
+		attemptsSet([]);
+
 		// Request the attempts
 		Rest.read('patient', 'setup/attempts', {
 			key: key
@@ -184,9 +194,37 @@ export default function Misc(props) {
 				patientSet(res.data);
 
 				// If there are failed attempts
-				if(res.data.attempts) {
+				if(res.data.attempts !== null) {
 					patientAttempts(res.data._id);
 				}
+			}
+		});
+	}
+
+	// Reset the failed attempts count
+	function patientReset(key) {
+
+		// Request the attempts
+		Rest.update('patient', 'setup/reset', {
+			key: key
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data, set the state
+			if(res.data) {
+
+				// Clone the current patient, reset the count, and set the
+				//	state
+				let oPatient = clone(patient);
+				oPatient.attempts = 0;
+				patientSet(oPatient);
 			}
 		});
 	}
@@ -392,15 +430,32 @@ export default function Misc(props) {
 			inner = (
 				<Paper className="padded">
 					<Grid container spacing={2}>
-						<Grid item xs={12} md={6}><strong>Activated: </strong><span>{patient.activated ? 'Yes' : 'No / ' + patient.attempts + ' attempts'}</span></Grid>
-						<Grid item xs={12} md={6}><strong>Email: </strong><span>{patient.email}</span></Grid>
 						<Grid item xs={12} md={6}><strong>CRM: </strong><span>{_CRM_TYPE[patient.crm_type]} / {patient.crm_id}</span></Grid>
-						{patient.rx_type &&
-							<Grid item xs={12} md={6}><strong>RX: </strong><span>{_RX_TYPE[patient.rx_type]} / {patient.rx_id}</span></Grid>
-						}
-						{patient.attempts > 0 &&
+						<Grid item xs={12} md={6}><strong>RX: </strong>{patient.rx_type !== null && <span>{_RX_TYPE[patient.rx_type]} / {patient.rx_id}</span>}</Grid>
+						<Grid item xs={12} md={6}>
+							<span style={{verticalAlign: 'middle'}}>
+								<strong>Activated: </strong>
+								{patient.activated ? 'Yes' : 'No / ' + patient.attempts + ' attempts '}
+							</span>
+							{!patient.activated && patient.attempts > 0 &&
+								<Tooltip title="Reset Attempts">
+									<IconButton onClick={() => patientReset(patient._id)}>
+										<RotateLeftIcon />
+									</IconButton>
+								</Tooltip>
+							}
+						</Grid>
+						<Grid item xs={12} md={6}><strong>Email: </strong><span>{patient.email}</span></Grid>
+						{patient.attempts !== null &&
 							<React.Fragment>
-								<Grid item xs={12}><strong>Failed Attempts:</strong></Grid>
+								<Grid item xs={12}>
+									<strong style={{verticalAlign: 'middle'}}>Failed Attempts: </strong>
+									<Tooltip title="Refresh Attempts List">
+										<IconButton onClick={() => patientAttempts(patient._id)}>
+											<RefreshIcon />
+										</IconButton>
+									</Tooltip>
+								</Grid>
 								{attempts.map(o =>
 									<React.Fragment>
 										<Grid item xs={12} md={4}><strong>Date:</strong> {Utils.datetime(o._created)}</Grid>
@@ -417,12 +472,12 @@ export default function Misc(props) {
 
 		// Header + content
 		patientElement = (
-			<React.Fragment key="patient">
+			<Box key="patient" className="patient">
 				<div className="pageHeader">
 					<div className="title">Patient Portal</div>
 				</div>
 				{inner}
-			</React.Fragment>
+			</Box>
 		)
 	}
 

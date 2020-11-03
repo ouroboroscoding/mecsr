@@ -194,7 +194,7 @@ export default function Misc(props) {
 				patientSet(res.data);
 
 				// If there are failed attempts
-				if(res.data.attempts !== null) {
+				if(res.data && res.data.attempts !== null) {
 					patientAttempts(res.data._id);
 				}
 			}

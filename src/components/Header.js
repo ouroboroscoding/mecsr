@@ -340,7 +340,7 @@ function ViewItem(props) {
 
 		// If we're currently selected, change the page
 		if(props.selected) {
-			history.push(props.provider !== null ? '/pending' : '/unclaimed');
+			history.push('/unclaimed');
 		}
 
 		// Trigger the viewed being removed
@@ -1163,7 +1163,7 @@ export default class Header extends React.Component {
 	}
 
 	// A viewed conversation was added
-	viewedAdd(number, name) {
+	viewedAdd(number, name, customer) {
 
 		// Does it already exist in the claimed?
 		let iClaimed = Tools.afindi(this.state.claimed, 'customerPhone', number);
@@ -1219,10 +1219,19 @@ export default class Header extends React.Component {
 					}
 
 					// If there's data
-					if(res.data) {
+					if('data' in res) {
 
 						// Clone the viewed state
 						let lView = Tools.clone(this.state.viewed);
+
+						// If we got no data
+						if(res.data === 0) {
+							res.data = {
+								customerId: 0,
+								customerName: 'N/A',
+								claimedUser: null
+							}
+						}
 
 						// Add the record to the end
 						lView.push({

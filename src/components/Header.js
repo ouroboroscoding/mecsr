@@ -308,7 +308,7 @@ function ViewItem(props) {
 
 		// Attempt to claim the conversation
 		claimed.add(props.phone).then(res => {
-			Events.trigger('claimedAdd', props.phone, props.name, res.customerId);
+			Events.trigger('claimedAdd', props.phone, props.name, props.id);
 			Events.trigger('viewedRemove', props.phone, false);
 		}, error => {
 			// If we got a duplicate

@@ -1340,7 +1340,7 @@ export default class Header extends React.Component {
 
 				// Get the ID and name from the phone number
 				Rest.read('monolith', 'customer/id/byPhone', {
-					phoneNumber: data.phoneNumber
+					phoneNumber: data.claim.phoneNumber
 				}).done(res => {
 
 					// If there's an error or warning
@@ -1357,14 +1357,13 @@ export default class Header extends React.Component {
 						// Clone the claims
 						let lClaimed = Tools.clone(this.state.claimed);
 
-						// Add the number and transferred by to the data
-						res.data['customerPhone'] = data.phoneNumber;
-						res.data['transferredBy'] = data.transferredBy;
-						res.data['orderId'] = data.orderId;
-						res.data['provider'] = data.provider;
+						// Add the data to the claim
+						data.claim.customerId = res.data.customerId
+						data.claim.customerName = res.data.customerName;
+						data.claim.claimedUser = res.data.claimedUser
 
 						// Push the transfer to the top
-						lClaimed.unshift(res.data);
+						lClaimed.unshift(data.claim);
 
 						// Save the state
 						this.setState({

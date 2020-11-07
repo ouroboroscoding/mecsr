@@ -20,6 +20,7 @@ import Select from '@material-ui/core/Select';
 import Tooltip from '@material-ui/core/Tooltip';
 
 // Material UI Icons
+import AddIcon from '@material-ui/icons/Add';
 import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
 import RefreshIcon from '@material-ui/icons/Refresh';
@@ -314,8 +315,22 @@ export default function RX(props) {
 	if(props.prescriptions === null) {
 		prescriptions = <p>Loading...</p>
 	}
-	else if(props.prescriptions === 0 || props.prescriptions.length === 0) {
-		prescriptions = <p>No Prescriptions found for this customer</p>
+	else if(props.prescriptions === 0) {
+		prescriptions = (
+			<p>
+				<span style={{verticalAlign: 'middle'}}>No DoseSpot account for this patient</span>
+				{Utils.hasRight(props.user, 'prescriptions', 'create') &&
+					<Tooltip title="Create Account">
+						<IconButton onClick={props.onDsCreate}>
+							<AddIcon />
+						</IconButton>
+					</Tooltip>
+				}
+			</p>
+		);
+	}
+	else if(props.prescriptions.length === 0) {
+		prescriptions = <p>No prescriptions found for this customer</p>
 	}
 	else {
 		prescriptions = (

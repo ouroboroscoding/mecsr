@@ -388,7 +388,7 @@ export default class Customer extends React.Component {
 
 		// Find the MIP using the phone number
 		Rest.read('prescriptions', 'patient/prescriptions', {
-			patient_id: parseInt(id, 10)
+			patient_id: id
 		}).done(res => {
 
 			// If not mounted

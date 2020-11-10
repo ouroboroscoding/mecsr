@@ -530,6 +530,14 @@ export default class SMS extends React.Component {
 					}
 					sReplacement = this.props.customer.shipping.lastName;
 					break;
+				case 'verify_id_link':
+					if(!this.props.mips || this.props.mips.length === 0) {
+						Event.trigger('error', 'Can not use template without MIP data');
+						return;
+					}
+					sReplacement = 'https://www.maleexcelmip.com/mip/verifyId/Upload?landing_id=' +
+									this.props.mips[0].id;
+					break;
 				default:
 					sReplacement = 'UNKNOWN VARIABLE "' + lMatch[1] + '"';
 			}

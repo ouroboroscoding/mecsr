@@ -120,6 +120,14 @@ td {
 	margin-bottom: 5px;
 }
 
+.MuiBox-root.actions {
+	text-align: right;
+
+	button {
+		margin-left: 10px;
+	}
+}
+
 .pageHeader {
 	display: flex;
 

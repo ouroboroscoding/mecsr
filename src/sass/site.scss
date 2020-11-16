@@ -152,6 +152,14 @@ td {
 	}
 }
 
+.MuiBox-root.actions {
+	text-align: right;
+
+	button {
+		margin-left: 10px;
+	}
+}
+
 .pageHeader {
 	display: flex;
 

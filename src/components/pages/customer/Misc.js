@@ -9,6 +9,7 @@
  */
 
 // NPM modules
+import Tree from 'format-oc/Tree'
 import React, { useEffect, useState } from 'react';
 
 // Material UI
@@ -26,8 +27,12 @@ import TableRow from '@material-ui/core/TableRow';
 import Tooltip from '@material-ui/core/Tooltip';
 
 // Material UI Icons
+import EditIcon from '@material-ui/icons/Edit';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
+
+// Format Components
+import FormComponent from '../../format/Form';
 
 // Generic modules
 import Events from '../../../generic/events';
@@ -36,6 +41,15 @@ import { clone } from '../../../generic/tools';
 
 // Local modules
 import Utils from '../../../utils';
+
+// Agent Definition
+import SetupDef from '../../../definitions/patient/account_setup';
+SetupDef['__react__'] = {
+	update: ['email', 'lname', 'dob']
+}
+
+// Generate the agent Tree
+const SetupTree = new Tree(clone(SetupDef));
 
 // CRM and RX Types
 const _CRM_TYPE = {
@@ -62,6 +76,7 @@ export default function Misc(props) {
 	let [attempts, attemptsSet] = useState([]);
 	let [calendly, calendlySet] = useState(null);
 	let [patient, patientSet] = useState(null);
+	let [patientUpdate, patientUpdateSet] = useState(false);
 	let [stops, stopsSet] = useState(null);
 
 	// Effects
@@ -229,6 +244,21 @@ export default function Misc(props) {
 		});
 	}
 
+	function patientUpdated(values) {
+
+		// Clone the data
+		let oPatient = clone(patient);
+
+		// For each changed value
+		for(let k in values) {
+			oPatient[k] = values[k];
+		}
+
+		// Store the new state and hide the edit form
+		patientSet(oPatient);
+		patientUpdateSet(false);
+	}
+
 	function stopChange(event, service) {
 
 		// Clone the stops
@@ -328,9 +358,9 @@ export default function Misc(props) {
 		// If we're still loading
 		let inner = null
 		if(calendly === null) {
-			inner = <p>Loading...</p>
+			inner = <span>Loading...</span>
 		} else if(calendly.length === 0) {
-			inner = <p>No appointments found</p>
+			inner = <span>No appointments found</span>
 		} else {
 			inner = (
 				<Table stickyHeader aria-label="sticky table">
@@ -362,7 +392,9 @@ export default function Misc(props) {
 				<div className="pageHeader">
 					<div className="title">Calendly Appointments</div>
 				</div>
-				{inner}
+				<Paper className="padded">
+					{inner}
+				</Paper>
 			</React.Fragment>
 		)
 	}
@@ -376,7 +408,7 @@ export default function Misc(props) {
 		// If we're still loading
 		let inner = null
 		if(stops === null) {
-			inner = <p>Loading...</p>
+			inner = <span>Loading...</span>
 		} else {
 			inner = (
 				<Grid container spacing={2}>
@@ -401,7 +433,9 @@ export default function Misc(props) {
 				<div className="pageHeader">
 					<div className="title">SMS Stop flags (Twilio)</div>
 				</div>
-				{inner}
+				<Paper className="padded">
+					{inner}
+				</Paper>
 			</React.Fragment>
 		)
 
@@ -416,57 +450,77 @@ export default function Misc(props) {
 		// If we're still loading
 		let inner = null
 		if(patient === null) {
-			inner = <p>Loading...</p>
+			inner = <span>Loading...</span>
 		} else if(patient === false) {
 			inner = (
-				<p>
+				<span>
 					Customer has no patient portal access.
 					{(!props.readOnly && Utils.hasRight(props.user, 'patient_account', 'create')) &&
 						<span> <Button color="primary" onClick={patientCreate} variant="contained">Send Setup Email</Button></span>
 					}
-				</p>
+				</span>
 			);
 		} else {
 			inner = (
-				<Paper className="padded">
-					<Grid container spacing={2}>
-						<Grid item xs={12} md={6}><strong>CRM: </strong><span>{_CRM_TYPE[patient.crm_type]} / {patient.crm_id}</span></Grid>
-						<Grid item xs={12} md={6}><strong>RX: </strong>{patient.rx_type !== null && <span>{_RX_TYPE[patient.rx_type]} / {patient.rx_id}</span>}</Grid>
-						<Grid item xs={12} md={6}>
-							<span style={{verticalAlign: 'middle'}}>
-								<strong>Activated: </strong>
-								{patient.activated ? 'Yes' : 'No / ' + patient.attempts + ' attempts '}
-							</span>
-							{!patient.activated && patient.attempts > 0 &&
-								<Tooltip title="Reset Attempts">
-									<IconButton onClick={() => patientReset(patient._id)}>
-										<RotateLeftIcon />
-									</IconButton>
-								</Tooltip>
-							}
-						</Grid>
-						<Grid item xs={12} md={6}><strong>Email: </strong><span>{patient.email}</span></Grid>
-						{patient.attempts !== null &&
-							<React.Fragment>
-								<Grid item xs={12}>
-									<strong style={{verticalAlign: 'middle'}}>Failed Attempts: </strong>
-									<Tooltip title="Refresh Attempts List">
-										<IconButton onClick={() => patientAttempts(patient._id)}>
-											<RefreshIcon />
+				<React.Fragment>
+					{patientUpdate ?
+						<FormComponent
+							cancel={() => patientUpdateSet(false)}
+							noun="setup/update"
+							service="patient"
+							success={patientUpdated}
+							title={false}
+							tree={SetupTree}
+							type="update"
+							value={patient}
+						/>
+					:
+						<Grid container spacing={2}>
+							<Grid item xs={12} md={6}><strong>CRM: </strong><span>{_CRM_TYPE[patient.crm_type]} / {patient.crm_id}</span></Grid>
+							<Grid item xs={12} md={6}><strong>RX: </strong>{patient.rx_type !== null && <span>{_RX_TYPE[patient.rx_type]} / {patient.rx_id}</span>}</Grid>
+							<Grid item xs={12} md={6}>
+								<span style={{verticalAlign: 'middle'}}>
+									<strong>Activated: </strong>
+									{patient.activated ? 'Yes' : 'No / ' + patient.attempts + ' attempts '}
+								</span>
+								{!patient.activated && patient.attempts > 0 &&
+									<Tooltip title="Reset Attempts">
+										<IconButton onClick={() => patientReset(patient._id)}>
+											<RotateLeftIcon />
 										</IconButton>
 									</Tooltip>
-								</Grid>
-								{attempts.map(o =>
-									<React.Fragment>
-										<Grid item xs={12} md={4}><strong>Date:</strong> {Utils.datetime(o._created)}</Grid>
-										<Grid item xs={12} md={4}><strong>DOB:</strong> "{o.dob}"</Grid>
-										<Grid item xs={12} md={4}><strong>Last Name:</strong> "{o.lname}"</Grid>
-									</React.Fragment>
-								)}
-							</React.Fragment>
-						}
-					</Grid>
-				</Paper>
+								}
+							</Grid>
+							<Grid item xs={12} md={6}><strong>Email: </strong><span>{patient.email}</span></Grid>
+							{!patient.activated &&
+								<React.Fragment>
+									<Grid item xs={12} md={6}><strong>Last Name: </strong><span>{patient.lname}</span></Grid>
+									<Grid item xs={12} md={6}><strong>DOB: </strong><span>{patient.dob}</span></Grid>
+									<Grid item xs={12}><strong>Setup Link: </strong><span>{'https://' + process.env.REACT_APP_MEPP_DOMAIN + '/#key=s' + patient._id}</span></Grid>
+								</React.Fragment>
+							}
+							{patient.attempts !== null &&
+								<React.Fragment>
+									<Grid item xs={12}>
+										<strong style={{verticalAlign: 'middle'}}>Failed Attempts: </strong>
+										<Tooltip title="Refresh Attempts List">
+											<IconButton className="nopadding" onClick={() => patientAttempts(patient._id)}>
+												<RefreshIcon />
+											</IconButton>
+										</Tooltip>
+									</Grid>
+									{attempts.map(o =>
+										<React.Fragment>
+											<Grid item xs={12} md={4}><strong>Date:</strong> {Utils.datetime(o._created)}</Grid>
+											<Grid item xs={12} md={4}><strong>DOB:</strong> "{o.dob}"</Grid>
+											<Grid item xs={12} md={4}><strong>Last Name:</strong> "{o.lname}"</Grid>
+										</React.Fragment>
+									)}
+								</React.Fragment>
+							}
+						</Grid>
+					}
+				</React.Fragment>
 			);
 		}
 
@@ -474,9 +528,20 @@ export default function Misc(props) {
 		patientElement = (
 			<Box key="patient" className="patient">
 				<div className="pageHeader">
-					<div className="title">Patient Portal</div>
+					<div className="title">
+						Patient Portal&nbsp;
+						{patient && !patient.activated && Utils.hasRight(props.user, 'patient_account', 'update') &&
+							<Tooltip title="Edit Setup Values">
+								<IconButton className="edit" onClick={() => patientUpdateSet(b => !b)}>
+									<EditIcon />
+								</IconButton>
+							</Tooltip>
+						}
+					</div>
 				</div>
-				{inner}
+				<Paper className="padded">
+					{inner}
+				</Paper>
 			</Box>
 		)
 	}
@@ -485,9 +550,7 @@ export default function Misc(props) {
 	return (
 		<React.Fragment>{[
 			calendlyElement,
-			<hr />,
 			stopsElement,
-			<hr />,
 			patientElement
 		]}
 		</React.Fragment>

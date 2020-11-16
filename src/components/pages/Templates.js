@@ -281,6 +281,10 @@ export default function Templates(props) {
 							<TableCell>{"{chrt_link}"}</TableCell>
 							<TableCell>https://www.maleexcelmip.com/mip/form/CHRT?landing_id=Kent-ckent@domain.com-2020-07-12-MIP-H1&formId=MIP-H1</TableCell>
 						</TableRow>
+						<TableRow>
+							<TableCell>{"{verify_id_link}"}</TableCell>
+							<TableCell>https://www.maleexcelmip.com/mip/verifyId/Upload?landing_id=Kent-ckent@domain.com-2020-07-12-MIP-H1</TableCell>
+						</TableRow>
 					</TableBody>
 				</Table>
 			</div>

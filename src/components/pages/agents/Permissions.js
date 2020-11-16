@@ -39,7 +39,7 @@ const TYPES = [
 		{name: "customers", title: "CRM Data", allowed: READ}
 	]},
 	{title: "Patient Portal", rights: [
-		{name: "patient_account", title: "Account", allowed: CREATE | READ}
+		{name: "patient_account", title: "Account", allowed: CREATE | READ | UPDATE}
 	]},
 	{title: "Memo", rights: [
 		{name: "calendly", title: "Calendly Appointment", allowed: READ},

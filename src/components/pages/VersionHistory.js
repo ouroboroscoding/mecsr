@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.16.9', 'November 16th, 2020', [
+		'Added more info to Patient Portal section of Misc. tab of customer page. Can now see last name and dob used to verify customer, as well as the link sent by email. Those with edit rights can now modify last name, dob, and email associated with account setup.'
+	]],
 	['1.16.3', 'October 29th, 2020', [
 		'Added displaying of failed Patient Portal setup attempts to Misc. tab of Customer page. Should help in figuring out customer\'s issues.'
 	]],

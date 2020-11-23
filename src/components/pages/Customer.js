@@ -386,9 +386,9 @@ export default class Customer extends React.Component {
 
 	fetchPrescriptions(id, clinician) {
 
-		// Find the MIP using the phone number
+		// Fetch the prescriptions using the patient ID
 		Rest.read('prescriptions', 'patient/prescriptions', {
-			patient_id: parseInt(id, 10)
+			patient_id: id
 		}).done(res => {
 
 			// If not mounted

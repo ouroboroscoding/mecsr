@@ -1067,7 +1067,7 @@ export default class Header extends React.Component {
 	signout(ev) {
 
 		// Call the signout
-		Rest.create('auth', 'signout', {}).done(res => {
+		Rest.create('csr', 'signout', {}).done(res => {
 
 			// If there's an error
 			if(res.error && !Utils.restError(res.error)) {
@@ -1344,48 +1344,6 @@ export default class Header extends React.Component {
 		// Move forward based on the type
 		switch(data.type) {
 
-			// If someone transferred a claim to us
-			case 'claim_transfered':
-
-				// Get the ID and name from the phone number
-				Rest.read('monolith', 'customer/id/byPhone', {
-					phoneNumber: data.phoneNumber
-				}).done(res => {
-
-					// If there's an error or warning
-					if(res.error && !Utils.restError(res.error)) {
-						Events.trigger('error', JSON.stringify(res.error));
-					}
-					if(res.warning) {
-						Events.trigger('warning', JSON.stringify(res.warning));
-					}
-
-					// If there's data
-					if(res.data) {
-
-						// Clone the claims
-						let lClaimed = Tools.clone(this.state.claimed);
-
-						// Add the number and transferred by to the data
-						res.data['customerPhone'] = data.phoneNumber;
-						res.data['transferredBy'] = data.transferredBy;
-						res.data['orderId'] = data.orderId;
-						res.data['provider'] = data.provider;
-
-						// Push the transfer to the top
-						lClaimed.unshift(res.data);
-
-						// Save the state
-						this.setState({
-							claimed: lClaimed
-						});
-
-						// Notify the agent
-						Events.trigger('info', 'A conversation claim has been transferred to you');
-					}
-				})
-				break;
-
 			// If a claim was removed
 			case 'claim_removed':
 
@@ -1419,7 +1377,71 @@ export default class Header extends React.Component {
 						}
 					}
 				}
-				break
+				break;
+
+			// If someone transferred a claim to us
+			case 'claim_transfered':
+
+				// Get the ID and name from the phone number
+				Rest.read('monolith', 'customer/id/byPhone', {
+					phoneNumber: data.claim.phoneNumber
+				}).done(res => {
+
+					// If there's an error or warning
+					if(res.error && !Utils.restError(res.error)) {
+						Events.trigger('error', JSON.stringify(res.error));
+					}
+					if(res.warning) {
+						Events.trigger('warning', JSON.stringify(res.warning));
+					}
+
+					// If there's data
+					if(res.data) {
+
+						// Clone the claims
+						let lClaimed = Tools.clone(this.state.claimed);
+
+						// Add the data to the claim
+						data.claim.customerId = res.data.customerId
+						data.claim.customerName = res.data.customerName;
+						data.claim.claimedUser = res.data.claimedUser
+
+						// Push the transfer to the top
+						lClaimed.unshift(data.claim);
+
+						// Save the state
+						this.setState({
+							claimed: lClaimed
+						});
+
+						// Notify the agent
+						Events.trigger('info', 'A conversation claim has been transferred to you');
+					}
+				})
+				break;
+
+			// If a claim we already has got new data
+			case 'claim_updated':
+
+				// Look for the claim
+				let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
+
+				// If we found one
+				if(iIndex > -1) {
+
+					// Clone the claims
+					let lClaimed = Tools.clone(this.state.claimed);
+
+					// Update the claim
+					lClaimed[iIndex] = data.claim;
+
+					// Save the state
+					this.setState({
+						claimed: lClaimed
+					});
+
+					// Notify the agent
+					Events.trigger('info', 'A conversation claim has been updated with new info, please check notes');
 
 			// Unknown type
 			default:

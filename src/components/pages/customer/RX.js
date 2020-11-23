@@ -195,7 +195,7 @@ export default function RX(props) {
 
 			// Request it from the server
 			Rest.read('prescriptions', 'patient/sso', {
-				patient_id: parseInt(props.patientId, 10),
+				patient_id: props.patientId,
 				clinician_id: parseInt(props.user.dsClinicianId, 10)
 			}).done(res => {
 

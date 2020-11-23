@@ -1345,7 +1345,7 @@ export default class Header extends React.Component {
 		switch(data.type) {
 
 			// If a claim was removed
-			case 'claim_removed':
+			case 'claim_removed': {
 
 				// Look for the claim
 				let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
@@ -1378,9 +1378,10 @@ export default class Header extends React.Component {
 					}
 				}
 				break;
+			}
 
 			// If someone transferred a claim to us
-			case 'claim_transfered':
+			case 'claim_transfered': {
 
 				// Get the ID and name from the phone number
 				Rest.read('monolith', 'customer/id/byPhone', {
@@ -1419,9 +1420,10 @@ export default class Header extends React.Component {
 					}
 				})
 				break;
+			}
 
 			// If a claim we already has got new data
-			case 'claim_updated':
+			case 'claim_updated': {
 
 				// Look for the claim
 				let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
@@ -1442,6 +1444,9 @@ export default class Header extends React.Component {
 
 					// Notify the agent
 					Events.trigger('info', 'A conversation claim has been updated with new info, please check notes');
+				}
+				break;
+			}
 
 			// Unknown type
 			default:

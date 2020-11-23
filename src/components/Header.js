@@ -1344,6 +1344,41 @@ export default class Header extends React.Component {
 		// Move forward based on the type
 		switch(data.type) {
 
+			// If a claim was removed
+			case 'claim_removed':
+
+				// Look for the claim
+				let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
+
+				// If we found one
+				if(iIndex > -1) {
+
+					// Clone the claims
+					let lClaimed = Tools.clone(this.state.claimed);
+
+					// Delete the claim
+					lClaimed.splice(iIndex, 1);
+
+					// Set the new state
+					this.setState({
+						claimed: lClaimed
+					});
+
+					// If we're on a customer
+					let lPath = Utils.parsePath(this.state.path);
+					if(lPath[0] === 'customer') {
+
+						// If it's the one removed
+						if(lPath[1] === data.phoneNumber) {
+
+							// Switch to view
+							Events.trigger('viewedAdd', lPath[1], lPath[2]);
+							Events.trigger('error', 'This customer is not claimed, switching to view only.');
+						}
+					}
+				}
+				break;
+
 			// If someone transferred a claim to us
 			case 'claim_transfered':
 
@@ -1385,8 +1420,8 @@ export default class Header extends React.Component {
 				})
 				break;
 
-			// If a claim was removed
-			case 'claim_removed':
+			// If a claim we already has got new data
+			case 'claim_updated':
 
 				// Look for the claim
 				let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
@@ -1397,28 +1432,16 @@ export default class Header extends React.Component {
 					// Clone the claims
 					let lClaimed = Tools.clone(this.state.claimed);
 
-					// Delete the claim
-					lClaimed.splice(iIndex, 1);
+					// Update the claim
+					lClaimed[iIndex] = data.claim;
 
-					// Set the new state
+					// Save the state
 					this.setState({
 						claimed: lClaimed
 					});
 
-					// If we're on a customer
-					let lPath = Utils.parsePath(this.state.path);
-					if(lPath[0] === 'customer') {
-
-						// If it's the one removed
-						if(lPath[1] === data.phoneNumber) {
-
-							// Switch to view
-							Events.trigger('viewedAdd', lPath[1], lPath[2]);
-							Events.trigger('error', 'This customer is not claimed, switching to view only.');
-						}
-					}
-				}
-				break
+					// Notify the agent
+					Events.trigger('info', 'A conversation claim has been updated with new info, please check notes');
 
 			// Unknown type
 			default:

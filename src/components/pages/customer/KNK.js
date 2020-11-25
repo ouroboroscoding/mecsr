@@ -12,6 +12,7 @@
 import React from 'react';
 
 // Material UI
+import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
@@ -25,6 +26,13 @@ import Tooltip from '@material-ui/core/Tooltip';
 // Material UI Icons
 import RefreshIcon from '@material-ui/icons/Refresh';
 
+// Generic modules
+import Events from '../../../generic/events';
+import Rest from '../../../generic/rest';
+
+// Local modules
+import Utils from '../../../utils';
+
 // Helper
 const EnToTxt = {
 	"A": "Audio",
@@ -35,6 +43,26 @@ const EnToTxt = {
 
 // KNK component
 export default function KNK(props) {
+
+	function memoSync(order_id) {
+		Rest.update('monolith', 'order/refresh', {
+			orderId: order_id
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If we got data
+			if('data' in res) {
+				Events.trigger('success', 'Konnektive order data synced with Memo');
+			}
+		})
+	}
 
 	// Init customer section
 	let elCustomer = null;
@@ -152,7 +180,16 @@ export default function KNK(props) {
 							<React.Fragment key={i}>
 								<TableRow>
 									<TableCell>
-										<p><nobr><strong>ID: </strong>{o.orderId}</nobr></p>
+										<p><nobr>
+											<strong>ID: </strong>
+											<span>{o.orderId} </span>
+											<Button
+												className="sync"
+												color="primary"
+												onClick={ev => memoSync(o.orderId)}
+												variant="contained"
+											>Sync Memo</Button>
+										</nobr></p>
 										<p><strong>Campaign: </strong><span>{o.campaign}</span></p>
 										<p><nobr><strong>Email: </strong><span>{o.email}</span></nobr></p>
 										<p><nobr><strong>Phone: </strong><span>{o.phone}</span></nobr></p>

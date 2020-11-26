@@ -91,7 +91,8 @@ class Signin extends React.Component {
 			<Dialog
 				disableBackdropClick
 				disableEscapeKeyDown
-				maxWidth="lg"
+				fullWidth={true}
+				maxWidth="sm"
 				open={true}
 				aria-labelledby="confirmation-dialog-title"
 			>

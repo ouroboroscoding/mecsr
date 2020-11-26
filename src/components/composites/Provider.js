@@ -36,7 +36,7 @@ export default function Provider(props) {
 	function submit() {
 
 		// Check for notes
-		let content = noteRef.current.value;
+		let content = noteRef.current.value.trim();
 
 		// If we got text
 		if(content.trim() === '') {
@@ -45,11 +45,12 @@ export default function Provider(props) {
 		}
 
 		// Send the message to the server
-		Rest.create('monolith', 'customer/note', {
-			action: 'Send to Provider',
-			content: content,
-			label: 'Provider',
-			order_id: props.orderId
+		Rest.update('monolith', 'customer/transfer', {
+			phoneNumber: props.customerPhone,
+			customerId: props.customerId,
+			orderId: props.orderId,
+			note: content,
+			provider: props.provider
 		}).done(res => {
 
 			// If there's an error or warning
@@ -62,7 +63,7 @@ export default function Provider(props) {
 
 			// If we're ok
 			if(res.data) {
-				props.onSubmit();
+				props.onTransfer();
 			}
 		});
 	}

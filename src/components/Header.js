@@ -103,6 +103,25 @@ function CustomerItem(props) {
 		providerSet(props.user.id);
 	}
 
+	function providerTransfer() {
+
+		// Hide the dialog
+		providerSet(false);
+
+		// Delete the claim
+		claimed.remove(props.customerPhone).then(res => {
+			// Trigger the claimed being removed
+			Events.trigger('claimedRemove', props.customerPhone, props.selected);
+		}, error => {
+			Events.trigger('error', JSON.stringify(error));
+		});
+
+		// If we're currently selected, change the page
+		if(props.selected) {
+			history.push(props.provider !== null ? '/pending' : '/unclaimed');
+		}
+	}
+
 	// X click
 	function remove(event) {
 
@@ -123,12 +142,10 @@ function CustomerItem(props) {
 				customerPhone: props.customerPhone
 			}).done(res => {
 
-				// If there's an error
+				// If there's an error or warning
 				if(res.error && !Utils.restError(res.error)) {
 					Events.trigger('error', JSON.stringify(res.error));
 				}
-
-				// If there's a warning
 				if(res.warning) {
 					Events.trigger('warning', JSON.stringify(res.warning));
 				}
@@ -277,7 +294,7 @@ function CustomerItem(props) {
 			{provider &&
 				<Provider
 					onClose={e => providerSet(false)}
-					onSubmit={remove}
+					onTransfer={providerTransfer}
 					{...props}
 				/>
 			}
@@ -1341,6 +1358,8 @@ export default class Header extends React.Component {
 	// WebSocket message
 	wsMessage(data) {
 
+		console.log('ws:', data);
+
 		// Move forward based on the type
 		switch(data.type) {
 
@@ -1397,18 +1416,28 @@ export default class Header extends React.Component {
 					}
 
 					// If there's data
-					if(res.data) {
+					if('data' in res) {
 
 						// Clone the claims
 						let lClaimed = Tools.clone(this.state.claimed);
 
-						// Add the data to the claim
-						data.claim.customerId = res.data.customerId
-						data.claim.customerName = res.data.customerName;
-						data.claim.claimedUser = res.data.claimedUser
+						// If there's no actual data
+						if(res.data === 0) {
+							res.data = {
+								customerId: 0,
+								customerName: 'N/A',
+								claimedUser: this.state.user.id
+							}
+						}
+
+						// Add the number and transferred by to the data
+						res.data['customerPhone'] = data.claim.phoneNumber;
+						res.data['transferredBy'] = data.claim.transferredBy;
+						res.data['orderId'] = data.claim.orderId;
+						res.data['provider'] = data.claim.provider;
 
 						// Push the transfer to the top
-						lClaimed.unshift(data.claim);
+						lClaimed.unshift(res.data);
 
 						// Save the state
 						this.setState({

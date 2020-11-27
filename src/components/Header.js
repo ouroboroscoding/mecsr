@@ -457,7 +457,6 @@ function ViewItem(props) {
 			{transfer !== false &&
 				<Transfer
 					customerId={props.id}
-					ignore={transfer}
 					name={props.name}
 					number={props.phone}
 					onClose={e => transferSet(false)}

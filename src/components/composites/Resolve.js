@@ -45,7 +45,7 @@ export default function Resolve(props) {
 			Rest.create('monolith', 'customer/note', {
 				action: 'CSR Note - Resolved',
 				content: content,
-				customer_id: props.customerId
+				customerId: props.customerId
 			}).done(res => {
 
 				// If there's an error

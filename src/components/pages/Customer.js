@@ -77,6 +77,7 @@ export default class Customer extends React.Component {
 		this.knkOrdersRefresh = this.knkOrdersRefresh.bind(this);
 		this.newMessage = this.newMessage.bind(this);
 		this.pharmacyFill = this.pharmacyFill.bind(this);
+		this.rxCreatePatient = this.rxCreatePatient.bind(this);
 		this.rxRefresh = this.rxRefresh.bind(this);
 		this.tabChange = this.tabChange.bind(this);
 	}
@@ -385,9 +386,9 @@ export default class Customer extends React.Component {
 
 	fetchPrescriptions(id, clinician) {
 
-		// Find the MIP using the phone number
+		// Fetch the prescriptions using the patient ID
 		Rest.read('prescriptions', 'patient/prescriptions', {
-			patient_id: parseInt(id, 10)
+			patient_id: id
 		}).done(res => {
 
 			// If not mounted
@@ -638,6 +639,7 @@ export default class Customer extends React.Component {
 					<RX
 						hrtLabs={this.state.hrtLabs}
 						onAdhocAdd={this.adhocAdd}
+						onDsCreate={this.rxCreatePatient}
 						onPharmacyFill={this.pharmacyFill}
 						onRefresh={this.rxRefresh}
 						orders={this.state.orders}
@@ -662,6 +664,41 @@ export default class Customer extends React.Component {
 				}
 			</div>
 		);
+	}
+
+	rxCreatePatient() {
+
+		// Send the request to the server
+		Rest.create('monolith', 'customer/dsid', {
+			customerId: this.props.customerId,
+			clinician_id: parseInt(this.props.user.dsClinicianId)
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+
+				// New state
+				let oState = {
+					"patient_id": res.data
+				}
+
+				// If there's an id
+				if(res.data) {
+					oState.prescriptions = [];
+				}
+
+				// Set the state
+				this.setState(oState);
+			}
+		});
 	}
 
 	rxRefresh() {

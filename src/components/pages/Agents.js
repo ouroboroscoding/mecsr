@@ -23,10 +23,12 @@ import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import HttpsIcon from '@material-ui/icons/Https';
+import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
 // Composites
@@ -64,10 +66,12 @@ export default function Agents(props) {
 	// State
 	let [agents, agentsSet] = useState(null);
 	let [create, createSet] = useState(false);
+	let [memo, memoSet] = useState(false);
 	let [password, passwordSet] = useState(false);
 	let [permissions, permissionsSet] = useState(false);
 
 	// Refs
+	let memoRef = useRef();
 	let passwdRef = useRef();
 	let permsRef = useRef();
 
@@ -76,7 +80,7 @@ export default function Agents(props) {
 
 		// If we have a user
 		if(props.user) {
-			fetchAgents();
+			agentsFetch();
 		} else {
 			agentsSet(null);
 		}
@@ -92,13 +96,8 @@ export default function Agents(props) {
 		createSet(false);
 	}
 
-	// Toggle the create form
-	function createToggle() {
-		createSet(b => !b);
-	}
-
 	// Fetch all the agents from the server
-	function fetchAgents() {
+	function agentsFetch() {
 
 		// Fetch all agents
 		Rest.read('csr', 'agents', {}).done(res => {
@@ -118,6 +117,37 @@ export default function Agents(props) {
 
 				// Set the agents
 				agentsSet(res.data);
+			}
+		});
+	}
+
+	function memoImport() {
+
+		// Store the username
+		let sUserName = memoRef.current.value.trim();
+
+		// Import the memo user
+		Rest.create('csr', 'agent/memo', {
+			"userName": sUserName
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+				if(res.data) {
+					Events.trigger('success', 'Agent ' + sUserName + ' added');
+					memoSet(false);
+					agentsFetch();
+				} else {
+					Events.trigger('error', 'No such Memo user: ' + sUserName);
+				}
 			}
 		});
 	}
@@ -143,11 +173,7 @@ export default function Agents(props) {
 				Events.trigger('success', 'Password updated');
 				passwordSet(false);
 			}
-		})
-	}
-
-	function permissionsCancel() {
-		permissionsSet(false);
+		});
 	}
 
 	function permissionsShow(agent_id) {
@@ -232,19 +258,26 @@ export default function Agents(props) {
 		<div id="agents" className="page">
 			<div className="agents">
 				<Box className="pageHeader">
-					<div className="title">Agents</div>
+					<Typography variant="h4">Agents</Typography>
 					{Utils.hasRight(props.user, 'csr_agents', 'create') &&
-						<Tooltip title="Create new agent">
-							<IconButton onClick={createToggle}>
-								<AddCircleIcon />
-							</IconButton>
-						</Tooltip>
+						<React.Fragment>
+							<Tooltip title="Import Memo User">
+								<IconButton onClick={ev => memoSet(b => !b)}>
+									<PersonAddIcon />
+								</IconButton>
+							</Tooltip>
+							<Tooltip title="Create New Agent">
+								<IconButton onClick={ev => createSet(b => !b)}>
+									<AddCircleIcon />
+								</IconButton>
+							</Tooltip>
+						</React.Fragment>
 					}
 				</Box>
 				{create &&
 					<Paper className="padded">
 						<FormComponent
-							cancel={createToggle}
+							cancel={ev => createSet(b => !b)}
 							errors={{
 								1501: "Username already in use",
 								1502: "Password not strong enough"
@@ -281,9 +314,9 @@ export default function Agents(props) {
 				}
 				{permissions &&
 					<Dialog
-						aria-labelledby="confirmation-dialog-title"
+						aria-labelledby="permissions-dialog-title"
 						maxWidth="lg"
-						onClose={permissionsCancel}
+						onClose={ev => permissionsSet(false)}
 						open={true}
 					>
 						<DialogTitle id="permissions-dialog-title">Update Permissions</DialogTitle>
@@ -294,7 +327,7 @@ export default function Agents(props) {
 							/>
 						</DialogContent>
 						<DialogActions>
-							<Button variant="contained" color="secondary" onClick={permissionsCancel}>
+							<Button variant="contained" color="secondary" onClick={ev => permissionsSet(false)}>
 								Cancel
 							</Button>
 							<Button variant="contained" color="primary" onClick={permissionsUpdate}>
@@ -307,10 +340,10 @@ export default function Agents(props) {
 					<Dialog
 						aria-labelledby="confirmation-dialog-title"
 						maxWidth="lg"
-						onClose={() => passwordSet(false)}
+						onClose={ev => passwordSet(false)}
 						open={true}
 					>
-						<DialogTitle id="password-dialog-title">Update Password</DialogTitle>
+						<DialogTitle id="confirmation-dialog-title">Update Password</DialogTitle>
 						<DialogContent dividers>
 							<TextField
 								label="New Password"
@@ -318,11 +351,35 @@ export default function Agents(props) {
 							/>
 						</DialogContent>
 						<DialogActions>
-							<Button variant="contained" color="secondary" onClick={() => passwordSet(false)}>
+							<Button variant="contained" color="secondary" onClick={ev => passwordSet(false)}>
 								Cancel
 							</Button>
 							<Button variant="contained" color="primary" onClick={passwordUpdate}>
 								Update
+							</Button>
+						</DialogActions>
+					</Dialog>
+				}
+				{memo &&
+					<Dialog
+						aria-labelledby="memo-dialog-title"
+						maxWidth="lg"
+						onClose={ev => memoSet(false)}
+						open={true}
+					>
+						<DialogTitle id="memo-dialog-title">Import Memo User</DialogTitle>
+						<DialogContent dividers>
+							<TextField
+								label="User Name"
+								inputRef={memoRef}
+							/>
+						</DialogContent>
+						<DialogActions>
+							<Button variant="contained" color="secondary" onClick={ev => memoSet(false)}>
+								Cancel
+							</Button>
+							<Button variant="contained" color="primary" onClick={memoImport}>
+								Import User
 							</Button>
 						</DialogActions>
 					</Dialog>

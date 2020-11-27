@@ -151,7 +151,7 @@ export default class Notes extends React.Component {
 			// If there's data
 			if('data' in res) {
 
-				// Set the MIP
+				// Set the Notes
 				this.setState({
 					notes: res.data.notes,
 					status: res.data.status
@@ -256,7 +256,8 @@ export default class Notes extends React.Component {
 		// Init the data
 		let oData = {
 			action: 'CSR Note',
-			content: content
+			content: content,
+			customerId: this.prop.customerId
 		}
 
 		// If we have an order
@@ -268,18 +269,8 @@ export default class Notes extends React.Component {
 			// If the label changed, send it with the order ID
 			if(this.state.status.label !== label) {
 				oData.label = label;
-				oData.order_id = this.state.status.orderId;
+				oData.orderId = this.state.status.orderId;
 			}
-
-			// Else, send the customer ID
-			else {
-				oData.customer_id = this.props.customerId.toString()
-			}
-		}
-
-		// No status means it's just a customer note
-		else {
-			oData.customer_id = this.props.customerId
 		}
 
 		// Send the message to the server

@@ -18,7 +18,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
-	['1.16.10', 'November 24thth, 2020', [
+	['1.17.0', 'November 26th, 2020', [
+		'Added ability to transfer customers/conversations that came from Providers back to those Providers.'
+	]],
+	['1.16.10', 'November 24th, 2020', [
 		'Added "Sync Memo" button on every Konnektive order to allow agents to sync Memo with changes done in Konnektive.'
 	]],
 	['1.16.9', 'November 16th, 2020', [

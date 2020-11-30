@@ -257,7 +257,7 @@ export default class Notes extends React.Component {
 		let oData = {
 			action: 'CSR Note',
 			content: content,
-			customerId: this.prop.customerId
+			customerId: this.props.customerId
 		}
 
 		// If we have an order

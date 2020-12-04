@@ -707,8 +707,6 @@ export default class Header extends React.Component {
 
 	menuItem(pathname, number) {
 
-		console.log(pathname);
-
 		// New state
 		let state = {
 			path: pathname

@@ -357,6 +357,15 @@ export default function RX(props) {
 		);
 	}
 
+	// DS Details
+	let details = null;
+	if(props.details === null || props.details === 0) {
+		details = <span />
+	}
+	else {
+		details = <p>{JSON.stringify(props.details)}</p>
+	}
+
 	// HRTLabs
 	let hrtLabs = null;
 	if (props.hrtLabs === null) {
@@ -434,6 +443,7 @@ export default function RX(props) {
 					width="100%"
 				/>
 			}
+			{details}
 			{prescriptions}
 			<hr/>
 			<div className="pageHeader">

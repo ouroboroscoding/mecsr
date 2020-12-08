@@ -18,7 +18,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
-	['1.17.5', 'December 8th, 2020', [
+	['1.17.6', 'December 8th, 2020', [
 		'Fixed issues when generating CHRT links in templates.'
 	]],
 	['1.17.0', 'November 26th, 2020', [

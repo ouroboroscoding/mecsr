@@ -471,8 +471,8 @@ export default class SMS extends React.Component {
 					sReplacement = this.props.customer.billing.lastName;
 					break;
 				case 'chrt_link':
-					if(!this.props.mips) {
-						Event.trigger('error', 'Can not use template without MIP data');
+					if(!this.props.mips || !this.props.customer) {
+						Event.trigger('error', 'Can not use template without MIP and KNK data');
 						return;
 					}
 
@@ -483,7 +483,7 @@ export default class SMS extends React.Component {
 					for(let o of this.props.mips) {
 
 						// If it's an H1
-						if(['MIP-H1', 'MIP-H2'].indexOf(o.form) > -1 && o.complete === 'Y') {
+						if(['MIP-H1', 'MIP-H2'].indexOf(o.form) > -1 && o.completed) {
 							oLanding = o;
 							break;
 						}
@@ -491,7 +491,7 @@ export default class SMS extends React.Component {
 
 					// If we have an ID
 					if(oLanding) {
-						sReplacement = `https://www.maleexcelmip.com/mip/form/CHRT?landing_id=${oLanding.id}&formId=${oLanding.form}`
+						sReplacement = `https://www.maleexcelmip.com/mip/form/CHRT?landing_id=${oLanding.id}&formId=${oLanding.form}&ktCustomerId=${this.props.customer.customerId}`
 					} else {
 						sReplacement = 'NO PREVIOUS COMPLETED HRT MIP FOUND!';
 						Events.trigger('error', 'No previous completed HRT MIP was found for this customer, you should not message them without further research');

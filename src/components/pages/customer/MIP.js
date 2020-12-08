@@ -295,7 +295,8 @@ export default function MIP(props) {
 
 	// If we have customer info
 	if(props.customer) {
-		sMipUrl += 'firstName=' + encodeURIComponent(props.customer.billing.firstName) + '&' +
+		sMipUrl += 'ktCustomerId=' + encodeURIComponent(props.customer.customerId) + '&' +
+					'firstName=' + encodeURIComponent(props.customer.billing.firstName) + '&' +
 					'lastName=' + encodeURIComponent(props.customer.billing.lastName) + '&' +
 					'email=' + encodeURIComponent(props.customer.email) + '&' +
 					'phone=' + encodeURIComponent(props.customer.phone) + '&';
@@ -313,7 +314,7 @@ export default function MIP(props) {
 				<div style={{textAlign: "right"}}>
 					<a href={sMipUrl + 'formId=MIP-A2'} target="_blank" rel="noopener noreferrer">New ED Mip</a>
 					&nbsp;|&nbsp;
-					<a href={sMipUrl + 'formId=MIP-H1'} target="_blank" rel="noopener noreferrer">New HRT Mip</a>
+					<a href={sMipUrl + 'formId=MIP-H2'} target="_blank" rel="noopener noreferrer">New HRT Mip</a>
 				</div>
 				<p>No MIP found for this customer</p>
 			</React.Fragment>

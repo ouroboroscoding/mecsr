@@ -206,7 +206,7 @@ function CustomerItem(props) {
 	return (
 		<React.Fragment>
 			<Link to={Utils.customerPath(props.customerPhone, props.customerId)} onClick={click}>
-				<ListItem button selected={props.selected} className={props.transferredBy ? 'transferred' : ''}>
+				<ListItem button selected={props.selected} className={!props.viewed ? 'transferred' : ''}>
 					<ListItemAvatar>
 						{props.newMsgs ?
 							<Avatar style={{backgroundColor: 'red'}}><NewReleasesIcon /></Avatar> :
@@ -584,7 +584,8 @@ export default class Header extends React.Component {
 			customerName: name,
 			customerPhone: number,
 			orderId: order_id,
-			provider: provider
+			provider: provider,
+			viewed: true
 		});
 
 		// Generate the path
@@ -742,19 +743,19 @@ export default class Header extends React.Component {
 			let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', number);
 
 			// If we have it, and it's a transfer
-			if(iIndex > -1 && this.state.claimed[iIndex].transferredBy) {
+			if(iIndex > -1 && !this.state.claimed[iIndex].viewed) {
 
 				// Clone the claims
 				let lClaimed = Tools.clone(this.state.claimed);
 
-				// Remove the transferredBy
-				lClaimed[iIndex].transferredBy = null;
+				// Set the viewed flag
+				lClaimed[iIndex].viewed = true;
 
 				// Update the state
 				state.claimed = lClaimed;
 
 				// Tell the server
-				Rest.update('monolith', 'customer/claim/clear', {
+				Rest.update('monolith', 'customer/claim/view', {
 					phoneNumber: number
 				}).done(res => {
 					// If there's an error or warning
@@ -1432,6 +1433,7 @@ export default class Header extends React.Component {
 						// Add the number and transferred by to the data
 						res.data['customerPhone'] = data.claim.phoneNumber;
 						res.data['transferredBy'] = data.claim.transferredBy;
+						res.data['viewed'] = data.claim.viewed;
 						res.data['orderId'] = data.claim.orderId;
 						res.data['provider'] = data.claim.provider;
 

@@ -25,7 +25,7 @@ $menu-width: 250px;
 @import 'pages/unclaimed';
 @import 'pages/version';
 
-html, body, #root, #site, #content {
+html, body, #root, #site {
 	height: 100%;
 }
 
@@ -163,7 +163,7 @@ td {
 .pageHeader {
 	display: flex;
 
-	.MuiTypography-root {
+	.title, .MuiTypography-root {
 		flex-grow: 1
 	}
 
@@ -173,6 +173,30 @@ td {
 
 		.MuiSvgIcon-root {
 			font-size: 2.5rem;
+		}
+	}
+}
+
+.sectionHeader {
+	display: flex;
+
+	.MuiTypography-root {
+		flex-basis: 0;
+		flex-shrink: 1;
+		flex-grow: 1;
+		font-size: 2rem;
+		font-weight: 400;
+	}
+
+	.actions {
+
+		button {
+			position: relative;
+			top: -5px;
+
+			.MuiSvgIcon-root {
+				font-size: 1.5rem;
+			}
 		}
 	}
 }

@@ -13,6 +13,9 @@ import React, { useState } from 'react';
 import { Switch, Route, useHistory } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
 
+// Data modules
+import DoseSpot from '../data/dosespot';
+
 // Generic modules
 import Events from '../generic/events';
 import Rest from '../generic/rest';
@@ -90,8 +93,14 @@ export default function Site(props) {
 	let history = useHistory();
 
 	// User hooks
-	useSignedIn(user => userSet(user));
-	useSignedOut(() => userSet(false));
+	useSignedIn(user => {
+		userSet(user);
+		DoseSpot.init(user.dsClinicianId);
+	});
+	useSignedOut(() => {
+		userSet(false);
+		DoseSpot.init(0)
+	});
 
 	// Resize hooks
 	useResize(() => mobileSet(document.documentElement.clientWidth < 600 ? true : false));

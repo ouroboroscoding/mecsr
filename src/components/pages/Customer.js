@@ -33,6 +33,9 @@ import Notes from './customer/Notes';
 import RX from './customer/RX';
 import SMS from './customer/SMS';
 
+// Data modules
+import DoseSpot from '../../data/dosespot';
+
 // Generic modules
 import Events from '../../generic/events';
 import Rest from '../../generic/rest';
@@ -56,6 +59,7 @@ export default class Customer extends React.Component {
 			hrtLabs: null,
 			mips: null,
 			orders: null,
+			patient_details: null,
 			patient_id: null,
 			pharmacy_fill: null,
 			prescriptions: null,
@@ -73,12 +77,13 @@ export default class Customer extends React.Component {
 
 		// Bind methods
 		this.adhocAdd = this.adhocAdd.bind(this);
+		this.dsCreate = this.dsCreate.bind(this);
+		this.dsUpdate = this.dsUpdate.bind(this);
+		this.dsRefresh = this.dsRefresh.bind(this);
 		this.knkCustomerRefresh = this.knkCustomerRefresh.bind(this);
 		this.knkOrdersRefresh = this.knkOrdersRefresh.bind(this);
 		this.newMessage = this.newMessage.bind(this);
 		this.pharmacyFill = this.pharmacyFill.bind(this);
-		this.rxCreatePatient = this.rxCreatePatient.bind(this);
-		this.rxRefresh = this.rxRefresh.bind(this);
 		this.tabChange = this.tabChange.bind(this);
 	}
 
@@ -98,10 +103,12 @@ export default class Customer extends React.Component {
 				this.fetchHrtLabs();
 				this.fetchKnkCustomer();
 				this.fetchMips();
-				this.fetchPatientId();
-				this.fetchPharmacyFill();
 				this.fetchShipping();
 				this.fetchTriggers();
+				if(Utils.hasRight(this.props.user, 'prescriptions', 'read')) {
+					this.dsId();
+					this.fetchPharmacyFill();
+				}
 			} else {
 				this.setState({
 					customer: 0,
@@ -174,6 +181,115 @@ export default class Customer extends React.Component {
 					this.setState({"triggers": triggers});
 				}
 			}
+		});
+	}
+
+	dsCreate() {
+		DoseSpot.create(this.props.customerId).then(data => {
+
+			// New state
+			let oState = {
+				"patient_id": data
+			}
+
+			// If there's an id
+			if(data) {
+				oState.prescriptions = [];
+				this.dsDetails(data);
+			}
+
+			// Set the state
+			this.setState(oState);
+
+		}, error => {
+			Events.trigger('error', JSON.stringify(error));
+		});
+	}
+
+	dsDetails(id) {
+		DoseSpot.details(id).then(data => {
+
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// Set the state
+			this.setState({
+				patient_details: data
+			});
+
+		}, error => {
+			Events.trigger('error', JSON.stringify(error));
+		});
+	}
+
+	dsId() {
+
+		DoseSpot.fetch(this.props.customerId.toString()).then(data => {
+
+			// New state
+			let oState = {"patient_id": data}
+
+			// If there's an id
+			if(data) {
+				this.dsDetails(data);
+				this.dsRx(data);
+			} else {
+				oState.patient_details = 0;
+				oState.prescriptions = 0;
+			}
+
+			// Set the state
+			this.setState(oState);
+
+		}, error => {
+			Events.trigger('error', JSON.stringify(error));
+		});
+	}
+
+	dsRx(id) {
+		DoseSpot.prescriptions(id).then(data => {
+
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// Set the state
+			this.setState({
+				prescriptions: data
+			});
+
+		}, error => {
+			Events.trigger('error', JSON.stringify(error));
+		});
+	}
+
+	dsRefresh() {
+		this.setState({
+			patient_details: null,
+			patient_id: null,
+			prescriptions: null
+		}, () => {
+			this.dsId();
+		});
+	}
+
+	dsUpdate() {
+		this.setState({patient_details: null});
+		DoseSpot.update(this.props.customerId).then(data => {
+
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// Fetch details again
+			this.dsDetails(this.state.patient_id);
+
+		}, error => {
+			Events.trigger('error', JSON.stringify(error));
 		});
 	}
 
@@ -311,47 +427,6 @@ export default class Customer extends React.Component {
 		});
 	}
 
-	fetchPatientId() {
-
-		// Find the MIP using the phone number
-		Rest.read('monolith', 'customer/dsid', {
-			customerId: this.props.customerId.toString()
-		}).done(res => {
-
-			// If not mounted
-			if(!this.mounted) {
-				return;
-			}
-
-			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if('data' in res) {
-
-				// New state
-				let oState = {
-					"patient_id": res.data
-				}
-
-				// If there's an id
-				if(res.data) {
-					this.fetchPrescriptions(res.data, this.props.user.dsClinicianId);
-				} else {
-					oState.prescriptions = 0;
-				}
-
-				// Set the state
-				this.setState(oState);
-			}
-		});
-	}
-
 	fetchPharmacyFill() {
 
 		// Request the fill errors
@@ -379,37 +454,6 @@ export default class Customer extends React.Component {
 				// Set the state
 				this.setState({
 					pharmacy_fill: res.data
-				});
-			}
-		});
-	}
-
-	fetchPrescriptions(id, clinician) {
-
-		// Fetch the prescriptions using the patient ID
-		Rest.read('prescriptions', 'patient/prescriptions', {
-			patient_id: id
-		}).done(res => {
-
-			// If not mounted
-			if(!this.mounted) {
-				return;
-			}
-
-			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if('data' in res) {
-
-				// Set the state
-				this.setState({
-					prescriptions: res.data
 				});
 			}
 		});
@@ -637,11 +681,13 @@ export default class Customer extends React.Component {
 				</div>
 				<div className="prescriptions" style={{display: this.state.tab === 4 ? 'block' : 'none'}}>
 					<RX
+						details={this.state.patient_details}
 						hrtLabs={this.state.hrtLabs}
 						onAdhocAdd={this.adhocAdd}
-						onDsCreate={this.rxCreatePatient}
+						onDsCreate={this.dsCreate}
+						onDsUpdate={this.dsUpdate}
 						onPharmacyFill={this.pharmacyFill}
-						onRefresh={this.rxRefresh}
+						onRefresh={this.dsRefresh}
 						orders={this.state.orders}
 						patientId={this.state.patient_id}
 						pharmacyFill={this.state.pharmacy_fill}
@@ -664,50 +710,6 @@ export default class Customer extends React.Component {
 				}
 			</div>
 		);
-	}
-
-	rxCreatePatient() {
-
-		// Send the request to the server
-		Rest.create('monolith', 'customer/dsid', {
-			customerId: this.props.customerId,
-			clinician_id: parseInt(this.props.user.dsClinicianId)
-		}).done(res => {
-
-			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if('data' in res) {
-
-				// New state
-				let oState = {
-					"patient_id": res.data
-				}
-
-				// If there's an id
-				if(res.data) {
-					oState.prescriptions = [];
-				}
-
-				// Set the state
-				this.setState(oState);
-			}
-		});
-	}
-
-	rxRefresh() {
-		this.setState({
-			patient_id: null,
-			prescriptions: null
-		}, () => {
-			this.fetchPatientId();
-		});
 	}
 
 	tabChange(event, tab) {

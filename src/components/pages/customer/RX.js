@@ -555,7 +555,7 @@ export default function RX(props) {
 					readOnly={props.readOnly}
 				/>
 			}
-			{props.hrtLabs !== null &&
+			{props.hrtLabs !== null && props.hrtLabs !== 0 &&
 				<HrtResults
 					labs={props.hrtLabs}
 				/>

@@ -18,6 +18,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.19.0', 'December 10th, 2020', [
+		'Renamed "Prescriptions" section to "DoseSpot" in RX tab.',
+		'Added ability to update DoseSpot customer information from Konnektive data in RX tab.'
+	]],
 	['1.18.0', 'December 10th, 2020', [
 		'Numerous background changes related to integration with the Provider portal.'
 	]],

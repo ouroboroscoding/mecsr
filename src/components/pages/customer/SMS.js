@@ -471,29 +471,30 @@ export default class SMS extends React.Component {
 					sReplacement = this.props.customer.billing.lastName;
 					break;
 				case 'chrt_link':
-					if(!this.props.mips) {
-						Event.trigger('error', 'Can not use template without MIP data');
+					if(!this.props.mips || !this.props.customer) {
+						Event.trigger('error', 'Can not use template without MIP and KNK data');
 						return;
 					}
 
 					// Existing landing ID
-					let sLandingId = false;
+					let oLanding = false;
 
 					// Go through each mip available
 					for(let o of this.props.mips) {
 
 						// If it's an H1
-						if(o.form === 'MIP-H1' && o.complete === 'Y') {
-							sLandingId = o.id;
+						if(['MIP-H1', 'MIP-H2'].indexOf(o.form) > -1 && o.completed) {
+							oLanding = o;
 							break;
 						}
 					}
 
 					// If we have an ID
-					if(sLandingId) {
-						sReplacement = `https://www.maleexcelmip.com/mip/form/CHRT?landing_id=${sLandingId}&formId=MIP-H1`
+					if(oLanding) {
+						sReplacement = `https://www.maleexcelmip.com/mip/form/CHRT?landing_id=${oLanding.id}&formId=${oLanding.form}&ktCustomerId=${this.props.customer.customerId}`
 					} else {
-						sReplacement = 'https://www.maleexcelmip.com/mip/form/hsymp?formId=MIP-H1';
+						sReplacement = 'NO PREVIOUS COMPLETED HRT MIP FOUND!';
+						Events.trigger('error', 'No previous completed HRT MIP was found for this customer, you should not message them without further research');
 					}
 					break;
 				case 'email':

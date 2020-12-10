@@ -326,7 +326,49 @@ export function sso(patient_id) {
 	});
 }
 
-// Export all
+/**
+ * Update
+ *
+ * Updates an existing patient from a customer ID
+ *
+ * @name update
+ * @access public
+ * @param Number customer_id The ID of the customer to update a patient for
+ * @return Promise(Number)
+ */
+export function update(customer_id) {
+
+	// If init not called
+	if(!_clinicianId) {
+		throw new Error('Must call init() before update().');
+	}
+
+	// Return promise
+	return new Promise((resolve, reject) => {
+
+		// Call the rest request
+		Rest.update('monolith', 'customer/dsid', {
+			clinician_id: _clinicianId,
+			customerId: customer_id
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !Utils.restError(res.error)) {
+				reject(res.error);
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If we got data
+			if('data' in res) {
+				resolve(res.data);
+			}
+		});
+	});
+}
+
+// Export module
 export default {
 	create: create,
 	details: details,
@@ -335,5 +377,6 @@ export default {
 	medications: medications,
 	pharmacies: pharmacies,
 	prescriptions: prescriptions,
-	sso: sso
+	sso: sso,
+	update: update
 }

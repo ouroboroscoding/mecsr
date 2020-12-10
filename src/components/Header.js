@@ -1054,8 +1054,6 @@ export default class Header extends React.Component {
 
 	signedIn(user) {
 
-		console.log(user);
-
 		// Hide any modals and set the user
 		this.setState({
 			"overwrite": Utils.hasRight(user, 'csr_overwrite', 'create'),

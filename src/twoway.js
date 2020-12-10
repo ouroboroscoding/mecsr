@@ -138,8 +138,6 @@ function _handleMessage(sock, ev) {
 	// If we got a string back
 	if(typeof ev.data === 'string') {
 
-		console.log(ev.data);
-
 		// If we're authorized
 		if(ev.data === 'authorized') {
 

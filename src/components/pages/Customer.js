@@ -78,6 +78,7 @@ export default class Customer extends React.Component {
 		// Bind methods
 		this.adhocAdd = this.adhocAdd.bind(this);
 		this.dsCreate = this.dsCreate.bind(this);
+		this.dsUpdate = this.dsUpdate.bind(this);
 		this.dsRefresh = this.dsRefresh.bind(this);
 		this.knkCustomerRefresh = this.knkCustomerRefresh.bind(this);
 		this.knkOrdersRefresh = this.knkOrdersRefresh.bind(this);
@@ -99,13 +100,15 @@ export default class Customer extends React.Component {
 
 			// If we have a customer ID
 			if(this.props.customerId) {
-				this.dsId();
 				this.fetchHrtLabs();
 				this.fetchKnkCustomer();
 				this.fetchMips();
-				this.fetchPharmacyFill();
 				this.fetchShipping();
 				this.fetchTriggers();
+				if(Utils.hasRight(this.props.user, 'prescriptions', 'read')) {
+					this.dsId();
+					this.fetchPharmacyFill();
+				}
 			} else {
 				this.setState({
 					customer: 0,
@@ -192,6 +195,7 @@ export default class Customer extends React.Component {
 			// If there's an id
 			if(data) {
 				oState.prescriptions = [];
+				this.dsDetails(data);
 			}
 
 			// Set the state
@@ -269,6 +273,23 @@ export default class Customer extends React.Component {
 			prescriptions: null
 		}, () => {
 			this.dsId();
+		});
+	}
+
+	dsUpdate() {
+		this.setState({patient_details: null});
+		DoseSpot.update(this.props.customerId).then(data => {
+
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// Fetch details again
+			this.dsDetails(this.state.patient_id);
+
+		}, error => {
+			Events.trigger('error', JSON.stringify(error));
 		});
 	}
 
@@ -664,6 +685,7 @@ export default class Customer extends React.Component {
 						hrtLabs={this.state.hrtLabs}
 						onAdhocAdd={this.adhocAdd}
 						onDsCreate={this.dsCreate}
+						onDsUpdate={this.dsUpdate}
 						onPharmacyFill={this.pharmacyFill}
 						onRefresh={this.dsRefresh}
 						orders={this.state.orders}

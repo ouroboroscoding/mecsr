@@ -28,7 +28,7 @@ import Rest from '../generic/rest';
 import Utils from '../utils';
 
 // Sign In
-class Signin extends React.Component {
+export default class Signin extends React.Component {
 
 	constructor(props) {
 
@@ -180,5 +180,3 @@ class Signin extends React.Component {
 		});
 	}
 }
-
-export default Signin;

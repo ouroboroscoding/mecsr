@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.18.0', 'December 10th, 2020', [
+		'Numerous background changes related to integration with the Provider portal.'
+	]],
 	['1.17.6', 'December 8th, 2020', [
 		'Fixed issues when generating CHRT links in templates.'
 	]],

@@ -32,6 +32,7 @@ import AllInboxIcon from '@material-ui/icons/AllInbox';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 import AssessmentIcon from '@material-ui/icons/Assessment';
+import CancelIcon from '@material-ui/icons/Cancel';
 import CloseIcon from '@material-ui/icons/Close';
 import CheckIcon from '@material-ui/icons/Check';
 import CommentIcon from '@material-ui/icons/Comment';
@@ -50,6 +51,7 @@ import ViewListIcon from '@material-ui/icons/ViewList';
 
 // Composite components
 import Account from './composites/Account';
+import Decline from './composites/Decline';
 import Provider from './composites/Provider';
 import Resolve from './composites/Resolve';
 import Transfer from './composites/Transfer';
@@ -75,6 +77,7 @@ import Utils from '../utils';
 function CustomerItem(props) {
 
 	// State
+	let [decline, declineSet] = useState(false);
 	let [list, listSet] = useState(false);
 	let [provider, providerSet] = useState(false);
 	let [resolve, resolveSet] = useState(false);
@@ -83,23 +86,48 @@ function CustomerItem(props) {
 	// Hooks
 	let history = useHistory();
 
-	function addToListClick(event) {
-		event.stopPropagation();
-		event.preventDefault();
+	function addToListClick(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
 		listSet(true);
 	}
 
 	// Click event
-	function click(event) {
+	function click(ev) {
 		props.onClick(
 			Utils.customerPath(props.customerPhone, props.customerId),
 			props.customerPhone
 		)
 	}
 
-	function providerClick(event) {
-		event.stopPropagation();
-		event.preventDefault();
+	function declineClick(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
+		declineSet(true);
+	}
+
+	function declineSubmit() {
+
+		// Hide the dialog
+		declineSet(false);
+
+		// Delete the claim
+		claimed.remove(props.customerPhone).then(res => {
+			// Trigger the claimed being removed
+			Events.trigger('claimedRemove', props.customerPhone, props.selected);
+		}, error => {
+			Events.trigger('error', JSON.stringify(error));
+		});
+
+		// If we're currently selected, change the page
+		if(props.selected) {
+			history.push(props.provider !== null ? '/pending' : '/unclaimed');
+		}
+	}
+
+	function providerClick(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
 		providerSet(props.user.id);
 	}
 
@@ -123,12 +151,12 @@ function CustomerItem(props) {
 	}
 
 	// X click
-	function remove(event) {
+	function remove(ev) {
 
 		// Stop all propogation of the event
-		if(event) {
-			event.stopPropagation();
-			event.preventDefault();
+		if(ev) {
+			ev.stopPropagation();
+			ev.preventDefault();
 		}
 
 		// If we resolved
@@ -167,16 +195,16 @@ function CustomerItem(props) {
 	}
 
 	// Resolve click
-	function resolveClick(event) {
-		event.stopPropagation();
-		event.preventDefault();
+	function resolveClick(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
 		resolveSet(true);
 	}
 
 	// Transfer click
-	function transferClick(event) {
-		event.stopPropagation();
-		event.preventDefault();
+	function transferClick(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
 		transferSet(props.user.id);
 	}
 
@@ -222,7 +250,15 @@ function CustomerItem(props) {
 									#: {Utils.nicePhone(props.customerPhone)}
 								</span>
 								<span className="customerActions">
-									{!props.provider &&
+									{props.provider !== null ?
+										<span className="tooltip">
+											<Tooltip title="Decline Order">
+												<IconButton className="close" onClick={declineClick}>
+													<CancelIcon />
+												</IconButton>
+											</Tooltip>
+										</span>
+									:
 										<span className="tooltip">
 											<Tooltip title="Remove Claim">
 												<IconButton className="close" onClick={remove}>
@@ -298,6 +334,13 @@ function CustomerItem(props) {
 					{...props}
 				/>
 			}
+			{decline &&
+				<Decline
+					orderId={props.orderId}
+					onClose={e => declineSet(false)}
+					onSubmit={declineSubmit}
+				/>
+			}
 		</React.Fragment>
 	);
 }
@@ -312,16 +355,16 @@ function ViewItem(props) {
 	// Hooks
 	let history = useHistory();
 
-	function addToListClick(event) {
-		event.stopPropagation();
-		event.preventDefault();
+	function addToListClick(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
 		listSet(true);
 	}
 
 	// Claim
-	function claim(event) {
-		event.stopPropagation();
-		event.preventDefault();
+	function claim(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
 
 		// Attempt to claim the conversation
 		claimed.add(props.phone).then(res => {
@@ -339,7 +382,7 @@ function ViewItem(props) {
 	}
 
 	// Click event
-	function click(event) {
+	function click(ev) {
 		props.onClick(
 			Utils.viewedPath(props.phone, props.id),
 			props.phone
@@ -347,12 +390,12 @@ function ViewItem(props) {
 	}
 
 	// X click
-	function remove(event) {
+	function remove(ev) {
 
 		// Stop all propogation of the event
-		if(event) {
-			event.stopPropagation();
-			event.preventDefault();
+		if(ev) {
+			ev.stopPropagation();
+			ev.preventDefault();
 		}
 
 		// If we're currently selected, change the page
@@ -365,9 +408,9 @@ function ViewItem(props) {
 	}
 
 	// Transfer click
-	function transferClick(event) {
-		event.stopPropagation();
-		event.preventDefault();
+	function transferClick(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
 		transferSet(props.claimed);
 	}
 

@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.19.2', 'December 12th, 2020', [
+		'Added "Decline Order" option on claims from Pending Orders or transferred by Providers. This allows agents to decline a QA order and remove it from their claims without needing to transfer it back to the provider.'
+	]],
 	['1.19.0', 'December 10th, 2020', [
 		'Renamed "Prescriptions" section to "DoseSpot" in RX tab.',
 		'Added ability to update DoseSpot customer information from Konnektive data in RX tab.'

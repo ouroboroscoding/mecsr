@@ -471,7 +471,7 @@ function Trigger(props) {
 				{props.adhoc_type &&
 					<Grid item xs={12}><strong>AdHoc: </strong><span>{props.adhoc_type}</span></Grid>
 				}
-				{(props.adhoc_type === null && Utils.hasRight(props.user, 'welldyne_adhoc', 'create') && !props.readOnly) &&
+				{(props.adhoc_type === null && props.onAdhocAdd && !props.readOnly) &&
 					<Grid item xs={12}><strong>AdHoc Type: </strong>
 						<Select
 							inputRef={adhocType}
@@ -540,7 +540,10 @@ export default function RX(props) {
 				/>
 			}
 			{props.triggers && props.triggers.length > 0 &&
-				<Triggers triggers={props.triggers} />
+				<Triggers
+					onAdhocAdd={Utils.hasRight(props.user, 'welldyne_adhoc', 'create') ? props.onAdhocAdd : false}
+					triggers={props.triggers}
+				/>
 			}
 			{props.patientId !== null &&
 				<DoseSpot

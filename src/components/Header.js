@@ -1517,6 +1517,52 @@ export default class Header extends React.Component {
 				break;
 			}
 
+			// If a claim had it's number swapped
+			case 'claim_swapped': {
+
+				console.log(data);
+
+				// Look for the claim
+				let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
+
+				// If we found one
+				if(iIndex > -1) {
+
+					// Clone the claims
+					let lClaimed = Tools.clone(this.state.claimed);
+
+					// Change the phone number
+					lClaimed[iIndex]['customerPhone'] = data['newNumber'];
+
+					// Init the state
+					let oState = {
+						claimed: lClaimed
+					}
+
+					// If we're on a customer
+					let lPath = Utils.parsePath(this.state.path);
+					if(lPath[0] === 'customer') {
+
+						// If it's the one swapped
+						if(lPath[1] === data.phoneNumber) {
+
+							// Set the new path
+							oState.path = Utils.customerPath(data.newNumber, lPath[2])
+
+							console.log(oState.path);
+
+							// Change the page we're on
+							this.props.history.replace(oState.path);
+						}
+					}
+
+					// Set the new state
+					this.setState(oState);
+				}
+
+				break;
+			}
+
 			// Unknown type
 			default:
 				console.error('Unknown websocket message:', data);

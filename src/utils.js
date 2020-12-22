@@ -14,6 +14,7 @@ import Rest from './generic/rest';
 
 // Regex
 const rePhone = /^1?(\d{3})(\d{3})(\d{4})$/
+const reBBUrl = /^\[url=([^|]+)\|([^\]]+)\]$/
 
 // Rights
 const oRights = {
@@ -116,6 +117,17 @@ export default {
 
 		// Return on the right having the type
 		return (user.permissions[name].rights & oRights[type]) ? true : false;
+	},
+
+	bbUrl: function(val) {
+		let lMatch = reBBUrl.exec(val);
+		if(!lMatch) {
+			return false;
+		}
+		return {
+			text: lMatch[1],
+			href: lMatch[2]
+		}
 	},
 
 	nicePhone: function(val) {

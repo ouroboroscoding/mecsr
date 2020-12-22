@@ -45,9 +45,15 @@ function Message(props) {
 	return (
 		<div className={"message " + props.type}>
 			<div className="content">
-				{props.notes.split('\n').map((s,i) =>
-					<p key={i}>{s}</p>
-				)}
+				{props.notes.split('\n').map((s,i) => {
+					if(s[0] === '[') {
+						let oBB = Utils.bbUrl(s);
+						if(oBB) {
+							return <p key={i}><a href={oBB.href} target="_blank" rel="noopener noreferrer">{oBB.text}</a></p>
+						}
+					}
+					return <p key={i}>{s}</p>
+				})}
 			</div>
 			<div className="footer">
 				{props.type === 'Outgoing' &&

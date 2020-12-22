@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.20.0', 'December 22nd, 2020', [
+		'Added option to change phone number in one place that updates Konnektive and Memo.'
+	]],
 	['1.19.2', 'December 12th, 2020', [
 		'Added "Decline Order" option on claims from Pending Orders or transferred by Providers. This allows agents to decline a QA order and remove it from their claims without needing to transfer it back to the provider.'
 	]],

@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.21.0', 'December 22nd, 2020', [
+		'Missed calls now appear as "SMS" messages with the link to the recording.'
+	]],
 	['1.20.0', 'December 22nd, 2020', [
 		'Added option to change phone number in one place that updates Konnektive and Memo.'
 	]],

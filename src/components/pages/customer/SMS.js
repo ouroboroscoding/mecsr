@@ -49,7 +49,7 @@ function Message(props) {
 					if(s[0] === '[') {
 						let oBB = Utils.bbUrl(s);
 						if(oBB) {
-							return <p key={i}><a href={oBB.href} target="_blank">{oBB.text}</a></p>
+							return <p key={i}><a href={oBB.href} target="_blank" rel="noopener noreferrer">{oBB.text}</a></p>
 						}
 					}
 					return <p key={i}>{s}</p>

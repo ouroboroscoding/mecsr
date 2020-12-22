@@ -13,12 +13,18 @@ import React from 'react';
 
 // Material UI
 import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
 import IconButton from '@material-ui/core/IconButton';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
+import EditIcon from '@material-ui/icons/Edit';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 //import PhoneIcon from '@material-ui/icons/Phone';
 
@@ -73,6 +79,7 @@ export default class SMS extends React.Component {
 		this.state = {
 			messages: [],
 			needsStatus: [],
+			phoneChange: false,
 			stop: false,
 			type: ''
 		}
@@ -82,6 +89,7 @@ export default class SMS extends React.Component {
 
 		// Refs
 		this.messagesBottom = null;
+		this.newNumber = null;
 		this.sendEl = null;
 		this.text = null;
 
@@ -90,6 +98,7 @@ export default class SMS extends React.Component {
 
 		// Bind methods
 		this.callPhone = this.callPhone.bind(this);
+		this.changePhoneNumber = this.changePhoneNumber.bind(this);
 		this.copyPhone = this.copyPhone.bind(this);
 		this.fetchStatus = this.fetchStatus.bind(this);
 		this.scrollToBottom = this.scrollToBottom.bind(this);
@@ -125,6 +134,42 @@ export default class SMS extends React.Component {
 		alert('not implemented yet');
 	}
 
+	changePhoneNumber(event) {
+
+		// Init the data to send with the request
+		let oData = {
+			old: this.props.phoneNumber,
+			new: this.newNumber.value
+		}
+
+		// If we have a customer ID
+		if(this.props.customer && this.props.customer.customerId) {
+			oData.customerId = this.props.customer.customerId.toString();
+		}
+
+		// Send the request to the server
+		Rest.update('monolith', 'phone/change', oData).done(res => {
+
+			// If not mounted
+			if(!this.mounted) {
+				return;
+			}
+
+			// If there's an error or warning
+			if(res.error && !Utils.restError(res.error)) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If we got success
+			if(res.data) {
+				Events.trigger('success', 'Phone number changed!');
+			}
+		});
+	}
+
 	copyPhone(event) {
 		// Copy the primary key to the clipboard then notify the user
 		Clipboard.copy(this.props.phoneNumber).then(b => {
@@ -150,12 +195,10 @@ export default class SMS extends React.Component {
 				return;
 			}
 
-			// If there's an error
+			// If there's an error or warning
 			if(res.error && !Utils.restError(res.error)) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -268,7 +311,7 @@ export default class SMS extends React.Component {
 				<div className="info">
 					<span className="title">{this.props.mobile ? '#' : 'Phone Number'}: </span>
 					<span className="right20">
-						<a href="tel:{this.props.phoneNumber}">
+						<a href={'tel:' + this.props.phoneNumber}>
 							{Utils.nicePhone(this.props.phoneNumber)}
 						</a>
 						<Tooltip title="Copy Phone Number">
@@ -276,6 +319,13 @@ export default class SMS extends React.Component {
 								<FileCopyIcon />
 							</IconButton>
 						</Tooltip>
+						{!this.props.readOnly && Utils.hasRight(this.props.user, 'customers', 'update') &&
+							<Tooltip title="Change Phone Number">
+								<IconButton onClick={ev => this.setState({phoneChange: true})}>
+									<EditIcon />
+								</IconButton>
+							</Tooltip>
+						}
 						{/*<Tooltip title="Call Customer">
 							<IconButton onClick={this.callPhone}>
 								<PhoneIcon />
@@ -335,6 +385,44 @@ export default class SMS extends React.Component {
 							</Button>
 						</div>
 					</React.Fragment>
+				}
+				{this.state.phoneChange &&
+					<Dialog
+						fullWidth={true}
+						maxWidth="md"
+						open={true}
+						onClose={ev => this.setState({phoneChange: false})}
+					>
+						<DialogTitle>Change Customer Phone Number</DialogTitle>
+						<DialogContent dividers>
+							<Typography>
+								Please set the new number with no international
+								code or spaces. It should be 10 digits only.
+							</Typography>
+							<br />
+							<Typography>
+								Note that running this will update all messages
+								associated with the current phone number to the
+								new number, regnerate the message summary, and
+								update Konnektive if a customer is associated
+								with the claim.
+							</Typography>
+							<br />
+							<TextField
+								label="New Phone Number"
+								inputRef={ref => this.newNumber = ref}
+								variant="outlined"
+							/>
+						</DialogContent>
+						<DialogActions>
+							<Button variant="contained" color="secondary" onClick={ev => this.setState({phoneChange: false})}>
+								Cancel
+							</Button>
+							<Button variant="contained" color="primary" onClick={this.changePhoneNumber}>
+								Change Number
+							</Button>
+						</DialogActions>
+					</Dialog>
 				}
 			</React.Fragment>
 		)

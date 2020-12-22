@@ -69,7 +69,7 @@ export default class Unclaimed extends React.Component {
 		// Track any signedIn/signedOut events
 		Events.add('signedIn', this.signedIn);
 		Events.add('signedOut', this.signedOut);
-		Events.add('Unclaimed', this.refresh);
+		Events.add('Unclaimed', this.fetch);
 
 		// If we have a user
 		if(this.state.user) {
@@ -82,7 +82,7 @@ export default class Unclaimed extends React.Component {
 		// Stop tracking any signedIn/signedOut events
 		Events.remove('signedIn', this.signedIn);
 		Events.remove('signedOut', this.signedOut);
-		Events.remove('Unclaimed', this.refresh);
+		Events.remove('Unclaimed', this.fetch);
 	}
 
 	claim(number, name, customer_id) {

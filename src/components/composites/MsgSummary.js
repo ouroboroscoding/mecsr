@@ -20,6 +20,9 @@ import Paper from '@material-ui/core/Paper';
 // Generic modules
 import Events from '../../generic/events';
 
+// Local modules
+import Utils from '../../utils';
+
 // Regex
 const reReceived = /^Received at (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}|\d{1,2}\/\d{1,2}\/\d{4}, \d{1,2}:\d{2}:\d{2} [AP]M)\n([^]+)$/
 const reSent = /^Sent by (.+) at (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}|\d{1,2}\/\d{1,2}\/\d{4}, \d{1,2}:\d{2}:\d{2} [AP]M)\n([^]+)$/
@@ -62,9 +65,15 @@ function Message(props) {
 	return (
 		<div className={"message " + msg.direction}>
 			<div className="content">
-				{msg.content.split('\n').map((s,i) =>
-					<p key={i}>{s}</p>
-				)}
+				{msg.content.split('\n').map((s,i) => {
+					if(s[0] === '[') {
+						let oBB = Utils.bbUrl(s);
+						if(oBB) {
+							return <p key={i}><a href={oBB.href} target="_blank">{oBB.text}</a></p>
+						}
+					}
+					return <p key={i}>{s}</p>
+				})}
 			</div>
 			<div className="footer">
 				{msg.direction === 'Outgoing' &&

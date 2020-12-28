@@ -30,20 +30,22 @@ import Tooltip from '@material-ui/core/Tooltip';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 
 // Format Components
-import ResultsComponent from '../format/Results';
-import FormComponent from '../format/Form';
+import ResultsComponent from 'shared/components/format/Results';
+import FormComponent from 'shared/components/format/Form';
 
-// Generic modules
-import Events from '../../generic/events';
-import Rest from '../../generic/rest';
-import Tools from '../../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { afindi, clone } from 'shared/generic/tools';
 
 // Local modules
-import Utils from '../../utils';
+import Utils from 'utils';
 
 // Definitions
 //import TemplateEmailDef from '../../definitions/csr/tpl_email';
-import TemplateSMSDef from '../../definitions/csr/tpl_sms';
+import TemplateSMSDef from 'definitions/csr/tpl_sms';
 
 // Generate the template Trees
 //const TemplateEmailTree = new Tree(TemplateEmailDef);
@@ -77,7 +79,7 @@ function GenericTemplates(props) {
 
 	function createSuccess(template) {
 		templatesSet(templates => {
-			let ret = Tools.clone(templates);
+			let ret = clone(templates);
 			ret.unshift(template);
 			return ret;
 		});
@@ -96,7 +98,7 @@ function GenericTemplates(props) {
 		Rest.read('csr', props.noun + 's', {}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 
@@ -121,10 +123,10 @@ function GenericTemplates(props) {
 		templatesSet(templates => {
 
 			// Clone the templates
-			let ret = Tools.clone(templates);
+			let ret = clone(templates);
 
 			// Find the index
-			let iIndex = Tools.afindi(ret, '_id', _id);
+			let iIndex = afindi(ret, '_id', _id);
 
 			// If one is found, remove it
 			if(iIndex > -1) {

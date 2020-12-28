@@ -21,18 +21,17 @@ import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 
 // Components
-import MsgSummary from '../composites/MsgSummary';
+import MsgSummary from 'components/composites/MsgSummary';
 
 // Data modules
-import claimed from '../../data/claimed';
+import claimed from 'data/claimed';
 
-// Generic modules
-import Events from '../../generic/events';
-import Rest from '../../generic/rest';
-import Tools from '../../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
 
-// Local modules
-import Utils from '../../utils';
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { empty, safeLocalStorage } from 'shared/generic/tools';
 
 // Search component
 export default class Search extends React.Component {
@@ -50,7 +49,7 @@ export default class Search extends React.Component {
 			name: '',
 			phone: '',
 			records: [],
-			searchType: Tools.safeLocalStorage('searchType', '0'),
+			searchType: safeLocalStorage('searchType', '0'),
 			user: props.user || false
 		}
 
@@ -153,7 +152,7 @@ export default class Search extends React.Component {
 		}
 
 		// If there's no params, do nothing
-		if(Tools.empty(oParams)) {
+		if(empty(oParams)) {
 			return;
 		}
 
@@ -161,7 +160,7 @@ export default class Search extends React.Component {
 		Rest.read('monolith', 'msgs/search', oParams).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 
@@ -193,7 +192,7 @@ export default class Search extends React.Component {
 		}
 
 		// If there's no params, do nothing
-		if(Tools.empty(oParams)) {
+		if(empty(oParams)) {
 			return;
 		}
 
@@ -201,7 +200,7 @@ export default class Search extends React.Component {
 		Rest.read('monolith', 'msgs/search/customer', oParams).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 

@@ -13,16 +13,18 @@ import React, { useState } from 'react';
 import { Switch, Route, useHistory } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
 
-// Data modules
-import DoseSpot from '../data/dosespot';
+// Shared data modules
+import DoseSpot from 'shared/data/dosespot';
 
-// Generic modules
-import Events from '../generic/events';
-import Rest from '../generic/rest';
+// Shared communication modules
+import Rest from 'shared/communication/rest';
 
-// Hooks
-import { useSignedIn, useSignedOut } from '../hooks/user';
-import { useResize } from '../hooks/resize';
+// Shared generic modules
+import Events from 'shared/generic/events';
+
+// Shared hooks
+import { useEvent } from 'shared/hooks/event';
+import { useResize } from 'shared/hooks/resize';
 
 // Composite component modules
 import Alerts from './Alerts';
@@ -45,8 +47,8 @@ import VersionHistory from './pages/VersionHistory';
 // Local modules
 import { LoaderHide, LoaderShow } from './Loader';
 
-// css
-import '../sass/site.scss';
+// SASS CSS
+import 'sass/site.scss';
 
 // Init the rest services
 Rest.init(process.env.REACT_APP_MEMS_DOMAIN, process.env.REACT_APP_WS_DOMAIN, xhr => {
@@ -92,12 +94,12 @@ export default function Site(props) {
 	// Hooks
 	let history = useHistory();
 
-	// User hooks
-	useSignedIn(user => {
+	// Sign in/out event hooks
+	useEvent('signedIn', user => {
 		userSet(user);
 		DoseSpot.init(user.dsClinicianId);
 	});
-	useSignedOut(() => {
+	useEvent('signedOut', () => {
 		userSet(false);
 		DoseSpot.init(0)
 	});

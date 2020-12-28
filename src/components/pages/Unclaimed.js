@@ -19,18 +19,20 @@ import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 
 // Components
-import MsgSummary from '../composites/MsgSummary';
+import MsgSummary from 'components/composites/MsgSummary';
 
 // Data modules
-import claimed from '../../data/claimed';
+import claimed from 'data/claimed';
 
-// Generic modules
-import Events from '../../generic/events';
-import Rest from '../../generic/rest';
-import Tools from '../../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { afindi, clone, safeLocalStorage } from 'shared/generic/tools';
 
 // Local modules
-import Utils from '../../utils';
+import Utils from 'utils';
 
 // Unclaimed component
 export default class Unclaimed extends React.Component {
@@ -43,11 +45,11 @@ export default class Unclaimed extends React.Component {
 		// Initial state
 		this.state = {
 			filtered: [],
-			order: Tools.safeLocalStorage('unclaimed_order', 'ASC'),
+			order: safeLocalStorage('unclaimed_order', 'ASC'),
 			records: [],
-			sales: Tools.safeLocalStorage('unclaimed_sales', 'Y') === 'Y',
-			salesNoSent: Tools.safeLocalStorage('unclaimed_sales_no_sent', 'Y') === 'Y',
-			support: Tools.safeLocalStorage('unclaimed_support', 'Y') === 'Y',
+			sales: safeLocalStorage('unclaimed_sales', 'Y') === 'Y',
+			salesNoSent: safeLocalStorage('unclaimed_sales_no_sent', 'Y') === 'Y',
+			support: safeLocalStorage('unclaimed_support', 'Y') === 'Y',
 			user: props.user
 		}
 
@@ -109,7 +111,7 @@ export default class Unclaimed extends React.Component {
 		}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 
@@ -122,10 +124,10 @@ export default class Unclaimed extends React.Component {
 			if(res.data) {
 
 				// Clone the current records
-				let records = Tools.clone(this.state.records);
+				let records = clone(this.state.records);
 
 				// Find the record to hide
-				let iIndex = Tools.afindi(records, 'customerPhone', number);
+				let iIndex = afindi(records, 'customerPhone', number);
 
 				// If we found it
 				if(iIndex > -1) {
@@ -151,7 +153,7 @@ export default class Unclaimed extends React.Component {
 		}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 
@@ -272,7 +274,7 @@ export default class Unclaimed extends React.Component {
 		let bChecked = event.target.checked;
 
 		// Init the new state
-		let oState = Tools.clone(this.state);
+		let oState = clone(this.state);
 		oState.sales = bChecked;
 
 		// If it's not checked
@@ -298,7 +300,7 @@ export default class Unclaimed extends React.Component {
 		let bChecked = event.target.checked;
 
 		// Init the new state
-		let oState = Tools.clone(this.state);
+		let oState = clone(this.state);
 		oState.salesNoSent = bChecked;
 
 		// If it's not checked
@@ -338,7 +340,7 @@ export default class Unclaimed extends React.Component {
 		let bChecked = event.target.checked;
 
 		// Init the new state
-		let oState = Tools.clone(this.state);
+		let oState = clone(this.state);
 		oState.support = bChecked;
 
 		// Generate the new filter messages

@@ -26,12 +26,11 @@ import Tooltip from '@material-ui/core/Tooltip';
 // Material UI Icons
 import RefreshIcon from '@material-ui/icons/Refresh';
 
-// Generic modules
-import Events from '../../../generic/events';
-import Rest from '../../../generic/rest';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
 
-// Local modules
-import Utils from '../../../utils';
+// Shared generic modules
+import Events from 'shared/generic/events';
 
 // Helper
 const EnToTxt = {
@@ -50,7 +49,7 @@ export default function KNK(props) {
 		}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {

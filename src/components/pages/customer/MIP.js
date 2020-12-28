@@ -30,13 +30,15 @@ import Tooltip from '@material-ui/core/Tooltip';
 import EditIcon from '@material-ui/icons/Edit';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-// Generic modules
-import Events from '../../../generic/events';
-import Rest from '../../../generic/rest';
-import Tools from '../../../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { clone } from 'shared/generic/tools';
 
 // Local modules
-import Utils from '../../../utils';
+import Utils from 'utils';
 
 // QuestionMultiple
 class QuestionMultiple extends React.Component {
@@ -50,7 +52,7 @@ class QuestionMultiple extends React.Component {
 	clicked(event) {
 		let index = parseInt(event.target.dataset.index);
 		let option = this.props.options[index];
-		let value = Tools.clone(this.state.value);
+		let value = clone(this.state.value);
 		if(event.target.checked) {
 			value.push(option);
 		} else {
@@ -226,7 +228,7 @@ function Question(props) {
 		}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 

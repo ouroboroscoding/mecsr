@@ -11,8 +11,8 @@
 // NPM modules
 import React from 'react';
 
-// Generic modules
-import Events from  '../generic/events';
+// Shared generic modules
+import Events from  'shared/generic/events';
 
 // Local variables
 let _count = 1;

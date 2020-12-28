@@ -20,18 +20,20 @@ import Checkbox from '@material-ui/core/Checkbox';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 // Format Components
-import ResultsComponent from '../../format/Results';
+import ResultsComponent from 'shared/components/format/Results';
 
-// Generic modules
-import Events from '../../../generic/events';
-import Rest from '../../../generic/rest';
-import Tools from '../../../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { afindi, clone, isObject } from 'shared/generic/tools';
 
 // Local modules
-import Utils from '../../../utils';
+import Utils from 'utils';
 
 // Definitions
-import OutboundDef from '../../../definitions/welldyne/outbound';
+import OutboundDef from 'definitions/welldyne/outbound';
 OutboundDef['__react__'] = {
 	"results": ["crm_id", "customer_name", "crm_order", "triggered", "queue", "reason", "ready"]
 }
@@ -78,7 +80,7 @@ export default function Outbound(props) {
 		}).done(res => {
 
 			// If there's an error or a warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				if(res.error.code === 1802) {
 					Events.trigger('error', 'No associated trigger can be found for this error, you will need to manually inform WellDyneRx to remove this.');
 				} else if(res.error.code === 1101) {
@@ -102,10 +104,10 @@ export default function Outbound(props) {
 				recordsSet(records => {
 
 					// Clone the records
-					let ret = Tools.clone(records);
+					let ret = clone(records);
 
 					// Find the index
-					let iIndex = Tools.afindi(ret, '_id', _id);
+					let iIndex = afindi(ret, '_id', _id);
 
 					// If one is found, remove it
 					if(iIndex > -1) {
@@ -117,7 +119,7 @@ export default function Outbound(props) {
 				});
 
 				// If we got an object back
-				if(Tools.isObject(res.data)) {
+				if(isObject(res.data)) {
 
 					// Tell the adhoc page there's a new record
 					Events.trigger('adhocCreated', res.data);
@@ -133,7 +135,7 @@ export default function Outbound(props) {
 		Rest.read('welldyne', 'outbounds', {}).done(res => {
 
 			// If there's an error or a warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -179,7 +181,7 @@ export default function Outbound(props) {
 		}).done(res => {
 
 			// If there's an error or a warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -193,10 +195,10 @@ export default function Outbound(props) {
 				recordsSet(records => {
 
 					// Clone the records
-					let ret = Tools.clone(records);
+					let ret = clone(records);
 
 					// Find the index
-					let iIndex = Tools.afindi(ret, '_id', sID);
+					let iIndex = afindi(ret, '_id', sID);
 
 					// If one is found, update the ready flag
 					if(iIndex > -1) {

@@ -21,12 +21,11 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
-// Generic modules
-import Events from '../../generic/events';
-import Rest from '../../generic/rest';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
 
-// Local modules
-import Utils from '../../utils';
+// Shared generic modules
+import Events from 'shared/generic/events';
 
 // Decline
 export default function Decline(props) {
@@ -41,7 +40,7 @@ export default function Decline(props) {
 		}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				if(res.error.code === 1103) {
 					Events.trigger('error', 'Failed to update order status in Konnektive, please try again or contact support');
 				} else {

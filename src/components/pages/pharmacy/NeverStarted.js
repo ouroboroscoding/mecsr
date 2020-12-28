@@ -22,19 +22,21 @@ import Tooltip from '@material-ui/core/Tooltip';
 // Material UI Icons
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 
-// Format Components
-import ResultsComponent from '../../format/Results';
+// Shared format Components
+import ResultsComponent from 'shared/components/format/Results';
 
-// Generic modules
-import Events from '../../../generic/events';
-import Rest from '../../../generic/rest';
-import Tools from '../../../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { afindi, clone } from 'shared/generic/tools';
 
 // Local modules
-import Utils from '../../../utils';
+import Utils from 'utils';
 
 // Definitions
-import NeverStartedDef from '../../../definitions/welldyne/never_started';
+import NeverStartedDef from 'definitions/welldyne/never_started';
 NeverStartedDef['__react__'] = {
 	"results": ["crm_id", "customer_name", "crm_order", "triggered", "medication", "reason", "ready"]
 }
@@ -86,7 +88,7 @@ export default function NeverStarted(props) {
 		Rest.read('welldyne', 'never/starteds', {}).done(res => {
 
 			// If there's an error or a warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -120,7 +122,7 @@ export default function NeverStarted(props) {
 		}).done(res => {
 
 			// If there's an error or a warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				if(res.error.code === 1803) {
 					Events.trigger('error', "Can't find the file " + res.error.msg + ' on the FTP server');
 				} else if(res.error.code === 1804) {
@@ -172,7 +174,7 @@ export default function NeverStarted(props) {
 		}).done(res => {
 
 			// If there's an error or a warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -186,10 +188,10 @@ export default function NeverStarted(props) {
 				recordsSet(records => {
 
 					// Clone the records
-					let ret = Tools.clone(records);
+					let ret = clone(records);
 
 					// Find the index
-					let iIndex = Tools.afindi(ret, '_id', sID);
+					let iIndex = afindi(ret, '_id', sID);
 
 					// If one is found, update the ready flag
 					if(iIndex > -1) {
@@ -210,10 +212,10 @@ export default function NeverStarted(props) {
 		recordsSet(records => {
 
 			// Clone the records
-			let ret = Tools.clone(records);
+			let ret = clone(records);
 
 			// Find the index
-			let iIndex = Tools.afindi(ret, '_id', _id);
+			let iIndex = afindi(ret, '_id', _id);
 
 			// If one is found, remove it
 			if(iIndex > -1) {

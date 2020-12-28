@@ -31,19 +31,21 @@ import EditIcon from '@material-ui/icons/Edit';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 
-// Format Components
-import FormComponent from '../../format/Form';
+// Shared Format Components
+import FormComponent from 'shared/components/format/Form';
 
-// Generic modules
-import Events from '../../../generic/events';
-import Rest from '../../../generic/rest';
-import { clone } from '../../../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { clone } from 'shared/generic/tools';
 
 // Local modules
-import Utils from '../../../utils';
+import Utils from 'utils';
 
 // Agent Definition
-import SetupDef from '../../../definitions/patient/account_setup';
+import SetupDef from 'definitions/patient/account_setup';
 SetupDef['__react__'] = {
 	update: ['email', 'lname', 'dob']
 }
@@ -108,7 +110,7 @@ export default function Misc(props) {
 		}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -134,7 +136,7 @@ export default function Misc(props) {
 		}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -168,7 +170,7 @@ export default function Misc(props) {
 		Rest.create('csr', 'patient/account', oData).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				if(res.error.code === 1910) {
 					Events.trigger('error', 'Customer\'s DOB is invalid. Please verify DOB in MIP and if necessary, contact customer to get valid DOB.');
 				} else {
@@ -197,7 +199,7 @@ export default function Misc(props) {
 		}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -225,7 +227,7 @@ export default function Misc(props) {
 		}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -274,7 +276,7 @@ export default function Misc(props) {
 			}).done(res => {
 
 				// If there's an error or warning
-				if(res.error && !Utils.restError(res.error)) {
+				if(res.error && !res._handled) {
 					Events.trigger('error', JSON.stringify(res.error));
 				}
 				if(res.warning) {
@@ -303,7 +305,7 @@ export default function Misc(props) {
 			}).done(res => {
 
 				// If there's an error or warning
-				if(res.error && !Utils.restError(res.error)) {
+				if(res.error && !res._handled) {
 					if(res.error.code === 1509) {
 						Events.trigger('error', "Can't remove STOP set by customer");
 					} else {
@@ -335,7 +337,7 @@ export default function Misc(props) {
 		}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {

@@ -21,13 +21,15 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TextField from '@material-ui/core/TextField';
 
-// Generic modules
-import Events from '../../generic/events';
-import Rest from '../../generic/rest';
-import Tools from '../../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { afindi, clone } from 'shared/generic/tools';
 
 // Local modules
-import Utils from '../../utils';
+import Utils from 'utils';
 
 /**
  * Line
@@ -51,7 +53,7 @@ function Line(props) {
 		}).done(res => {
 
 			// If there's an error or a warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -121,7 +123,7 @@ export default function ManualAdHoc(props) {
 		Rest.read('welldyne', 'adhoc/manual', {}).done(res => {
 
 			// If there's an error or a warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -144,10 +146,10 @@ export default function ManualAdHoc(props) {
 		recordsSet(records => {
 
 			// Clone the records
-			let ret = Tools.clone(records);
+			let ret = clone(records);
 
 			// Find the index
-			let iIndex = Tools.afindi(ret, '_id', _id);
+			let iIndex = afindi(ret, '_id', _id);
 
 			// If one is found, remove it
 			if(iIndex > -1) {

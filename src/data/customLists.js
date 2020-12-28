@@ -8,13 +8,12 @@
  * @created 2020-08-16
  */
 
-// Generic modules
-import Events from '../generic/events';
-import Rest from '../generic/rest';
-import Tools from '../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
 
-// Local modules
-import Utils from '../utils';
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { afindi, clone, sortByKey } from 'shared/generic/tools';
 
 // Module data
 let __callbacks = [];
@@ -27,7 +26,7 @@ Events.add('signedIn', user => {
 	Rest.read('csr', 'lists', {}).done(res => {
 
 		// If there's an error or warning
-		if(res.error && !Utils.restError(res.error)) {
+		if(res.error && !res._handled) {
 			Events.trigger('error', JSON.stringify(res.error));
 		}
 		if(res.warning) {
@@ -77,7 +76,7 @@ export function createItem(list, item, success) {
 	}).done(res => {
 
 		// If there's an error or warning
-		if(res.error && !Utils.restError(res.error)) {
+		if(res.error && !res._handled) {
 			if(res.error.code === 1101) {
 				Events.trigger('error', 'This conversation is already part of the given list');
 			} else {
@@ -92,7 +91,7 @@ export function createItem(list, item, success) {
 		if(res.data) {
 
 			// Look for the list
-			let i = Tools.afindi(__lists, '_id', list);
+			let i = afindi(__lists, '_id', list);
 
 			// If we found it
 			if(i > -1) {
@@ -131,7 +130,7 @@ export function createList(title, success=null) {
 	}).done(res => {
 
 		// If there's an error or warning
-		if(res.error && !Utils.restError(res.error)) {
+		if(res.error && !res._handled) {
 			Events.trigger('error', JSON.stringify(res.error));
 		}
 		if(res.warning) {
@@ -149,7 +148,7 @@ export function createList(title, success=null) {
 			})
 
 			// Resort the data
-			__lists.sort(Tools.sortByKey('title'));
+			__lists.sort(sortByKey('title'));
 
 			// Notify
 			notify()
@@ -181,7 +180,7 @@ export function deleteItem(list, _id) {
 	}).done(res => {
 
 		// If there's an error or warning
-		if(res.error && !Utils.restError(res.error)) {
+		if(res.error && !res._handled) {
 			Events.trigger('error', JSON.stringify(res.error));
 		}
 		if(res.warning) {
@@ -192,13 +191,13 @@ export function deleteItem(list, _id) {
 		if(res.data) {
 
 			// Find the list
-			let iList = Tools.afindi(__lists, '_id', list);
+			let iList = afindi(__lists, '_id', list);
 
 			// If we found it
 			if(iList > -1) {
 
 				// Find the item
-				let iItem = Tools.afindi(__lists[iList].items, '_id', _id);
+				let iItem = afindi(__lists[iList].items, '_id', _id);
 
 				// If we found it
 				if(iItem > -1) {
@@ -232,7 +231,7 @@ export function deleteList(_id) {
 	}).done(res => {
 
 		// If there's an error or warning
-		if(res.error && !Utils.restError(res.error)) {
+		if(res.error && !res._handled) {
 			Events.trigger('error', JSON.stringify(res.error));
 		}
 		if(res.warning) {
@@ -243,7 +242,7 @@ export function deleteList(_id) {
 		if(res.data) {
 
 			// Find the index of the deleted list
-			let i = Tools.afindi(__lists, '_id', _id);
+			let i = afindi(__lists, '_id', _id);
 
 			// If we found it
 			if(i > -1) {
@@ -268,7 +267,7 @@ export function deleteList(_id) {
  * @return Array
  */
 export function fetch() {
-	return Tools.clone(__lists);
+	return clone(__lists);
 }
 
 /**
@@ -306,7 +305,7 @@ export function track(callback, remove=false) {
 function notify() {
 
 	// Clone the current data
-	let lLists = Tools.clone(__lists);
+	let lLists = clone(__lists);
 
 	// Pass the clone to everyone tracking
 	for(let f of __callbacks) {
@@ -314,12 +313,13 @@ function notify() {
 	}
 }
 
-// Export public functions
-export default {
+// Default export
+const CustomLists = {
 	createList: createList,
 	createItem: createItem,
 	deleteList: deleteList,
 	deleteItem: deleteItem,
 	fetch: fetch,
 	track: track
-}
+};
+export default CustomLists;

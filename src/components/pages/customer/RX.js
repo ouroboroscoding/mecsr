@@ -28,15 +28,15 @@ import EditIcon from '@material-ui/icons/Edit';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 
-// Date modules
-import DoseSpotData from '../../../data/dosespot';
+// Shared data modules
+import DoseSpotData from 'shared/data/dosespot';
 
-// Generic modules
-import Events from '../../../generic/events';
-import { afindi } from '../../../generic/tools';
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { afindi } from 'shared/generic/tools';
 
 // Local modules
-import Utils from '../../../utils';
+import Utils from 'utils';
 
 /**
  * Dose Spot

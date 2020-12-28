@@ -16,17 +16,19 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 
 // Composite components
-import CustomerSummary from '../composites/CustomerSummary';
+import CustomerSummary from 'components/composites/CustomerSummary';
 
 // Data modules
-import claimed from '../../data/claimed';
+import claimed from 'data/claimed';
 
-// Generic modules
-import Events from '../../generic/events';
-import Rest from '../../generic/rest';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
 
 // Local modules
-import Utils from '../../utils';
+import Utils from 'utils';
 
 // Pending component
 export default class Pending extends React.Component {
@@ -92,7 +94,7 @@ export default class Pending extends React.Component {
 		Rest.read('monolith', 'orders/pending/csr', {}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {

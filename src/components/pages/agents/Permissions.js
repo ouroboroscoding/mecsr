@@ -18,7 +18,7 @@ import Paper from '@material-ui/core/Paper';
 import Switch from '@material-ui/core/Switch';
 
 // Generic
-import Tools from '../../../generic/tools';
+import Tools from 'shared/generic//tools';
 
 // defines
 const CREATE = 4;

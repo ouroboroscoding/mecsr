@@ -21,14 +21,16 @@ import Tooltip from '@material-ui/core/Tooltip';
 import RefreshIcon from '@material-ui/icons/Refresh';
 
 // Format Components
-import ResultsComponent from '../../format/Results';
+import ResultsComponent from 'shared/components/format/Results';
 
-// Generic modules
-import Events from '../../../generic/events';
-import Rest from '../../../generic/rest';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
 
 // Local modules
-import Utils from '../../../utils';
+import Utils from 'utils';
 
 // Generate the Tree
 const ClaimedTree = new Tree({
@@ -73,7 +75,7 @@ export default function Claimed(props) {
 		Rest.read('monolith', 'stats/claimed', {}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 

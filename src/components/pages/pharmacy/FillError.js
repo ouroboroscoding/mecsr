@@ -17,18 +17,20 @@ import Box from '@material-ui/core/Box';
 import Checkbox from '@material-ui/core/Checkbox';
 
 // Format Components
-import ResultsComponent from '../../format/Results';
+import ResultsComponent from 'shared/components/format/Results';
 
-// Generic modules
-import Events from '../../../generic/events';
-import Rest from '../../../generic/rest';
-import Tools from '../../../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { afindi, clone } from 'shared/generic/tools';
 
 // Local modules
-import Utils from '../../../utils';
+import Utils from 'utils';
 
 // Definitions
-import FillErrorDef from '../../../definitions/prescriptions/pharmacy_fill_error';
+import FillErrorDef from 'definitions/prescriptions/pharmacy_fill_error';
 FillErrorDef['__react__'] = {
 	"results": ["crm_id", "customer_name", "crm_order", "list", "reason", "fail_count", "ready"],
 	"update": ["crm_order", "ready"]
@@ -77,7 +79,7 @@ export default function FillError(props) {
 		Rest.read('prescriptions', 'pharmacy/fill/errors', {}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 
@@ -125,7 +127,7 @@ export default function FillError(props) {
 		}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 
@@ -141,10 +143,10 @@ export default function FillError(props) {
 				recordsSet(records => {
 
 					// Clone the records
-					let ret = Tools.clone(records);
+					let ret = clone(records);
 
 					// Find the index
-					let iIndex = Tools.afindi(ret, '_id', sID);
+					let iIndex = afindi(ret, '_id', sID);
 
 					// If one is found, update the ready flag
 					if(iIndex > -1) {
@@ -165,10 +167,10 @@ export default function FillError(props) {
 		recordsSet(records => {
 
 			// Clone the records
-			let ret = Tools.clone(records);
+			let ret = clone(records);
 
 			// Find the index
-			let iIndex = Tools.afindi(ret, '_id', _id);
+			let iIndex = afindi(ret, '_id', _id);
 
 			// If one is found, remove it
 			if(iIndex > -1) {

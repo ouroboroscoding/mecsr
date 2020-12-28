@@ -136,7 +136,7 @@ export default class Signin extends React.Component {
 		Rest.create('csr', 'signin', {
 			"userName": this.fields.userName.value,
 			"passwd": this.fields.passwd.value
-		}, false).done(res => {
+		}, {session: false}).done(res => {
 
 			// If there's an error
 			if(res.error && !res._handled) {

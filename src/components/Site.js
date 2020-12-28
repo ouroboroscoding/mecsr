@@ -63,9 +63,9 @@ Rest.init(process.env.REACT_APP_MEMS_DOMAIN, process.env.REACT_APP_WS_DOMAIN, xh
 			': ' + xhr.statusText +
 			' (' + xhr.status + ')');
 	}
-}, (method, url, data) => {
+}, (method, url, data, opts) => {
 	LoaderShow();
-}, (method, url, data) => {
+}, (method, url, data, opts) => {
 	LoaderHide();
 });
 

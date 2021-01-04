@@ -19,13 +19,12 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import TextField from '@material-ui/core/TextField';
 
-// Generic modules
-import Events from '../generic/events';
-import Hash from '../generic/hash';
-import Rest from '../generic/rest';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
 
-// Local modules
-import Utils from '../utils';
+// Shared generic modules
+import Events from 'shared/generic/events';
+import Hash from 'shared/generic/hash';
 
 // Sign In
 export default class Signin extends React.Component {
@@ -59,7 +58,7 @@ export default class Signin extends React.Component {
 		Rest.read('monolith', 'user', {}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 
@@ -137,10 +136,10 @@ export default class Signin extends React.Component {
 		Rest.create('csr', 'signin', {
 			"userName": this.fields.userName.value,
 			"passwd": this.fields.passwd.value
-		}, false).done(res => {
+		}, {session: false}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				switch(res.error.code) {
 					case 1001:
 						// Go through each message and mark the error

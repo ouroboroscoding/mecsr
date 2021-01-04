@@ -25,18 +25,18 @@ import Select from '@material-ui/core/Select';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
 
 // Material UI icons
 import EditIcon from '@material-ui/icons/Edit';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-// Generic modules
-import Events from '../../../generic/events';
-import Rest from '../../../generic/rest';
-import Tools from '../../../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
 
-// Local modules
-import Utils from '../../../utils';
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { clone } from 'shared/generic/tools';
 
 // QuestionMultiple
 class QuestionMultiple extends React.Component {
@@ -50,7 +50,7 @@ class QuestionMultiple extends React.Component {
 	clicked(event) {
 		let index = parseInt(event.target.dataset.index);
 		let option = this.props.options[index];
-		let value = Tools.clone(this.state.value);
+		let value = clone(this.state.value);
 		if(event.target.checked) {
 			value.push(option);
 		} else {
@@ -226,7 +226,7 @@ function Question(props) {
 		}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 
@@ -302,23 +302,33 @@ export default function MIP(props) {
 					'phone=' + encodeURIComponent(props.customer.phone) + '&';
 	}
 
+	// MIP links
+	let MIPLinks = (
+		<Box style={{textAlign: "right"}}>
+			<a href={sMipUrl + 'formId=MIP-A2'} target="_blank" rel="noopener noreferrer">New ED Mip</a>
+			&nbsp;|&nbsp;
+			<a href={sMipUrl + 'formId=MIP-H2'} target="_blank" rel="noopener noreferrer">New HRT Mip</a>
+		</Box>
+	);
+
 	// If we're still loading
 	if(props.mips === null) {
-		return <p>Loading...</p>
+		return (
+			<React.Fragment>
+				{MIPLinks}
+				<Typography>Loading...</Typography>
+			</React.Fragment>
+		);
 	}
 
 	// If there's no mip associated
 	else if(props.mips === 0) {
 		return (
 			<React.Fragment>
-				<div style={{textAlign: "right"}}>
-					<a href={sMipUrl + 'formId=MIP-A2'} target="_blank" rel="noopener noreferrer">New ED Mip</a>
-					&nbsp;|&nbsp;
-					<a href={sMipUrl + 'formId=MIP-H2'} target="_blank" rel="noopener noreferrer">New HRT Mip</a>
-				</div>
-				<p>No MIP found for this customer</p>
+				{MIPLinks}
+				<Typography>No MIP found for this customer</Typography>
 			</React.Fragment>
-		)
+		);
 	}
 
 	// Else, show the mip
@@ -326,11 +336,7 @@ export default function MIP(props) {
 
 		return (
 			<React.Fragment>
-				<div style={{textAlign: "right"}}>
-					<a href={sMipUrl + 'formId=MIP-A2'} target="_blank" rel="noopener noreferrer">New ED Mip</a>
-					&nbsp;|&nbsp;
-					<a href={sMipUrl + 'formId=MIP-H1'} target="_blank" rel="noopener noreferrer">New HRT Mip</a>
-				</div>
+				{MIPLinks}
 				{props.mips.map((o, i) =>
 					<ExpansionPanel key={i} expanded={expanded === o.id || (!expanded && i === 0)} onChange={handleChange}>
 						<ExpansionPanelSummary

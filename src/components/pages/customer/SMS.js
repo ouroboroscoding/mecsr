@@ -28,14 +28,16 @@ import EditIcon from '@material-ui/icons/Edit';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 //import PhoneIcon from '@material-ui/icons/Phone';
 
-// Generic modules
-import Clipboard from '../../../generic/clipboard';
-import Events from '../../../generic/events';
-import Rest from '../../../generic/rest';
-import Tools from '../../../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Clipboard from 'shared/generic/clipboard';
+import Events from 'shared/generic/events';
+import { afindi, clone, ucfirst } from 'shared/generic/tools';
 
 // Local modules
-import Utils from '../../../utils';
+import Utils from 'utils';
 
 // Regex
 const regTplVar = /{([^]+?)}/g
@@ -162,7 +164,7 @@ export default class SMS extends React.Component {
 			}
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -202,7 +204,7 @@ export default class SMS extends React.Component {
 			}
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -251,7 +253,7 @@ export default class SMS extends React.Component {
 			}
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 
@@ -275,11 +277,11 @@ export default class SMS extends React.Component {
 
 						// If we haven't cloned the messages yet
 						if(!lNewMsgs) {
-							lNewMsgs = Tools.clone(this.state.messages);
+							lNewMsgs = clone(this.state.messages);
 						}
 
 						// Find the corresponding message
-						let iIndex = Tools.afindi(lNewMsgs, 'id', o.id);
+						let iIndex = afindi(lNewMsgs, 'id', o.id);
 
 						// If we found it
 						if(iIndex > -1) {
@@ -339,7 +341,7 @@ export default class SMS extends React.Component {
 						</Tooltip>*/}
 					</span>
 					<span className="title">Type: </span>
-					<span className="right20">{Tools.ucfirst(this.state.type)}</span>
+					<span className="right20">{ucfirst(this.state.type)}</span>
 					{this.state.stop &&
 						<span className="title" style={{color: 'red'}}>STOP</span>
 					}
@@ -457,11 +459,14 @@ export default class SMS extends React.Component {
 		}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 
 				// If the customer requested a stop
 				if(res.error.code === 1500) {
 					Events.trigger('error', 'Customer has requested a STOP to SMS messages');
+				}
+				else if(res.error.code === 1304) {
+					Events.trigger('error', 'Twilio rejected the message: ' + res.error.msg);
 				}
 				else {
 					Events.trigger('error', JSON.stringify(res.error));
@@ -480,8 +485,8 @@ export default class SMS extends React.Component {
 				this.text.value = '';
 
 				// Clone the current messsages and status
-				let lNewMsgs = Tools.clone(this.state.messages);
-				let lStatus = Tools.clone(this.state.needsStatus);
+				let lNewMsgs = clone(this.state.messages);
+				let lStatus = clone(this.state.needsStatus);
 
 				// Add the new one to the end
 				lNewMsgs.push({
@@ -564,6 +569,34 @@ export default class SMS extends React.Component {
 					}
 					sReplacement = this.props.customer.billing.lastName;
 					break;
+				case 'ced_link':
+					if(!this.props.mips || !this.props.customer) {
+						Event.trigger('error', 'Can not use template without MIP and KNK data');
+						return;
+					}
+
+					// Existing landing ID
+					let bFound = false;
+
+					// Go through each mip available
+					for(let o of this.props.mips) {
+
+						// If it's an H1
+						if(['MIP-A1', 'MIP-A2'].indexOf(o.form) > -1 && o.completed) {
+							bFound = true;
+							break;
+						}
+					}
+
+					// If we have an ID
+					if(bFound) {
+						sReplacement = `https://www.maleexcelmip.com/mip/cont/ced?formId=MIP-CED&ktCustomerId=${this.props.customer.customerId}`
+					} else {
+						sReplacement = 'NO PREVIOUS COMPLETED ED MIP FOUND!';
+						Events.trigger('error', 'No previous completed ED MIP was found for this customer, you should not message them without further research');
+					}
+					break;
+
 				case 'chrt_link':
 					if(!this.props.mips || !this.props.customer) {
 						Event.trigger('error', 'Can not use template without MIP and KNK data');

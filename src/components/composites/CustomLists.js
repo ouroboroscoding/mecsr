@@ -38,14 +38,14 @@ import AddIcon from '@material-ui/icons/Add';
 import CloseIcon from '@material-ui/icons/Close';
 
 // Data modules
-import customLists from '../../data/customLists';
+import customLists from 'data/customLists';
 
-// Generic modules
-import Events from '../../generic/events';
-import Tools from '../../generic/tools';
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { afindi, safeLocalStorage } from 'shared/generic/tools';
 
 // Project modules
-import Utils from '../../utils';
+import Utils from 'utils';
 
 // Material-UI is truly terrible
 const Accordion = withStyles({
@@ -232,7 +232,7 @@ export default function CustomLists(props) {
 	// State
 	let [create, createSet] = useState(false);
 	let [lists, listsSet] = useState([]);
-	let [open, openSet] = useState(Tools.safeLocalStorage('openList', false));
+	let [open, openSet] = useState(safeLocalStorage('openList', false));
 
 	// Refs
 	let titleRef = useRef()
@@ -350,7 +350,7 @@ export class CustomListsForm extends React.Component {
 
 		// Get the lists
 		let lLists = customLists.fetch();
-		let sList = Tools.safeLocalStorage('customListAdd', '-1');
+		let sList = safeLocalStorage('customListAdd', '-1');
 
 		// If the list is optional
 		if(props.optional) {
@@ -358,7 +358,7 @@ export class CustomListsForm extends React.Component {
 		}
 
 		// Else, ff the list is not in the available ones
-		else if(sList !== '-1' && Tools.afindi(lLists, '_id', sList) === -1) {
+		else if(sList !== '-1' && afindi(lLists, '_id', sList) === -1) {
 			sList = '-1';
 		}
 

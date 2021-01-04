@@ -19,12 +19,14 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import TextField from '@material-ui/core/TextField';
 
-// Generic modules
-import Events from '../../generic/events';
-import Rest from '../../generic/rest';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
 
 // Local modules
-import Utils from '../../utils';
+import Utils from 'utils';
 
 // Resolve
 export default function Resolve(props) {
@@ -49,7 +51,7 @@ export default function Resolve(props) {
 			}).done(res => {
 
 				// If there's an error
-				if(res.error && !Utils.restError(res.error)) {
+				if(res.error && !res._handled) {
 					Events.trigger('error', JSON.stringify(res.error));
 				}
 

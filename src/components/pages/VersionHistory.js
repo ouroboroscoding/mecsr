@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.22.0', 'January 4th, 2021', [
+		'Underlining codebase updated. No functionality should change, but any issues should be reported immediately.'
+	]],
 	['1.21.0', 'December 22nd, 2020', [
 		'Missed calls now appear as "SMS" messages with the link to the recording.'
 	]],

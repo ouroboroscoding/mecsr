@@ -33,16 +33,18 @@ import Notes from './customer/Notes';
 import RX from './customer/RX';
 import SMS from './customer/SMS';
 
-// Data modules
-import DoseSpot from '../../data/dosespot';
+// Shared data modules
+import DoseSpot from 'shared/data/dosespot';
 
-// Generic modules
-import Events from '../../generic/events';
-import Rest from '../../generic/rest';
-import Tools from '../../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { afindi, clone } from 'shared/generic/tools';
 
 // Local modules
-import Utils from '../../utils';
+import Utils from 'utils';
 
 // Customer component
 export default class Customer extends React.Component {
@@ -151,7 +153,7 @@ export default class Customer extends React.Component {
 		}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -166,10 +168,10 @@ export default class Customer extends React.Component {
 			if(res.data) {
 
 				// Clone the current triggers
-				let triggers = Tools.clone(this.state.triggers);
+				let triggers = clone(this.state.triggers);
 
 				// Find the correct trigger
-				let iIndex = Tools.afindi(triggers, '_id', trigger_id);
+				let iIndex = afindi(triggers, '_id', trigger_id);
 
 				// If we found an index
 				if(iIndex > -1) {
@@ -306,7 +308,7 @@ export default class Customer extends React.Component {
 			}
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -338,7 +340,7 @@ export default class Customer extends React.Component {
 			}
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				if(res.error.code === 1104) {
 					this.setState({customer: 0});
 				} else {
@@ -378,7 +380,7 @@ export default class Customer extends React.Component {
 			}
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -409,7 +411,7 @@ export default class Customer extends React.Component {
 			}
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -441,7 +443,7 @@ export default class Customer extends React.Component {
 			}
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -472,7 +474,7 @@ export default class Customer extends React.Component {
 			}
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -501,7 +503,7 @@ export default class Customer extends React.Component {
 			}
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -533,7 +535,7 @@ export default class Customer extends React.Component {
 			}
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -585,7 +587,7 @@ export default class Customer extends React.Component {
 		}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -596,7 +598,7 @@ export default class Customer extends React.Component {
 			if('data' in res) {
 
 				// Clone the current pharmacy fill
-				let oPharmacyFill = Tools.clone(this.state.pharmacy_fill);
+				let oPharmacyFill = clone(this.state.pharmacy_fill);
 
 				// Add the new record to the fills
 				oPharmacyFill['fills'].push(res.data);

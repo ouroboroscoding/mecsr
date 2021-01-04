@@ -61,17 +61,19 @@ import { CustomListsDialog } from './composites/CustomLists';
 import Loader from './Loader';
 
 // Data modules
-import claimed from '../data/claimed';
+import claimed from 'data/claimed';
 
-// Generic modules
-import Events from '../generic/events';
-import PageVisibility from '../generic/pageVisibility';
-import Rest from '../generic/rest';
-import Tools from '../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+import TwoWay from 'shared/communication/twoway';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
+import PageVisibility from 'shared/generic/pageVisibility';
+import { afindi, clone, empty, safeLocalStorageJSON } from 'shared/generic/tools';
 
 // Local modules
-import TwoWay from '../twoway';
-import Utils from '../utils';
+import Utils from 'utils';
 
 // Customer Item component
 function CustomerItem(props) {
@@ -171,7 +173,7 @@ function CustomerItem(props) {
 			}).done(res => {
 
 				// If there's an error or warning
-				if(res.error && !Utils.restError(res.error)) {
+				if(res.error && !res._handled) {
 					Events.trigger('error', JSON.stringify(res.error));
 				}
 				if(res.warning) {
@@ -532,7 +534,7 @@ export default class Header extends React.Component {
 			"claimed": [],
 			"claimed_open": true,
 			"menu": false,
-			"newMsgs": Tools.safeLocalStorageJSON('newMsgs', {}),
+			"newMsgs": safeLocalStorageJSON('newMsgs', {}),
 			"overwrite": props.user ? Utils.hasRight(props.user, 'csr_overwrite', 'create') : false,
 			"path": window.location.pathname,
 			"pending": 0,
@@ -619,7 +621,7 @@ export default class Header extends React.Component {
 	claimedAdd(number, name, customer_id, order_id, provider=null) {
 
 		// Clone the claimed state
-		let lClaimed = Tools.clone(this.state.claimed);
+		let lClaimed = clone(this.state.claimed);
 
 		// Add the record to the end
 		lClaimed.push({
@@ -641,13 +643,13 @@ export default class Header extends React.Component {
 		}
 
 		// Does the new claim exist in the viewed?
-		let iIndex = Tools.afindi(this.state.viewed, 'customerPhone', number);
+		let iIndex = afindi(this.state.viewed, 'customerPhone', number);
 
 		// If we found one
 		if(iIndex > -1) {
 
 			// Clone the viewed state
-			let lViewed = Tools.clone(this.state.viewed);
+			let lViewed = clone(this.state.viewed);
 
 			// Remove the element
 			lViewed.splice(iIndex, 1);
@@ -675,7 +677,7 @@ export default class Header extends React.Component {
 			if(lPath[0] === 'customer') {
 
 				// If we can't find the customer we're on
-				if(Tools.afindi(data, 'customerPhone', lPath[1]) === -1) {
+				if(afindi(data, 'customerPhone', lPath[1]) === -1) {
 
 					// Switch to view
 					Events.trigger('viewedAdd', lPath[1], lPath[2]);
@@ -694,13 +696,13 @@ export default class Header extends React.Component {
 	claimedRemove(number, switch_path) {
 
 		// Find the index of the remove customer
-		let iClaimed = Tools.afindi(this.state.claimed, 'customerPhone', number);
+		let iClaimed = afindi(this.state.claimed, 'customerPhone', number);
 
 		// If we found one
 		if(iClaimed > -1) {
 
 			// Clone the claimed state
-			let lClaimed = Tools.clone(this.state.claimed);
+			let lClaimed = clone(this.state.claimed);
 
 			// Store the claim
 			let oClaim = this.state.claimed[iClaimed];
@@ -720,7 +722,7 @@ export default class Header extends React.Component {
 
 			// If it's in the new messages
 			if(number in this.state.newMsgs) {
-				let dNewMsgs = Tools.clone(this.state.newMsgs);
+				let dNewMsgs = clone(this.state.newMsgs);
 				delete dNewMsgs[number];
 				localStorage.setItem('newMsgs', JSON.stringify(dNewMsgs))
 				oState.newMsgs = dNewMsgs;
@@ -768,7 +770,7 @@ export default class Header extends React.Component {
 			if(number in this.state.newMsgs) {
 
 				// Clone the new messages
-				let dNewMsgs = Tools.clone(this.state.newMsgs);
+				let dNewMsgs = clone(this.state.newMsgs);
 
 				// Remove the corresponding key
 				delete dNewMsgs[number];
@@ -781,13 +783,13 @@ export default class Header extends React.Component {
 			}
 
 			// Look for it in claimed
-			let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', number);
+			let iIndex = afindi(this.state.claimed, 'customerPhone', number);
 
 			// If we have it, and it's a transfer
 			if(iIndex > -1 && !this.state.claimed[iIndex].viewed) {
 
 				// Clone the claims
-				let lClaimed = Tools.clone(this.state.claimed);
+				let lClaimed = clone(this.state.claimed);
 
 				// Set the viewed flag
 				lClaimed[iIndex].viewed = true;
@@ -800,7 +802,7 @@ export default class Header extends React.Component {
 					phoneNumber: number
 				}).done(res => {
 					// If there's an error or warning
-					if(res.error && !Utils.restError(res.error)) {
+					if(res.error && !res._handled) {
 						Events.trigger('error', JSON.stringify(res.error));
 					}
 					if(res.warning) {
@@ -836,7 +838,7 @@ export default class Header extends React.Component {
 		}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -847,13 +849,13 @@ export default class Header extends React.Component {
 			if('data' in res) {
 
 				// If there's any
-				if(!Tools.empty(res.data)) {
+				if(!empty(res.data)) {
 
 					// Do we set the state?
 					let bSetState = false;
 
 					// Clone the current messages
-					let dNewMsgs = Tools.clone(this.state.newMsgs);
+					let dNewMsgs = clone(this.state.newMsgs);
 
 					// Go through each one sent
 					for(let sNumber in res.data) {
@@ -1126,7 +1128,7 @@ export default class Header extends React.Component {
 		Rest.create('csr', 'signout', {}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 
@@ -1183,7 +1185,7 @@ export default class Header extends React.Component {
 		Rest.read('monolith', 'msgs/unclaimed/count', {}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -1200,7 +1202,7 @@ export default class Header extends React.Component {
 		Rest.read('monolith', 'orders/pending/csr/count', {}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -1222,7 +1224,7 @@ export default class Header extends React.Component {
 	viewedAdd(number, name, customer) {
 
 		// Does it already exist in the claimed?
-		let iClaimed = Tools.afindi(this.state.claimed, 'customerPhone', number);
+		let iClaimed = afindi(this.state.claimed, 'customerPhone', number);
 
 		// If it does
 		if(iClaimed > -1) {
@@ -1243,7 +1245,7 @@ export default class Header extends React.Component {
 		else {
 
 			// Find the index of the customer
-			let iViewed = Tools.afindi(this.state.viewed, 'customerPhone', number);
+			let iViewed = afindi(this.state.viewed, 'customerPhone', number);
 
 			// If we found one
 			if(iViewed > -1) {
@@ -1267,7 +1269,7 @@ export default class Header extends React.Component {
 				}).done(res => {
 
 					// If there's an error or warning
-					if(res.error && !Utils.restError(res.error)) {
+					if(res.error && !res._handled) {
 						Events.trigger('error', JSON.stringify(res.error));
 					}
 					if(res.warning) {
@@ -1278,7 +1280,7 @@ export default class Header extends React.Component {
 					if('data' in res) {
 
 						// Clone the viewed state
-						let lView = Tools.clone(this.state.viewed);
+						let lView = clone(this.state.viewed);
 
 						// If we got no data
 						if(res.data === 0) {
@@ -1318,13 +1320,13 @@ export default class Header extends React.Component {
 	viewedDuplicate(number, user_id) {
 
 		// Find the index of the viewed
-		let iIndex = Tools.afindi(this.state.viewed, 'customerPhone', number);
+		let iIndex = afindi(this.state.viewed, 'customerPhone', number);
 
 		// If we found one
 		if(iIndex > -1) {
 
 			// Clone the viewed state
-			let lView = Tools.clone(this.state.viewed);
+			let lView = clone(this.state.viewed);
 
 			// Update the viewed
 			lView[iIndex].claimedUser = user_id;
@@ -1338,13 +1340,13 @@ export default class Header extends React.Component {
 	viewedRemove(number, switch_path) {
 
 		// Find the index of the remove viewed
-		let iIndex = Tools.afindi(this.state.viewed, 'customerPhone', number);
+		let iIndex = afindi(this.state.viewed, 'customerPhone', number);
 
 		// If we found one
 		if(iIndex > -1) {
 
 			// Clone the viewed state
-			let lView = Tools.clone(this.state.viewed);
+			let lView = clone(this.state.viewed);
 
 			// Remove the element
 			lView.splice(iIndex, 1);
@@ -1406,13 +1408,13 @@ export default class Header extends React.Component {
 			case 'claim_removed': {
 
 				// Look for the claim
-				let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
+				let iIndex = afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
 
 				// If we found one
 				if(iIndex > -1) {
 
 					// Clone the claims
-					let lClaimed = Tools.clone(this.state.claimed);
+					let lClaimed = clone(this.state.claimed);
 
 					// Delete the claim
 					lClaimed.splice(iIndex, 1);
@@ -1447,7 +1449,7 @@ export default class Header extends React.Component {
 				}).done(res => {
 
 					// If there's an error or warning
-					if(res.error && !Utils.restError(res.error)) {
+					if(res.error && !res._handled) {
 						Events.trigger('error', JSON.stringify(res.error));
 					}
 					if(res.warning) {
@@ -1458,7 +1460,7 @@ export default class Header extends React.Component {
 					if('data' in res) {
 
 						// Clone the claims
-						let lClaimed = Tools.clone(this.state.claimed);
+						let lClaimed = clone(this.state.claimed);
 
 						// If there's no actual data
 						if(res.data === 0) {
@@ -1495,13 +1497,13 @@ export default class Header extends React.Component {
 			case 'claim_updated': {
 
 				// Look for the claim
-				let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
+				let iIndex = afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
 
 				// If we found one
 				if(iIndex > -1) {
 
 					// Clone the claims
-					let lClaimed = Tools.clone(this.state.claimed);
+					let lClaimed = clone(this.state.claimed);
 
 					// Update the claim
 					lClaimed[iIndex] = data.claim;
@@ -1523,13 +1525,13 @@ export default class Header extends React.Component {
 				console.log(data);
 
 				// Look for the claim
-				let iIndex = Tools.afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
+				let iIndex = afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
 
 				// If we found one
 				if(iIndex > -1) {
 
 					// Clone the claims
-					let lClaimed = Tools.clone(this.state.claimed);
+					let lClaimed = clone(this.state.claimed);
 
 					// Change the phone number
 					lClaimed[iIndex]['customerPhone'] = data['newNumber'];

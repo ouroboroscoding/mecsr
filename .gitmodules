@@ -1,6 +1,6 @@
 [submodule "src/definitions"]
 	path = src/definitions
 	url = ../medefs.git
-[submodule "src/components/format"]
-	path = src/components/format
-	url = ../react-format.git
+[submodule "src/shared"]
+	path = src/shared
+	url = ../me-ui-shared.git

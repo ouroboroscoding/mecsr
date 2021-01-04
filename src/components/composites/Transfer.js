@@ -25,13 +25,15 @@ import TextField from '@material-ui/core/TextField';
 // Composite components
 import { CustomListsForm } from './CustomLists';
 
-// Generic modules
-import Events from '../../generic/events';
-import Rest from '../../generic/rest';
-import Tools from '../../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { omap } from 'shared/generic/tools';
 
 // Local modules
-import Utils from '../../utils';
+import Utils from 'utils';
 
 // Transfer
 export default function Transfer(props) {
@@ -62,7 +64,7 @@ export default function Transfer(props) {
 		Rest.read('csr', 'agent/names', {}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 
@@ -111,7 +113,7 @@ export default function Transfer(props) {
 			}).done(res => {
 
 				// If there's an error
-				if(res.error && !Utils.restError(res.error)) {
+				if(res.error && !res._handled) {
 					Events.trigger('error', JSON.stringify(res.error));
 				}
 
@@ -164,7 +166,7 @@ export default function Transfer(props) {
 						value={agent}
 					>
 						<option aria-label="None" value="" />
-						{Tools.omap(agents, (o,k) =>
+						{omap(agents, (o,k) =>
 							<option key={k} value={k}>{o.firstName + ' ' + o.lastName}</option>
 						)}
 					</Select>

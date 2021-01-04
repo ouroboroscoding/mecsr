@@ -19,12 +19,14 @@ import Tooltip from '@material-ui/core/Tooltip';
 // Material UI Icons
 import RefreshIcon from '@material-ui/icons/Refresh';
 
-// Generic modules
-import Events from '../../../generic/events';
-import Rest from '../../../generic/rest';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
 
 // Local modules
-import Utils from '../../../utils';
+import Utils from 'utils';
 
 /**
  * WellDyne
@@ -62,7 +64,7 @@ export default function WellDyne(props) {
 		Rest.read('welldyne', 'stats', {}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 

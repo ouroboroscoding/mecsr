@@ -35,19 +35,21 @@ import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import Permissions from './agents/Permissions';
 
 // Format Components
-import ResultsComponent from '../format/Results';
-import FormComponent from '../format/Form';
+import ResultsComponent from 'shared/components/format/Results';
+import FormComponent from 'shared/components/format/Form';
 
-// Generic modules
-import Events from '../../generic/events';
-import Rest from '../../generic/rest';
-import Tools from '../../generic/tools';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { afindi, clone } from 'shared/generic/tools';
 
 // Local modules
-import Utils from '../../utils';
+import Utils from 'utils';
 
 // Agent Definition
-import AgentDef from '../../definitions/csr/agent_memo';
+import AgentDef from 'definitions/csr/agent_memo';
 
 // Generate the agent Tree
 const AgentTree = new Tree(AgentDef);
@@ -89,7 +91,7 @@ export default function Agents(props) {
 
 	function createSuccess(agent) {
 		agentsSet(agents => {
-			let ret = Tools.clone(agents);
+			let ret = clone(agents);
 			ret.unshift(agent);
 			return ret;
 		});
@@ -103,7 +105,7 @@ export default function Agents(props) {
 		Rest.read('csr', 'agents', {}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 
@@ -132,7 +134,7 @@ export default function Agents(props) {
 		}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -161,7 +163,7 @@ export default function Agents(props) {
 		}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -184,7 +186,7 @@ export default function Agents(props) {
 		}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -212,7 +214,7 @@ export default function Agents(props) {
 		}).done(res => {
 
 			// If there's an error or warning
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				Events.trigger('error', JSON.stringify(res.error));
 			}
 			if(res.warning) {
@@ -238,10 +240,10 @@ export default function Agents(props) {
 		agentsSet(agents => {
 
 			// Clone the agents
-			let ret = Tools.clone(agents);
+			let ret = clone(agents);
 
 			// Find the index
-			let iIndex = Tools.afindi(ret, '_id', _id);
+			let iIndex = afindi(ret, '_id', _id);
 
 			// If one is found, remove it
 			if(iIndex > -1) {

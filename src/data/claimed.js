@@ -8,12 +8,11 @@
  * @created 2020-07-26
  */
 
-// Generic modules
-import Events from '../generic/events';
-import Rest from '../generic/rest';
+// Shared communications modules
+import Rest from 'shared/communication/rest';
 
-// Local modules
-import Utils from '../utils';
+// Shared generic modules
+import Events from 'shared/generic/events';
 
 /**
  * Add
@@ -40,7 +39,7 @@ export function add(number, order=null, provider=null) {
 		}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				// If we're at max claims
 				if(res.error.code === 1504) {
 					Events.trigger('error', 'You\'ve reached the maximum number of claims. Please resolve, transfer, or unclaim previous claims.');
@@ -80,7 +79,7 @@ export function fetch(number) {
 		Rest.read('monolith', 'msgs/claimed', {}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				reject(res.error);
 			}
 
@@ -118,7 +117,7 @@ export function remove(number) {
 		}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				reject(res.error);
 			}
 
@@ -158,7 +157,7 @@ export function transfer(number, user_id) {
 		}).done(res => {
 
 			// If there's an error
-			if(res.error && !Utils.restError(res.error)) {
+			if(res.error && !res._handled) {
 				reject(res.error);
 			}
 
@@ -175,10 +174,11 @@ export function transfer(number, user_id) {
 	});
 }
 
-// Export all
-export default {
+// Default export
+const Claimed = {
 	add: add,
 	fetch: fetch,
 	remove: remove,
 	transfer: transfer
-}
+};
+export default Claimed;

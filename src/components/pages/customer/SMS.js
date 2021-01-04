@@ -465,6 +465,9 @@ export default class SMS extends React.Component {
 				if(res.error.code === 1500) {
 					Events.trigger('error', 'Customer has requested a STOP to SMS messages');
 				}
+				else if(res.error.code === 1304) {
+					Events.trigger('error', 'Twilio rejected the message: ' + res.error.msg);
+				}
 				else {
 					Events.trigger('error', JSON.stringify(res.error));
 				}
@@ -566,6 +569,34 @@ export default class SMS extends React.Component {
 					}
 					sReplacement = this.props.customer.billing.lastName;
 					break;
+				case 'ced_link':
+					if(!this.props.mips || !this.props.customer) {
+						Event.trigger('error', 'Can not use template without MIP and KNK data');
+						return;
+					}
+
+					// Existing landing ID
+					let bFound = false;
+
+					// Go through each mip available
+					for(let o of this.props.mips) {
+
+						// If it's an H1
+						if(['MIP-A1', 'MIP-A2'].indexOf(o.form) > -1 && o.completed) {
+							bFound = true;
+							break;
+						}
+					}
+
+					// If we have an ID
+					if(bFound) {
+						sReplacement = `https://www.maleexcelmip.com/mip/cont/ced?formId=MIP-CED&ktCustomerId=${this.props.customer.customerId}`
+					} else {
+						sReplacement = 'NO PREVIOUS COMPLETED ED MIP FOUND!';
+						Events.trigger('error', 'No previous completed ED MIP was found for this customer, you should not message them without further research');
+					}
+					break;
+
 				case 'chrt_link':
 					if(!this.props.mips || !this.props.customer) {
 						Event.trigger('error', 'Can not use template without MIP and KNK data');

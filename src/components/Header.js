@@ -247,9 +247,12 @@ function CustomerItem(props) {
 						primary={props.customerName}
 						secondary={
 							<React.Fragment>
-								<span>
-									ID: {props.customerId}<br/>
-									#: {Utils.nicePhone(props.customerPhone)}
+								<span className="customerDetails">
+									<p>#: {Utils.nicePhone(props.customerPhone)}</p>
+									<p>ID: {props.customerId}</p>
+									{props.orderId &&
+										<p>Order: {props.orderId}</p>
+									}
 								</span>
 								<span className="customerActions">
 									{props.provider !== null ?

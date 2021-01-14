@@ -73,14 +73,20 @@ export default function Decline(props) {
 			<DialogContent dividers>
 				<Typography>Choose the reason for the decline:</Typography>
 				<Grid container spacing={2}>
-					<Grid item xs={12} md={4}>
-						<Button color="primary" onClick={e => submit('Duplicate Order')} variant="contained">Duplicate Order</Button>
+					<Grid item xs={12} md={6} xl={3}>
+						<Button color="primary" onClick={props.onSubmit} variant="contained">Ran CC Successfully</Button>
 					</Grid>
-					<Grid item xs={12} md={4}>
-						<Button color="primary" onClick={e => submit('Current Customer')} variant="contained">Customer Request</Button>
+					<Grid item xs={12} md={6} xl={3}>
+						<Button color="primary" onClick={e => submit('Duplicate Order')} variant="contained">Duplicate Order*</Button>
 					</Grid>
-					<Grid item xs={12} md={4}>
-						<Button color="primary" onClick={e => submit('Contact Attempt')} variant="contained">Contact Attempt</Button>
+					<Grid item xs={12} md={6} xl={3}>
+						<Button color="primary" onClick={e => submit('Current Customer')} variant="contained">Customer Request*</Button>
+					</Grid>
+					<Grid item xs={12} md={6} xl={3}>
+						<Button color="primary" onClick={e => submit('Contact Attempt')} variant="contained">Contact Attempt*</Button>
+					</Grid>
+					<Grid item xs={12}>
+						<Typography>* Will cancel QA order in Konnektive</Typography>
 					</Grid>
 				</Grid>
 			</DialogContent>

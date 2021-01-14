@@ -18,6 +18,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.22.2', 'January 14th, 2021', [
+		'Added Order ID to claims from Pending Orders or transferred from Providers.',
+		'Added "Ran CC Successfully" option in Decline dialog.'
+	]],
 	['1.22.0', 'January 4th, 2021', [
 		'Underlining codebase updated. No functionality should change, but any issues should be reported immediately.'
 	]],

@@ -70,41 +70,54 @@
 		}
 	}
 
-	.MuiListItemAvatar-root {
-		height: 100px;
-	}
+	.MuiListItem-root {
+		align-items: normal;
 
-	.transferred {
-		background-color: #dff0ff;
-	}
-
-	.customerActions {
-		display: flex;
-		flex-direction: row;
-
-		.tooltip {
-			display: inline-block;
-			flex-grow: 1
+		.MuiListItemAvatar-root {
+			padding-top: 10px;
 		}
 
-		button {
-			padding: 5px;
-		}
+		.MuiListItemText-root {
 
-		.close:hover {
-			color: red;
-		}
+			.transferred {
+				background-color: #dff0ff;
+			}
 
-		.list:hover {
-			color: #3f51b5;
-		}
+			.customerDetails {
+				p {
+					margin: 0;
+				}
+			}
 
-		.transfer:hover {
-			color: yellow;
-		}
+			.customerActions {
+				display: flex;
+				flex-direction: row;
 
-		.provider:hover, .resolve:hover {
-			color: green;
+				.tooltip {
+					display: inline-block;
+					flex-grow: 1
+				}
+
+				button {
+					padding: 5px;
+				}
+
+				.close:hover {
+					color: red;
+				}
+
+				.list:hover {
+					color: #3f51b5;
+				}
+
+				.transfer:hover {
+					color: yellow;
+				}
+
+				.provider:hover, .resolve:hover {
+					color: green;
+				}
+			}
 		}
 	}
 }

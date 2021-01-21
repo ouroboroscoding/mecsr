@@ -285,58 +285,24 @@ export default function MIP(props) {
 		expandedSet(isExpanded ? event.currentTarget.id : false);
 	}
 
-	// Generate base MIP link
-	let sMipUrl = 'https://' + process.env.REACT_APP_MIP_DOMAIN + '/mip/form/callcenter?affId=memo&';
-
-	// If we have a user
-	if(props.user) {
-		sMipUrl += 'agentId=' + encodeURIComponent(props.user.userName) + '&';
-	}
-
-	// If we have customer info
-	if(props.customer) {
-		sMipUrl += 'ktCustomerId=' + encodeURIComponent(props.customer.customerId) + '&' +
-					'firstName=' + encodeURIComponent(props.customer.billing.firstName) + '&' +
-					'lastName=' + encodeURIComponent(props.customer.billing.lastName) + '&' +
-					'email=' + encodeURIComponent(props.customer.email) + '&' +
-					'phone=' + encodeURIComponent(props.customer.phone) + '&';
-	}
-
-	// MIP links
-	let MIPLinks = (
-		<Box style={{textAlign: "right"}}>
-			<a href={sMipUrl + 'formId=MIP-A2'} target="_blank" rel="noopener noreferrer">New ED Mip</a>
-			&nbsp;|&nbsp;
-			<a href={sMipUrl + 'formId=MIP-H2'} target="_blank" rel="noopener noreferrer">New HRT Mip</a>
-		</Box>
-	);
-
 	// If we're still loading
 	if(props.mips === null) {
 		return (
-			<React.Fragment>
-				{MIPLinks}
-				<Typography>Loading...</Typography>
-			</React.Fragment>
+			<Typography>Loading...</Typography>
 		);
 	}
 
 	// If there's no mip associated
 	else if(props.mips === 0) {
 		return (
-			<React.Fragment>
-				{MIPLinks}
-				<Typography>No MIP found for this customer</Typography>
-			</React.Fragment>
+			<Typography>No MIP found for this customer</Typography>
 		);
 	}
 
 	// Else, show the mip
 	else {
-
 		return (
 			<React.Fragment>
-				{MIPLinks}
 				{props.mips.map((o, i) =>
 					<ExpansionPanel key={i} expanded={expanded === o.id || (!expanded && i === 0)} onChange={handleChange}>
 						<ExpansionPanelSummary

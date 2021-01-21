@@ -32,7 +32,7 @@ import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
 // Composites
-import Permissions from './agents/Permissions';
+import Permissions from './Permissions';
 
 // Format Components
 import ResultsComponent from 'shared/components/format/Results';

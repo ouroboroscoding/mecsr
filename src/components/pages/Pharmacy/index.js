@@ -17,10 +17,10 @@ import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 
 // Pharmacy components
-import AdHoc from './pharmacy/AdHoc';
-import FillError from './pharmacy/FillError';
-import NeverStarted from './pharmacy/NeverStarted';
-import Outbound from './pharmacy/Outbound';
+import AdHoc from './AdHoc';
+import FillError from './FillError';
+import NeverStarted from './NeverStarted';
+import Outbound from './Outbound';
 
 /**
  * Pharmacy

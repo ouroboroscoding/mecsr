@@ -32,9 +32,6 @@ import Rest from 'shared/communication/rest';
 import Events from 'shared/generic/events';
 import { omap } from 'shared/generic/tools';
 
-// Local modules
-import Utils from 'utils';
-
 // Transfer
 export default function Transfer(props) {
 

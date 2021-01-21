@@ -25,9 +25,6 @@ import Rest from 'shared/communication/rest';
 // Shared generic modules
 import Events from 'shared/generic/events';
 
-// Local modules
-import Utils from 'utils';
-
 // Resolve
 export default function Resolve(props) {
 

@@ -31,9 +31,6 @@ import Rest from 'shared/communication/rest';
 import Events from 'shared/generic/events';
 import { afindi, clone, safeLocalStorage } from 'shared/generic/tools';
 
-// Local modules
-import Utils from 'utils';
-
 // Unclaimed component
 export default class Unclaimed extends React.Component {
 

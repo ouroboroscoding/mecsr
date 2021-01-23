@@ -26,12 +26,12 @@ import NotesIcon from '@material-ui/icons/Notes';
 import SmsIcon from '@material-ui/icons/Sms';
 
 // Customer components
-import KNK from './customer/KNK';
-import MIP from './customer/MIP';
-import Misc from './customer/Misc';
-import Notes from './customer/Notes';
-import RX from './customer/RX';
-import SMS from './customer/SMS';
+import KNK from './KNK';
+import MIP from './MIP';
+import Misc from './Misc';
+import Notes from './Notes';
+import RX from './RX';
+import SMS from './SMS';
 
 // Shared data modules
 import DoseSpot from 'shared/data/dosespot';
@@ -649,6 +649,7 @@ export default class Customer extends React.Component {
 						customer={this.state.customer}
 						mips={this.state.mips}
 						mobile={this.props.mobile}
+						orders={this.state.orders}
 						phoneNumber={this.props.phoneNumber}
 						readOnly={this.props.readOnly}
 						templates={this.state.sms_tpls}

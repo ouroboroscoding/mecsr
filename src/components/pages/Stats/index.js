@@ -17,8 +17,8 @@ import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 
 // Stats components
-import Claimed from './stats/Claimed';
-import WellDyne from './stats/WellDyne';
+import Claimed from './Claimed';
+import WellDyne from './WellDyne';
 
 /**
  * Stats

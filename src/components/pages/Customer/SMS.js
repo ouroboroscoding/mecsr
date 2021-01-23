@@ -17,7 +17,10 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
+import FormControl from '@material-ui/core/FormControl';
+import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
+import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -42,7 +45,16 @@ import Utils from 'utils';
 // Regex
 const regTplVar = /{([^]+?)}/g
 
-// Message component
+/**
+ * Message
+ *
+ * Handles individual messages
+ *
+ * @name Message
+ * @access private
+ * @param Object props Attributes sent to the component
+ * @returns React.Component
+ */
 function Message(props) {
 	return (
 		<div className={"message " + props.type}>
@@ -75,7 +87,15 @@ function Message(props) {
 	);
 }
 
-// SMS component
+/**
+ * SMS
+ *
+ * Handles the Customer SMS tab
+ *
+ * @name SMS
+ * @access public
+ * @extends React.Component
+ */
 export default class SMS extends React.Component {
 
 	constructor(props) {
@@ -96,16 +116,23 @@ export default class SMS extends React.Component {
 		this.mounted = false;
 
 		// Refs
-		this.messagesBottom = null;
-		this.newNumber = null;
-		this.sendEl = null;
-		this.text = null;
+		this.refCedOrder = null;
+		this.refCedPurchase = null;
+		this.refMessagesBottom = null;
+		this.refNewNumber = null;
+		this.refText = null;
 
 		// Timers
 		this.iStatuses = null;
 
 		// Bind methods
+		this.calendlyTemplateCancel = this.calendlyTemplateCancel.bind(this);
+		this.calendlyTemplateFinish = this.calendlyTemplateFinish.bind(this);
+		this.calendlyTemplateStart = this.calendlyTemplateStart.bind(this);
 		this.callPhone = this.callPhone.bind(this);
+		this.cedTemplateCancel = this.cedTemplateCancel.bind(this);
+		this.cedTemplateFinish = this.cedTemplateFinish.bind(this);
+		this.cedTemplateStart = this.cedTemplateStart.bind(this);
 		this.changePhoneNumber = this.changePhoneNumber.bind(this);
 		this.copyPhone = this.copyPhone.bind(this);
 		this.fetchStatus = this.fetchStatus.bind(this);
@@ -138,8 +165,157 @@ export default class SMS extends React.Component {
 		}
 	}
 
+	calendlyTemplateCancel() {
+		this.setState({calendly: false});
+		this.refText.value = '';
+	}
+
+	calendlyTemplateFinish() {
+
+		// Generate the link
+		Rest.create('providers', 'calendly/single', {
+			crm_id: this.state.calendly.customerId,
+			email: this.state.calendly.email,
+			name: this.state.calendly.name,
+			uri: this.refCalendly.value
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !res._handled) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If we were successful
+			if(res.data) {
+
+				// Get the current text value
+				let sSMS = this.refText.value;
+
+				// Set the new value
+				this.refText.value = sSMS.replace(
+					'{calendly_link}',
+					'https://' + process.env.REACT_APP_MEPP_DOMAIN + '/appointment/' + res.data
+				)
+
+				// Hide the dialog
+				this.setState({calendly: false});
+			}
+		});
+	}
+
+	calendlyTemplateStart(customerId, name, email) {
+
+		// Set the initial state
+		this.setState({calendly: {
+			customerId: customerId,
+			name: name,
+			email: email,
+			events: false
+		}});
+
+		// Get the list of Calendly events
+		Rest.read('monolith', 'calendly/events', {}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !res._handled) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If we were successful
+			if(res.data) {
+
+				// Clone the current calendly state
+				let oCalendly = clone(this.state.calendly);
+
+				// Add the list of events
+				oCalendly.events = res.data;
+
+				// Update the state
+				this.setState({calendly: oCalendly});
+			}
+		});
+	}
+
 	callPhone(event) {
 		alert('not implemented yet');
+	}
+
+	cedTemplateCancel() {
+		this.setState({ced: false});
+		this.refText.value = '';
+	}
+
+	cedTemplateFinish() {
+
+		// Generate the continuous order
+		Rest.create('monolith', 'order/continuous', {
+			customerId: this.props.customer.customerId,
+			orderId: this.refCedOrder.value,
+			purchaseId: this.refCedPurchase.value
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !res._handled) {
+				if(res.error.code === 1101) {
+					Events.trigger('error', 'A C-ED already exists for this customer.');
+				} else {
+					Events.trigger('error', JSON.stringify(res.error));
+				}
+				this.refText.value = '';
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If we were successful
+			if(res.data) {
+
+				// Get the current text value
+				let sSMS = this.refText.value;
+
+				// Set the new value
+				this.refText.value = sSMS.replace(
+					'{ced_link}',
+					`https://www.maleexcelmip.com/mip/cont/ced?formId=MIP-CED&ktCustomerId=${this.props.customer.customerId}`
+				)
+
+				// Hide the dialog
+				this.setState({ced: false});
+			}
+		});
+	}
+
+	cedTemplateStart() {
+
+		// Set an empty array so that the dialog pops up
+		this.setState({ced: []});
+
+		// Get the list of purchases
+		Rest.read('konnektive', 'customer/purchases', {
+			customerId: this.props.customer.customerId
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !res._handled) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If we were successful
+			if(res.data) {
+
+				// Store the list of purchases
+				this.setState({ced: res.data});
+			}
+		});
 	}
 
 	changePhoneNumber(event) {
@@ -147,7 +323,7 @@ export default class SMS extends React.Component {
 		// Init the data to send with the request
 		let oData = {
 			old: this.props.phoneNumber,
-			new: this.newNumber.value
+			new: this.refNewNumber.value
 		}
 
 		// If we have a customer ID
@@ -353,13 +529,13 @@ export default class SMS extends React.Component {
 							{...msg}
 						/>
 					)}
-					<div className="scroll" ref={el => this.messagesBottom = el} />
+					<div className="scroll" ref={el => this.refMessagesBottom = el} />
 				</div>
 				{!this.props.readOnly &&
 					<React.Fragment>
 						<div className="templates">
 							<Select
-								className='select'
+								className="select"
 								disabled={this.state.stop}
 								native
 								onChange={this.useTemplate}
@@ -376,7 +552,7 @@ export default class SMS extends React.Component {
 							<TextField
 								className="text"
 								disabled={this.state.stop}
-								inputRef={el => this.text = el}
+								inputRef={el => this.refText = el}
 								multiline
 								onKeyPress={this.textPress}
 								rows={this.props.mobile ? 1 : 3}
@@ -418,7 +594,7 @@ export default class SMS extends React.Component {
 							<br />
 							<TextField
 								label="New Phone Number"
-								inputRef={ref => this.newNumber = ref}
+								inputRef={ref => this.refNewNumber = ref}
 								variant="outlined"
 							/>
 						</DialogContent>
@@ -432,12 +608,114 @@ export default class SMS extends React.Component {
 						</DialogActions>
 					</Dialog>
 				}
+				{this.state.ced &&
+					<Dialog
+						fullWidth={true}
+						maxWidth="sm"
+						onClose={this.cedTemplateCancel}
+						open={true}
+					>
+						<DialogTitle>Select Order/Purchase for C-ED</DialogTitle>
+						<DialogContent dividers>
+							<FormControl className="dialog" variant="outlined">
+								<InputLabel htmlFor="ced-order">Select Order</InputLabel>
+								<Select
+									inputProps={{
+										id: 'ced-order',
+										ref: el => this.refCedOrder = el
+									}}
+									label="Select Order"
+									native
+									variant="outlined"
+								>
+									{this.props.orders.map(o =>
+										<option key={o.orderId} value={o.orderId}>{o.date} - {o.orderId} - {o.campaign}</option>
+									)}
+								</Select>
+							</FormControl>
+							{this.state.ced.length > 0 &&
+								<FormControl className="dialog" variant="outlined">
+									<InputLabel htmlFor="ced-purchase">Select Purchase</InputLabel>
+									<Select
+										inputProps={{
+											id: 'ced-purchase',
+											ref: el => this.refCedPurchase = el
+										}}
+										label="Select Purchase"
+										native
+										variant="outlined"
+									>
+										{this.state.ced.map(o =>
+											<option key={o.purchaseId} value={o.purchaseId}>{o.date} - {o.purchaseId} - {o.product.name}</option>
+										)}
+									</Select>
+								</FormControl>
+							}
+						</DialogContent>
+						<DialogActions>
+							<Button variant="contained" color="secondary" onClick={this.cedTemplateCancel}>
+								Cancel
+							</Button>
+							<Button variant="contained" color="primary" onClick={this.cedTemplateFinish}>
+								Finish Template
+							</Button>
+						</DialogActions>
+					</Dialog>
+				}
+				{this.state.calendly &&
+					<Dialog
+						fullWidth={true}
+						maxWidth="md"
+						onClose={this.calendlyTemplateCancel}
+						open={true}
+					>
+						<DialogTitle>Select Calendly Event</DialogTitle>
+						<DialogContent dividers>
+							<Grid container spacing={2}>
+								<Grid item xs={4}>Customer ID</Grid>
+								<Grid item xs={8}>{this.state.calendly.customerId}</Grid>
+								<Grid item xs={4}>Name</Grid>
+								<Grid item xs={8}>{this.state.calendly.name}</Grid>
+								<Grid item xs={4}>E-mail</Grid>
+								<Grid item xs={8}>{this.state.calendly.email}</Grid>
+								<Grid item xs={12}>
+									{this.state.calendly.events &&
+										<FormControl className="dialog" variant="outlined">
+											<InputLabel htmlFor="calendly-events">Select Event</InputLabel>
+											<Select
+												inputProps={{
+													id: 'calendly-events',
+													ref: el => this.refCalendly = el
+												}}
+												label="Select Event"
+												native
+												variant="outlined"
+											>
+												{this.state.calendly.events.map(o =>
+													<option value={o.uri}>{o.name} - {o.type.toUpperCase()}</option>
+												)}
+											</Select>
+										</FormControl>
+									}
+								</Grid>
+							</Grid>
+						</DialogContent>
+						<DialogActions>
+							<Button variant="contained" color="secondary" onClick={this.calendlyTemplateCancel}>
+								Cancel
+							</Button>
+							<Button variant="contained" color="primary" onClick={this.calendlyTemplateFinish}>
+								Finish Template
+							</Button>
+						</DialogActions>
+					</Dialog>
+				}
 			</React.Fragment>
 		)
 	}
 
 	scrollToBottom(type) {
-		this.messagesBottom.scrollIntoView({ behavior: type });
+		this.refMessagesBottom.scrollIntoView({ behavior: type });
 	}
 
 	send() {
@@ -542,9 +820,11 @@ export default class SMS extends React.Component {
 		for(let lMatch of sContent.matchAll(regTplVar)) {
 			let sReplacement = null;
 			switch(lMatch[1]) {
+
+				// Billing info, name + address
 				case 'billing':
 					if(!this.props.customer) {
-						Event.trigger('error', 'Can not use template without customer data');
+						Events.trigger('error', 'Can not use template without customer data');
 						return;
 					}
 					sReplacement = this.props.customer.billing.firstName + ' ' + this.props.customer.billing.lastName + '\n' +
@@ -555,23 +835,44 @@ export default class SMS extends React.Component {
 					sReplacement += this.props.customer.billing.city + ', ' + this.props.customer.billing.state + '\n' +
 									this.props.customer.billing.country + ', ' + this.props.customer.billing.postalCode;
 					break;
+
+				// Billing first name
 				case 'billing_first':
 					if(!this.props.customer) {
-						Event.trigger('error', 'Can not use template without customer data');
+						Events.trigger('error', 'Can not use template without customer data');
 						return;
 					}
 					sReplacement = this.props.customer.billing.firstName;
 					break;
+
+				// Billing last name
 				case 'billing_last':
 					if(!this.props.customer) {
-						Event.trigger('error', 'Can not use template without customer data');
+						Events.trigger('error', 'Can not use template without customer data');
 						return;
 					}
 					sReplacement = this.props.customer.billing.lastName;
 					break;
+
+				// Calendly appointment
+				case 'calendly_link':
+					if(!this.props.customer) {
+						Events.trigger('error', 'Can not use template without KNK data');
+						return;
+					}
+
+					// Start the process
+					this.calendlyTemplateStart(
+						this.props.customer.customerId,
+						this.props.customer.shipping.firstName + ' ' + this.props.customer.shipping.lastName,
+						this.props.customer.email
+					);
+					break;
+
+				// C-ED Link
 				case 'ced_link':
-					if(!this.props.mips || !this.props.customer) {
-						Event.trigger('error', 'Can not use template without MIP and KNK data');
+					if(!this.props.mips || !this.props.customer || !this.props.orders || this.props.orders.length === 0) {
+						Events.trigger('error', 'Can not use template without MIP and KNK data');
 						return;
 					}
 
@@ -590,8 +891,13 @@ export default class SMS extends React.Component {
 
 					// If we have an ID
 					if(bFound) {
-						sReplacement = `https://www.maleexcelmip.com/mip/cont/ced?formId=MIP-CED&ktCustomerId=${this.props.customer.customerId}`
-					} else {
+
+						// Start the process
+						this.cedTemplateStart();
+					}
+
+					// We can't generate a C-ED with the data available
+					else {
 						sReplacement = 'NO PREVIOUS COMPLETED ED MIP FOUND!';
 						Events.trigger('error', 'No previous completed ED MIP was found for this customer, you should not message them without further research');
 					}
@@ -599,7 +905,7 @@ export default class SMS extends React.Component {
 
 				case 'chrt_link':
 					if(!this.props.mips || !this.props.customer) {
-						Event.trigger('error', 'Can not use template without MIP and KNK data');
+						Events.trigger('error', 'Can not use template without MIP and KNK data');
 						return;
 					}
 
@@ -624,16 +930,20 @@ export default class SMS extends React.Component {
 						Events.trigger('error', 'No previous completed HRT MIP was found for this customer, you should not message them without further research');
 					}
 					break;
+
+				// Email
 				case 'email':
 					if(!this.props.customer) {
-						Event.trigger('error', 'Can not use template without customer data');
+						Events.trigger('error', 'Can not use template without customer data');
 						return;
 					}
 					sReplacement = this.props.customer.email;
 					break;
+
+				// Shipping info, name + address
 				case 'shipping':
 					if(!this.props.customer) {
-						Event.trigger('error', 'Can not use template without customer data');
+						Events.trigger('error', 'Can not use template without customer data');
 						return;
 					}
 					sReplacement = this.props.customer.shipping.firstName + ' ' + this.props.customer.shipping.lastName + '\n' +
@@ -644,28 +954,36 @@ export default class SMS extends React.Component {
 					sReplacement += this.props.customer.shipping.city + ', ' + this.props.customer.shipping.state + '\n' +
 									this.props.customer.shipping.country + ', ' + this.props.customer.shipping.postalCode;
 					break;
+
+				// Shipping first name
 				case 'shipping_first':
 					if(!this.props.customer) {
-						Event.trigger('error', 'Can not use template without customer data');
+						Events.trigger('error', 'Can not use template without customer data');
 						return;
 					}
 					sReplacement = this.props.customer.shipping.firstName;
 					break;
+
+				// Shipping last name
 				case 'shipping_last':
 					if(!this.props.customer) {
-						Event.trigger('error', 'Can not use template without customer data');
+						Events.trigger('error', 'Can not use template without customer data');
 						return;
 					}
 					sReplacement = this.props.customer.shipping.lastName;
 					break;
+
+				// Verify ID link
 				case 'verify_id_link':
 					if(!this.props.mips || this.props.mips.length === 0) {
-						Event.trigger('error', 'Can not use template without MIP data');
+						Events.trigger('error', 'Can not use template without MIP data');
 						return;
 					}
 					sReplacement = 'https://www.maleexcelmip.com/mip/verifyId/Upload?landing_id=' +
 									this.props.mips[0].id;
 					break;
+
+				// Bad data
 				default:
 					sReplacement = 'UNKNOWN VARIABLE "' + lMatch[1] + '"';
 			}
@@ -677,6 +995,6 @@ export default class SMS extends React.Component {
 		}
 
 		// Fill the text field
-		this.text.value = sContent;
+		this.refText.value = sContent;
 	}
 }

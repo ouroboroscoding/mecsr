@@ -17,8 +17,8 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Switch from '@material-ui/core/Switch';
 
-// Generic
-import Tools from 'shared/generic//tools';
+// Shared generic modules
+import { clone } from 'shared/generic/tools';
 
 // defines
 const CREATE = 4;
@@ -27,6 +27,10 @@ const UPDATE = 2;
 const DELETE = 8;
 const ALL    = 15;
 const TYPES = [
+	{title: "Calendly", rights: [
+		{name: "calendly", title: "Appointments", allowed: READ},
+		{name: "calendly_admin", title: "Events", allowed: READ}
+	]},
 	{title: "Customer Service", rights: [
 		{name: "csr_agents", title: "Agents: Ability to manage agents and permissions", allowed: ALL},
 		{name: "csr_claims", title: "Claims", allowed: CREATE | UPDATE | DELETE},
@@ -37,13 +41,12 @@ const TYPES = [
 	]},
 	{title: "CRM", rights: [
 		{name: "customers", title: "Customers", allowed: READ | UPDATE},
-		{name: "orders", title: "Orders", allowed: READ | UPDATE}
+		{name: "orders", title: "Orders", allowed: CREATE | READ | UPDATE}
 	]},
 	{title: "Patient Portal", rights: [
 		{name: "patient_account", title: "Account", allowed: CREATE | READ | UPDATE}
 	]},
 	{title: "Memo", rights: [
-		{name: "calendly", title: "Calendly Appointment", allowed: READ},
 		{name: "memo_mips", title: "Memo MIP", allowed: READ | UPDATE},
 		{name: "memo_notes", title: "Memo Notes", allowed: READ | CREATE}
 	]},
@@ -121,7 +124,7 @@ export default class Permissions extends React.Component {
 	change(name, rights) {
 
 		// Clone the current values
-		let value = Tools.clone(this.state.value);
+		let value = clone(this.state.value);
 
 		// If there are rights
 		if(rights) {

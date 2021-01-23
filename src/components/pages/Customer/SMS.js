@@ -197,7 +197,7 @@ export default class SMS extends React.Component {
 				// Set the new value
 				this.refText.value = sSMS.replace(
 					'{calendly_link}',
-					`https://my.maleexcel.com/appointment/${res.data}`
+					'https://' + process.env.REACT_APP_MEPP_DOMAIN + '/appointment/' + res.data
 				)
 
 				// Hide the dialog

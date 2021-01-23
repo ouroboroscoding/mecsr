@@ -27,9 +27,6 @@ import Rest from 'shared/communication/rest';
 // Shared generic modules
 import Events from 'shared/generic/events';
 
-// Local modules
-import Utils from 'utils';
-
 // Pending component
 export default class Pending extends React.Component {
 

@@ -727,7 +727,7 @@ export default class SMS extends React.Component {
 		}
 
 		// Store the message content
-		let content = this.text.value;
+		let content = this.refText.value;
 
 		// Send the message to the server
 		Rest.create('monolith', 'message/outgoing', {
@@ -760,7 +760,7 @@ export default class SMS extends React.Component {
 			if(res.data) {
 
 				// Clear the message
-				this.text.value = '';
+				this.refText.value = '';
 
 				// Clone the current messsages and status
 				let lNewMsgs = clone(this.state.messages);

@@ -45,6 +45,13 @@ import Utils from 'utils';
 // Regex
 const regTplVar = /{([^]+?)}/g
 
+// MIP paths
+const _MIP_PATHS = [
+	{path: '/mip/form/dailytada?formId=MIP-A2', name: 'ED - 5mg Tadalafil'},
+	{path: '/mip/form/6via?formId=MIP-A2', name: 'ED - 100mg Sildenafil'},
+	{path: '/mip/form/6cial?formId=MIP-A2', name: 'ED - 20mg Tadalafil'}
+];
+
 /**
  * Message
  *
@@ -116,9 +123,11 @@ export default class SMS extends React.Component {
 		this.mounted = false;
 
 		// Refs
+		this.refCalendly = null;
 		this.refCedOrder = null;
 		this.refCedPurchase = null;
 		this.refMessagesBottom = null;
+		this.refMipLink = null;
 		this.refNewNumber = null;
 		this.refText = null;
 
@@ -136,6 +145,9 @@ export default class SMS extends React.Component {
 		this.changePhoneNumber = this.changePhoneNumber.bind(this);
 		this.copyPhone = this.copyPhone.bind(this);
 		this.fetchStatus = this.fetchStatus.bind(this);
+		this.mipTemplateCancel = this.mipTemplateCancel.bind(this);
+		this.mipTemplateFinish = this.mipTemplateFinish.bind(this);
+		this.mipTemplateStart = this.mipTemplateStart.bind(this);
 		this.scrollToBottom = this.scrollToBottom.bind(this);
 		this.send = this.send.bind(this);
 		this.textPress = this.textPress.bind(this);
@@ -489,6 +501,37 @@ export default class SMS extends React.Component {
 		});
 	}
 
+	mipTemplateCancel() {
+		this.setState({mipLink: false});
+		this.refText.value = '';
+	}
+
+	mipTemplateFinish() {
+
+		// Generate the full link
+		let sMIP = 'https://' + process.env.REACT_APP_MIP_DOMAIN +
+				this.refMipLink.value;
+
+		// If we have a customer
+		if(this.props.customer) {
+			sMIP += '&ktCustomerId=' + encodeURIComponent(this.props.customer.customerId) + '&' +
+					'&firstName=' + encodeURIComponent(this.props.customer.shipping.firstName) + '&' +
+					'&lastName=' + encodeURIComponent(this.props.customer.shipping.lastName) + '&' +
+					'&email=' + encodeURIComponent(this.props.customer.email) + '&' +
+					'&phone=' + encodeURIComponent(this.props.customer.phone)
+		}
+
+		// Set the new value
+		this.refText.value = this.refText.value.replace('{mip_link}', sMIP);
+
+		// Hide the dialog
+		this.setState({mipLink: false});
+	}
+
+	mipTemplateStart() {
+		this.setState({mipLink: true});
+	}
+
 	render() {
 		return (
 			<React.Fragment>
@@ -705,6 +748,42 @@ export default class SMS extends React.Component {
 								Cancel
 							</Button>
 							<Button variant="contained" color="primary" onClick={this.calendlyTemplateFinish}>
+								Finish Template
+							</Button>
+						</DialogActions>
+					</Dialog>
+				}
+				{this.state.mipLink &&
+					<Dialog
+						fullWidth={true}
+						maxWidth="md"
+						onClose={this.mipTemplateCancel}
+						open={true}
+					>
+						<DialogTitle>Select Medication Type</DialogTitle>
+						<DialogContent dividers>
+							<FormControl className="dialog" variant="outlined">
+								<InputLabel htmlFor="mipLink-events">Select Medication</InputLabel>
+								<Select
+									inputProps={{
+										id: 'mipLink-events',
+										ref: el => this.refMipLink = el
+									}}
+									label="Select Medication"
+									native
+									variant="outlined"
+								>
+									{_MIP_PATHS.map(o =>
+										<option value={o.path}>{o.name}</option>
+									)}
+								</Select>
+							</FormControl>
+						</DialogContent>
+						<DialogActions>
+							<Button variant="contained" color="secondary" onClick={this.mipTemplateCancel}>
+								Cancel
+							</Button>
+							<Button variant="contained" color="primary" onClick={this.mipTemplateFinish}>
 								Finish Template
 							</Button>
 						</DialogActions>
@@ -938,6 +1017,11 @@ export default class SMS extends React.Component {
 						return;
 					}
 					sReplacement = this.props.customer.email;
+					break;
+
+				// MIP Link
+				case 'mip_link':
+					this.mipTemplateStart();
 					break;
 
 				// Shipping info, name + address

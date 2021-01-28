@@ -259,8 +259,24 @@ export default function Templates(props) {
 							<TableCell>Smith</TableCell>
 						</TableRow>
 						<TableRow>
+							<TableCell>{"{calendly_link}"}</TableCell>
+							<TableCell>https://my.maleexcel.com/appointment/4gHe8_</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell>{"{ced_link}"}</TableCell>
+							<TableCell>https://www.maleexcelmip.com/mip/cont/ced?formId=MIP-CED&ktCustomerId=321456</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell>{"{chrt_link}"}</TableCell>
+							<TableCell>https://www.maleexcelmip.com/mip/form/CHRT?landing_id=Kent-ckent@domain.com-2020-07-12-MIP-H1&formId=MIP-H1</TableCell>
+						</TableRow>
+						<TableRow>
 							<TableCell>{"{email}"}</TableCell>
 							<TableCell>jsmith@gmail.com</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell>{"{mip_link}"}</TableCell>
+							<TableCell>https://www.maleexcelmip.com/mip/form/dailytada?formId=MIP-A2&ktCustomerId=321456</TableCell>
 						</TableRow>
 						<TableRow>
 							<TableCell>{"{shipping}"}</TableCell>
@@ -278,18 +294,6 @@ export default function Templates(props) {
 						<TableRow>
 							<TableCell>{"{shipping_last}"}</TableCell>
 							<TableCell>Kent</TableCell>
-						</TableRow>
-						<TableRow>
-							<TableCell>{"{calendly_link}"}</TableCell>
-							<TableCell>https://my.maleexcel.com/appointment/4gHe8_</TableCell>
-						</TableRow>
-						<TableRow>
-							<TableCell>{"{ced_link}"}</TableCell>
-							<TableCell>https://www.maleexcelmip.com/mip/cont/ced?formId=MIP-CED&ktCustomerId=321456</TableCell>
-						</TableRow>
-						<TableRow>
-							<TableCell>{"{chrt_link}"}</TableCell>
-							<TableCell>https://www.maleexcelmip.com/mip/form/CHRT?landing_id=Kent-ckent@domain.com-2020-07-12-MIP-H1&formId=MIP-H1</TableCell>
 						</TableRow>
 						<TableRow>
 							<TableCell>{"{verify_id_link}"}</TableCell>

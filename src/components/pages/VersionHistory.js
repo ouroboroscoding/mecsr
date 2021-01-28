@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.23.3', 'January 28th, 2021', [
+		'Added proper generation of MIP ED links in SMS Templates'
+	]],
 	['1.23.0', 'January 21st, 2021', [
 		'Added proper generation of C-ED link in SMS Templates',
 		'Added proper generation of single use Calendly link in SMS Templates'

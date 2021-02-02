@@ -514,10 +514,10 @@ export default class SMS extends React.Component {
 
 		// If we have a customer
 		if(this.props.customer) {
-			sMIP += '&ktCustomerId=' + encodeURIComponent(this.props.customer.customerId) + '&' +
-					'&firstName=' + encodeURIComponent(this.props.customer.shipping.firstName) + '&' +
-					'&lastName=' + encodeURIComponent(this.props.customer.shipping.lastName) + '&' +
-					'&email=' + encodeURIComponent(this.props.customer.email) + '&' +
+			sMIP += '&ktCustomerId=' + encodeURIComponent(this.props.customer.customerId) +
+					'&firstName=' + encodeURIComponent(this.props.customer.shipping.firstName) +
+					'&lastName=' + encodeURIComponent(this.props.customer.shipping.lastName) +
+					'&email=' + encodeURIComponent(this.props.customer.email) +
 					'&phone=' + encodeURIComponent(this.props.customer.phone)
 		}
 

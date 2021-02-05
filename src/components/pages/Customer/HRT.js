@@ -192,7 +192,9 @@ function Patient(props) {
 								<Grid item xs={12} md={6} lg={3}><strong>Stage: </strong>{patient.stage}</Grid>
 								<Grid item xs={12} md={6} lg={3}><strong>Status: </strong>{patient.processStatus}</Grid>
 								<Grid item xs={12} md={6} lg={3}><strong>First Lab Sent: </strong>{patient.labSentAt}</Grid>
-								<Grid item xs={12} md={6} lg={3}><strong>Treatment Cycle: </strong>{patient.treatment_cycle}</Grid>
+								{patient.treatment_cycle &&
+									<Grid item xs={12} md={6} lg={3}><strong>Treatment Cycle: </strong>{patient.treatment_cycle}</Grid>
+								}
 								{patient.stage === 'Dropped' &&
 									<Grid item xs={12} md={6} lg={3}><strong>Dropped Reason: </strong>{patient.dropped_reason}</Grid>
 								}

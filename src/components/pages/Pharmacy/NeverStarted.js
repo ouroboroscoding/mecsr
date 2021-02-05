@@ -18,6 +18,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
@@ -248,8 +249,8 @@ export default function NeverStarted(props) {
 
 	return (
 		<React.Fragment>
-			<Box className="pageHeader">
-				<div className="title">Never Started Claims</div>
+			<Box className="page_header">
+				<Typography className="title">Never Started Claims</Typography>
 				{Utils.hasRight(props.user, 'welldyne_never_started', 'update') &&
 					<React.Fragment>
 						<TextField

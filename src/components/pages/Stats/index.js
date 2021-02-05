@@ -13,6 +13,7 @@ import React, { useState } from 'react';
 
 // Material UI
 import AppBar from '@material-ui/core/AppBar';
+import Box from '@material-ui/core/Box';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 
@@ -40,7 +41,7 @@ export default function Stats(props) {
 
 	// Return the rendered component
 	return (
-		<div id="stats" className="page">
+		<Box id="stats" className="page">
 			<AppBar position="static" color="default">
 				<Tabs
 					onChange={tabChange}
@@ -51,12 +52,12 @@ export default function Stats(props) {
 					<Tab label="WellDyne" />
 				</Tabs>
 			</AppBar>
-			<div className="claimed" style={{display: tab === 0 ? 'block' : 'none'}}>
+			<Box className="claimed" style={{display: tab === 0 ? 'block' : 'none'}}>
 				<Claimed user={props.user} />
-			</div>
-			<div className="welldyne" style={{display: tab === 1 ? 'block' : 'none'}}>
+			</Box>
+			<Box className="welldyne" style={{display: tab === 1 ? 'block' : 'none'}}>
 				<WellDyne user={props.user} />
-			</div>
-		</div>
+			</Box>
+		</Box>
 	);
 }

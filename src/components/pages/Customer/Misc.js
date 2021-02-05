@@ -25,6 +25,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
 import EditIcon from '@material-ui/icons/Edit';
@@ -391,8 +392,8 @@ export default function Misc(props) {
 		// Header + content
 		calendlyElement = (
 			<React.Fragment key="calendly">
-				<div className="pageHeader">
-					<div className="title">Calendly Appointments</div>
+				<div className="page_header">
+					<Typography className="title">Calendly Appointments</Typography>
 				</div>
 				<Paper className="padded">
 					{inner}
@@ -432,15 +433,14 @@ export default function Misc(props) {
 		// Header + content
 		stopsElement = (
 			<React.Fragment key="stops">
-				<div className="pageHeader">
-					<div className="title">SMS Stop flags (Twilio)</div>
+				<div className="page_header">
+					<Typography className="title">SMS Stop flags (Twilio)</Typography>
 				</div>
 				<Paper className="padded">
 					{inner}
 				</Paper>
 			</React.Fragment>
 		)
-
 	}
 
 	// Patient Portal elements
@@ -529,17 +529,15 @@ export default function Misc(props) {
 		// Header + content
 		patientElement = (
 			<Box key="patient" className="patient">
-				<div className="pageHeader">
-					<div className="title">
-						Patient Portal&nbsp;
-						{patient && !patient.activated && Utils.hasRight(props.user, 'patient_account', 'update') &&
-							<Tooltip title="Edit Setup Values">
-								<IconButton className="edit" onClick={() => patientUpdateSet(b => !b)}>
-									<EditIcon />
-								</IconButton>
-							</Tooltip>
-						}
-					</div>
+				<div className="page_header">
+					<Typography className="title">Patient Portal&nbsp;</Typography>
+					{patient && !patient.activated && Utils.hasRight(props.user, 'patient_account', 'update') &&
+						<Tooltip title="Edit Setup Values">
+							<IconButton className="edit" onClick={() => patientUpdateSet(b => !b)}>
+								<EditIcon />
+							</IconButton>
+						</Tooltip>
+					}
 				</div>
 				<Paper className="padded">
 					{inner}
@@ -550,11 +548,11 @@ export default function Misc(props) {
 
 	// Render
 	return (
-		<React.Fragment>{[
+		<Box className="misc">{[
 			calendlyElement,
 			stopsElement,
 			patientElement
 		]}
-		</React.Fragment>
+		</Box>
 	);
 }

@@ -18,6 +18,7 @@ $menu-width: 250px;
 /* pages */
 @import 'pages/agents';
 @import 'pages/customer';
+@import 'pages/hrt';
 @import 'pages/pending';
 @import 'pages/pharmacy';
 @import 'pages/search';
@@ -93,16 +94,16 @@ td {
 	width: calc(100% - #{$menu-width});
 }
 
-#manual_adhoc {
-	padding: 10px;
-}
-
 @media (max-width: 600px) {
 
 	#content {
 		width: 100%;
 		margin-left: 0;
 	}
+}
+
+#manual_adhoc {
+	padding: 10px;
 }
 
 /* classes */
@@ -166,11 +167,18 @@ td {
 	}
 }
 
-.pageHeader {
+.MuiTab-root {
+	min-width: 0 !important;
+}
+
+.page_header {
 	display: flex;
 
-	.title, .MuiTypography-root {
-		flex-grow: 1
+	.title {
+		flex-grow: 1;
+		font-size: 2rem;
+		font-weight: 400;
+		margin: 0 0 10px 0;
 	}
 
 	button {

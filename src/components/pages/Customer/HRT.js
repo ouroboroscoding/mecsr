@@ -1,0 +1,233 @@
+/**
+ * HRT
+ *
+ * Shows data related to HRT
+ *
+ * @author Chris Nasr <bast@maleexcel.com>
+ * @copyright MaleExcelMedical
+ * @created 2021-02-05
+ */
+
+// NPM modules
+import React, { useEffect, useState } from 'react';
+
+// Material UI
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
+// Shared generic modules
+import Events from 'shared/generic/events';
+import { empty } from 'shared/generic/tools';
+
+/**
+ * Lab Results
+ *
+ * @name LabResults
+ * @access private
+ * @param Object props Attributes sent to the component
+ * @return React.Component
+ */
+function LabResults(props) {
+
+	// State
+	let [results, resultsSet] = useState(0);
+
+	// Mount effect
+	useEffect(() => {
+		if(props.user) {
+			labResultsFetch();
+		} else {
+			resultsSet([]);
+		}
+	// eslint-disable-next-line
+	}, [props.user])
+
+	// Fetch Lab Results
+	function labResultsFetch() {
+
+		//Find the HRT Lab Test Resutls using the customerId
+		Rest.read('monolith', 'customer/hrtLabs', {
+			customerId: props.customerId.toString()
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !res._handled) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+				resultsSet(res.data);
+			}
+		});
+	}
+
+	// Render
+	return (
+		<Box className="labResults">
+			<Box className="sectionHeader">
+				<Box className="title">HRT Lab Results</Box>
+			</Box>
+			{results === 0 ?
+				<Typography>Loading...</Typography>
+			:
+				<React.Fragment>
+					{results.length === 0 ?
+						<Typography>No results found for this customer</Typography>
+					:
+						<React.Fragment>
+							{results.map(o =>
+								<Paper key={o.id} className='padded'>
+									<Grid container spacing={2}>
+										<Grid item xs={12} md={4}>
+											<strong>Sample Collection Date: </strong>
+											<span>{new Date(o.sampleCollection).toLocaleString()}</span>
+										</Grid>
+										<Grid item xs={12} md={4}>
+											<strong>Name: </strong>
+											<span>{o.name}</span>
+										</Grid>
+										<Grid item xs={12} md={4}>
+											<strong>Code: </strong>
+											<span>{o.code}</span>
+										</Grid>
+										<Grid item xs={12} md={4}>
+											<strong>Result: </strong>
+											<span>{o.result} {o.unitOfMeasure}</span>
+										</Grid>
+										<Grid item xs={12} md={4}>
+											<strong>Range: </strong>
+											<span>{o.range}</span>
+										</Grid>
+										<Grid item xs={12} md={4}>
+											<strong>Result Level: </strong>
+											<span>{o.resultLevel}</span>
+										</Grid>
+									</Grid>
+								</Paper>
+							)}
+						</React.Fragment>
+					}
+				</React.Fragment>
+			}
+		</Box>
+	);
+}
+
+/**
+ * Patient
+ *
+ * Displays patient record
+ *
+ * @name Patient
+ * @access private
+ * @param Object props Attributes sent to component
+ * @returns React.Component
+ */
+function Patient(props) {
+
+	// State
+	let [patient, patientSet] = useState(0);
+
+	// Mount effect
+	useEffect(() => {
+		if(props.user) {
+			patientFetch();
+		} else {
+			patientSet({});
+		}
+	// eslint-disable-next-line
+	}, [props.user])
+
+	// Fetch the patient record
+	function patientFetch() {
+
+		// Make the request to the server
+		Rest.read('monolith', 'customer/hrt', {
+			customerId: props.customerId.toString()
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !res._handled) {
+				if(res.error.code === 1104) {
+					patientSet({});
+				} else {
+					Events.trigger('error', JSON.stringify(res.error));
+				}
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+				patientSet(res.data);
+			}
+		});
+	}
+
+	// Render
+	return (
+		<Box className="patient">
+			<Box className="sectionHeader">
+				<Box className="title">HRT Patient</Box>
+			</Box>
+			{patient === 0 ?
+				<Typography>Loading...</Typography>
+			:
+				<React.Fragment>
+					{empty(patient) ?
+						<Typography>No record found for this customer</Typography>
+					:
+						<Paper className="padded">
+							<Grid container spacing={2}>
+								<Grid item xs={12} md={6} lg={3}><strong>Stage: </strong>{patient.stage}</Grid>
+								<Grid item xs={12} md={6} lg={3}><strong>Status: </strong>{patient.processStatus}</Grid>
+								<Grid item xs={12} md={6} lg={3}><strong>First Lab Sent: </strong>{patient.labSentAt}</Grid>
+								<Grid item xs={12} md={6} lg={3}><strong>Treatment Cycle: </strong>{patient.treatment_cycle}</Grid>
+								{patient.stage === 'Dropped' &&
+									<Grid item xs={12} md={6} lg={3}><strong>Dropped Reason: </strong>{patient.dropped_reason}</Grid>
+								}
+							</Grid>
+						</Paper>
+					}
+				</React.Fragment>
+			}
+		</Box>
+	);
+}
+
+/**
+ * HRT
+ *
+ * Return HRT related data
+ *
+ * @name HRT
+ * @access public
+ * @param Object props Attributes sent to the component
+ * @returns React.Component
+ */
+export default function HRT(props) {
+
+	// Render
+	return (
+		<Box className="hrtTab">
+			<Patient
+				customerId={props.customerId}
+				user={props.user}
+			/>
+			<LabResults
+				customerId={props.customerId}
+				user={props.user}
+			/>
+		</Box>
+	);
+}

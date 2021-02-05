@@ -931,6 +931,13 @@ export default class Header extends React.Component {
 							<Divider />
 						</React.Fragment>
 					}
+					<Link to="/hrt" onClick={this.menuClick}>
+						<ListItem button selected={this.state.path === "/hrt"}>
+							<ListItemIcon><AssessmentIcon /></ListItemIcon>
+							<ListItemText primary="HRT Patients" />
+						</ListItem>
+					</Link>
+					<Divider />
 					{Utils.hasRight(this.state.user, 'csr_templates', 'read') &&
 						<React.Fragment>
 							<Link to="/templates" onClick={this.menuClick}>

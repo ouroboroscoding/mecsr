@@ -5,14 +5,14 @@
 		flex-shrink: 0;
 	}
 
-	.messaging, .konnektive, .mip, .notes, .prescriptions, .misc {
+	.messaging, .konnektive, .mip, .notes, .prescriptions, .hrtTab, .misc {
 		flex-basis: 0;
 		flex-grow: 1;
 		flex-shrink: 1;
 		overflow: auto;
 	}
 
-	.konnektive, .mip, .prescriptions, .misc {
+	.konnektive, .mip, .prescriptions, .hrtTab, .misc {
 		padding: 10px;
 	}
 
@@ -289,6 +289,13 @@
 	.prescriptions {
 		hr {
 			border-top:1px solid #ff0000;
+		}
+	}
+
+	.hrtTab {
+
+		.patient, .labResults {
+			margin-bottom: 10px;
 		}
 	}
 

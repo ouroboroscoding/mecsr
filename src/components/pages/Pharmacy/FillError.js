@@ -15,6 +15,7 @@ import React, { useState, useEffect } from 'react';
 // Material UI
 import Box from '@material-ui/core/Box';
 import Checkbox from '@material-ui/core/Checkbox';
+import Typography from '@material-ui/core/Typography';
 
 // Format Components
 import ResultsComponent from 'shared/components/format/Results';
@@ -204,8 +205,8 @@ export default function FillError(props) {
 
 	return (
 		<React.Fragment>
-			<Box className="pageHeader">
-				<div className="title">Fill Error Records</div>
+			<Box className="page_header">
+				<Typography className="title">Fill Error Records</Typography>
 			</Box>
 			{results}
 		</React.Fragment>

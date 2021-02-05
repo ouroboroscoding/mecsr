@@ -15,6 +15,7 @@ import React, { useState, useEffect } from 'react';
 import Box from '@material-ui/core/Box';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
 import RefreshIcon from '@material-ui/icons/Refresh';
@@ -102,14 +103,14 @@ export default function WellDyne(props) {
 
 	return (
 		<React.Fragment>
-			<Box className="pageHeader">
-				<div className="title">WellDyne Stats
+			<Box className="page_header">
+				<Typography className="title">WellDyne Stats
 					<Tooltip title="Refresh Prescriptions">
 						<IconButton onClick={fetchRecords}>
 							<RefreshIcon />
 						</IconButton>
 					</Tooltip>
-				</div>
+				</Typography>
 			</Box>
 			{results}
 		</React.Fragment>

@@ -15,6 +15,7 @@ import React, { useState, useEffect } from 'react';
 // Material UI
 import Box from '@material-ui/core/Box';
 import Checkbox from '@material-ui/core/Checkbox';
+import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
@@ -240,8 +241,8 @@ export default function Outbound(props) {
 
 	return (
 		<React.Fragment>
-			<Box className="pageHeader">
-				<div className="title">Outbound Failed Claims</div>
+			<Box className="page_header">
+				<Typography className="title">Outbound Failed Claims</Typography>
 			</Box>
 			{results}
 		</React.Fragment>

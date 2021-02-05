@@ -25,6 +25,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 //import Tabs from '@material-ui/core/Tabs';
 import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
 import AddCircleIcon from '@material-ui/icons/AddCircle';
@@ -140,8 +141,8 @@ function GenericTemplates(props) {
 
 	return (
 		<React.Fragment>
-			<Box className="pageHeader">
-				<div className="title">{props.title}</div>
+			<Box className="page_header">
+				<Typography className="title">{props.title}</Typography>
 				{Utils.hasRight(props.user, 'csr_templates', 'create') &&
 					<Tooltip title="Create new template">
 						<IconButton onClick={createToggle}>

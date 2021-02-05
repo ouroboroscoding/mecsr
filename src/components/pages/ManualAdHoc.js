@@ -20,6 +20,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -192,11 +193,11 @@ export default function ManualAdHoc(props) {
 
 	// Return the rendered component
 	return (
-		<div id="manual_adhoc" className="page">
-			<Box className="pageHeader">
-				<div className="title">Manual AdHoc Records</div>
+		<Box id="manual_adhoc" className="page">
+			<Box className="page_header">
+				<Typography className="title">Manual AdHoc Records</Typography>
 			</Box>
 			{results}
-		</div>
+		</Box>
 	);
 }

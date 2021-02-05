@@ -35,6 +35,7 @@ import Signin from './Signin';
 // Page component modules
 import Agents from './pages/Agents';
 import Customer from './pages/Customer';
+import HRT from './pages/HRT';
 import ManualAdHoc from './pages/ManualAdHoc';
 import Pending from './pages/Pending';
 import Pharmacy from './pages/Pharmacy';
@@ -131,6 +132,9 @@ export default function Site(props) {
 						</Route>
 						<Route path="/stats">
 							<Stats user={user} />
+						</Route>
+						<Route path="/hrt">
+							<HRT user={user} />
 						</Route>
 						<Route path="/templates">
 							<Templates user={user} />

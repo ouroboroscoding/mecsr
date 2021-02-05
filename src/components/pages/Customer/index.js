@@ -18,6 +18,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
 // Material UI Icons
+import AccessibilityNewIcon from '@material-ui/icons/AccessibilityNew';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import LocalPharmacyIcon from '@material-ui/icons/LocalPharmacy';
@@ -27,6 +28,7 @@ import SmsIcon from '@material-ui/icons/Sms';
 
 // Customer components
 import KNK from './KNK';
+import HRT from './HRT';
 import MIP from './MIP';
 import Misc from './Misc';
 import Notes from './Notes';
@@ -58,7 +60,6 @@ export default class Customer extends React.Component {
 		this.state = {
 			calendly: null,
 			customer: null,
-			hrtLabs: null,
 			mips: null,
 			orders: null,
 			patient_details: null,
@@ -102,7 +103,6 @@ export default class Customer extends React.Component {
 
 			// If we have a customer ID
 			if(this.props.customerId) {
-				this.fetchHrtLabs();
 				this.fetchKnkCustomer();
 				this.fetchMips();
 				this.fetchShipping();
@@ -114,7 +114,6 @@ export default class Customer extends React.Component {
 			} else {
 				this.setState({
 					customer: 0,
-					hrtLabs: 0,
 					mips: 0,
 					pharmacy_fill: {fills: [], errors: []},
 					prescriptions: 0,
@@ -292,37 +291,6 @@ export default class Customer extends React.Component {
 
 		}, error => {
 			Events.trigger('error', JSON.stringify(error));
-		});
-	}
-
-	fetchHrtLabs() {
-
-		//Find the HRT Lab Test Resutls using the customerId
-		Rest.read('monolith', 'customer/hrtLabs', {
-			customerId: this.props.customerId.toString()
-		}).done(res => {
-
-			// If not mounted
-			if(!this.mounted) {
-				return;
-			}
-
-			// If there's an error or warning
-			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if('data' in res) {
-
-				// Set the HRT Lab Resutls
-				this.setState({
-					hrtLabs: res.data
-				});
-			}
 		});
 	}
 
@@ -626,6 +594,7 @@ export default class Customer extends React.Component {
 							<Tab icon={<LocalHospitalIcon />} />
 							<Tab icon={<NotesIcon />} />
 							<Tab icon={<LocalPharmacyIcon />} />
+							<Tab icon={<AccessibilityNewIcon />} />
 							<Tab icon={<CalendarTodayIcon />} />
 						</Tabs>
 					:
@@ -639,6 +608,7 @@ export default class Customer extends React.Component {
 							<Tab label="MIP" />
 							<Tab label="Notes" />
 							<Tab label="Rx" />
+							<Tab label="HRT" />
 							<Tab label="Misc" />
 						</Tabs>
 					}
@@ -701,15 +671,20 @@ export default class Customer extends React.Component {
 					/>
 				</div>
 				{this.state.tab === 5 &&
-					<div className="misc">
-						<Misc
-							crm_id={this.props.customerId}
-							patient_id={this.props.patient_id}
-							phoneNumber={this.props.phoneNumber}
-							readOnly={this.props.readOnly}
-							user={this.props.user}
-						/>
-					</div>
+					<HRT
+						customerId={this.props.customerId}
+						readOnly={this.props.readOnly}
+						user={this.props.user}
+					/>
+				}
+				{this.state.tab === 6 &&
+					<Misc
+						crm_id={this.props.customerId}
+						patient_id={this.props.patient_id}
+						phoneNumber={this.props.phoneNumber}
+						readOnly={this.props.readOnly}
+						user={this.props.user}
+					/>
 				}
 			</div>
 		);

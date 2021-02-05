@@ -18,6 +18,11 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.24.0', 'February 5th, 2021', [
+		'Added new HRT Patients page to display breakdown of current HRT patients',
+		'Added new Customer HRT tab for HRT details',
+		'Moved HRT Lab Results from Customer RX to Customer HRT'
+	]],
 	['1.23.3', 'January 28th, 2021', [
 		'Added proper generation of MIP ED links in SMS Templates'
 	]],

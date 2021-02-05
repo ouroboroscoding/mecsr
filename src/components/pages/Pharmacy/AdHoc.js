@@ -14,6 +14,7 @@ import React, { useState, useEffect } from 'react';
 
 // Material UI
 import Box from '@material-ui/core/Box';
+import Typography from '@material-ui/core/Typography';
 
 // Format Components
 import ResultsComponent from 'shared/components/format/Results';
@@ -151,8 +152,8 @@ export default function AdHoc(props) {
 
 	return (
 		<React.Fragment>
-			<Box className="pageHeader">
-				<div className="title">AdHoc Records</div>
+			<Box className="page_header">
+				<Typography className="title">AdHoc Records</Typography>
 			</Box>
 			{results}
 		</React.Fragment>

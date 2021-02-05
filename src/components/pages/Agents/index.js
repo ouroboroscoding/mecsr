@@ -259,8 +259,8 @@ export default function Agents(props) {
 	return (
 		<div id="agents" className="page">
 			<div className="agents">
-				<Box className="pageHeader">
-					<Typography variant="h4">Agents</Typography>
+				<Box className="page_header">
+					<Typography className="title">Agents</Typography>
 					{Utils.hasRight(props.user, 'csr_agents', 'create') &&
 						<React.Fragment>
 							<Tooltip title="Import Memo User">

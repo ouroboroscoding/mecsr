@@ -220,64 +220,6 @@ function DoseSpot(props) {
 }
 
 /**
- * HRT Lab Results
- *
- * @name HrtResults
- * @access private
- * @param Object props Parameters passed to the component
- * @return React.Component
- */
-function HrtResults(props) {
-
-	// Render
-	return (
-		<React.Fragment>
-			<Box className="sectionHeader">
-				<Box className="title">HRT Lab Results</Box>
-			</Box>
-			{props.labs.length === 0 ?
-				<Paper className="padded">
-					<Typography>No HRT Lab Results found for this customer</Typography>
-				</Paper>
-			:
-				<React.Fragment key="hrt">
-					{props.labs.map((o) => (
-						<Paper key={o.id} className='padded'>
-							<Grid container spacing={2}>
-								<Grid item xs={12} md={4}>
-									<strong>Sample Collection Date: </strong>
-									<span>{new Date(o.sampleCollection).toLocaleString()}</span>
-								</Grid>
-								<Grid item xs={12} md={4}>
-									<strong>Name: </strong>
-									<span>{o.name}</span>
-								</Grid>
-								<Grid item xs={12} md={4}>
-									<strong>Code: </strong>
-									<span>{o.code}</span>
-								</Grid>
-								<Grid item xs={12} md={4}>
-									<strong>Result: </strong>
-									<span>{o.result} {o.unitOfMeasure}</span>
-								</Grid>
-								<Grid item xs={12} md={4}>
-									<strong>Range: </strong>
-									<span>{o.range}</span>
-								</Grid>
-								<Grid item xs={12} md={4}>
-									<strong>Result Level: </strong>
-									<span>{o.resultLevel}</span>
-								</Grid>
-							</Grid>
-						</Paper>
-					))}
-				</React.Fragment>
-			}
-		</React.Fragment>
-	);
-}
-
-/**
  * Pharmacy Fill
  *
  * @name PharmacyFill
@@ -556,11 +498,6 @@ export default function RX(props) {
 					patientId={props.patientId}
 					prescriptions={props.prescriptions}
 					readOnly={props.readOnly}
-				/>
-			}
-			{props.hrtLabs !== null && props.hrtLabs !== 0 &&
-				<HrtResults
-					labs={props.hrtLabs}
 				/>
 			}
 		</Box>

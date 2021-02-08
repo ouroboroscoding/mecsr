@@ -9,12 +9,14 @@
  */
 
 // NPM modules
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // Material UI
 import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
+import Select from '@material-ui/core/Select';
 import Typography from '@material-ui/core/Typography';
 
 // Shared communications modules
@@ -135,7 +137,11 @@ function LabResults(props) {
 function Patient(props) {
 
 	// State
+	let [drop, dropSet] = useState(false);
 	let [patient, patientSet] = useState(0);
+
+	// Refs
+	let refReason = useRef();
 
 	// Mount effect
 	useEffect(() => {
@@ -146,6 +152,68 @@ function Patient(props) {
 		}
 	// eslint-disable-next-line
 	}, [props.user])
+
+	// Called when dropped button clicked
+	function dropShow(ev) {
+
+		// Set drop to true to show loading
+		dropSet(true);
+
+		// Fetch the dropped reasons from the server
+		Rest.read('monolith', 'hrt/dropped/reasons', {}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !res._handled) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if(res.data) {
+				dropSet(res.data);
+			}
+		})
+	}
+
+	function dropSubmit(ev) {
+
+		// Get the dropped reason
+		let iReason = refReason.current.value;
+
+		console.log('reason:', iReason);
+
+		// Send the request to the server
+		Rest.update('monolith', 'customer/hrt', {
+			customerId: props.customerId.toString(),
+			stage: 'Dropped',
+			processStatus: 'Dropped',
+			dropped_reason: iReason
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !res._handled) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+
+				// If we were successful
+				if(res.data) {
+					Events.trigger('success', 'Successfully dropped the patient from HRT');
+					patientFetch();
+					dropSet(false);
+				} else {
+					Events.trigger('error', 'There was an error saving the data');
+				}
+			}
+		})
+	}
 
 	// Fetch the patient record
 	function patientFetch() {
@@ -196,7 +264,32 @@ function Patient(props) {
 									<Grid item xs={12} md={6} lg={3}><strong>Treatment Cycle: </strong>{patient.treatment_cycle}</Grid>
 								}
 								{patient.stage === 'Dropped' &&
-									<Grid item xs={12} md={6} lg={3}><strong>Dropped Reason: </strong>{patient.dropped_reason}</Grid>
+									<Grid item xs={12} md={6} lg={3}><strong>Dropped Reason: </strong>{patient.reason}</Grid>
+								}
+								{patient.stage !== 'Dropped' && drop === false &&
+									<Grid item xs={12}>
+										<Button onClick={dropShow} variant="contained">Mark as Dropped</Button>
+									</Grid>
+								}
+								{drop &&
+									<Grid item xs={12}>
+										{drop === true ?
+											<Typography>Loading reasons...</Typography>
+										:
+											<React.Fragment>
+												<Select
+													native
+													inputRef={refReason}
+													variant="outlined"
+												>
+													{drop.map(o =>
+														<option key={o.id} value={o.id}>{o.name}</option>
+													)}
+												</Select>
+												<Button color="primary" onClick={dropSubmit} variant="contained">Drop</Button>
+											</React.Fragment>
+										}
+									</Grid>
 								}
 							</Grid>
 						</Paper>

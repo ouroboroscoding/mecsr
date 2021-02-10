@@ -257,6 +257,7 @@ function Patient(props) {
 					:
 						<Paper className="padded">
 							<Grid container spacing={2}>
+								<Grid item xs={12} md={6} lg={3}><strong>Joined Date: </strong>{patient.joinDate}</Grid>
 								<Grid item xs={12} md={6} lg={3}><strong>Stage: </strong>{patient.stage}</Grid>
 								<Grid item xs={12} md={6} lg={3}><strong>Status: </strong>{patient.processStatus}</Grid>
 								<Grid item xs={12} md={6} lg={3}><strong>First Lab Sent: </strong>{patient.labSentAt}</Grid>

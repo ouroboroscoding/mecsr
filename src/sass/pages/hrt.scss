@@ -1,5 +1,10 @@
 #hrt {
+
 	.stage {
+		flex-basis: 0;
+		flex-shrink: 1;
+		flex-grow: 1;
+		overflow: auto;
 		padding: 10px;
 	}
 }

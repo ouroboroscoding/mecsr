@@ -38,11 +38,11 @@ import { clone, empty, omap } from 'shared/generic/tools';
 const HrtTree = new Tree({
 	__name__: "HrtTree",
 	claim: {__type__: "string"},
+	joinDate: {__type__: "datetime", __react__: {title: 'Joined Date'}},
 	customerId: {__type__: "string", __react__: {title: 'Customer ID'}},
 	phoneNumber: {__type__: "string", __react__: {title: 'Phone Number'}},
 	firstName: {__type__: "string", __react__: {title: 'First'}},
-	lastName: {__type__: "string", __react__: {title: 'Last'}},
-	campaignName: {__type__: "string", __react__: {title: 'Campaign'}}
+	lastName: {__type__: "string", __react__: {title: 'Last'}}
 });
 
 /**
@@ -108,7 +108,8 @@ function Patients(props) {
 		// Make the request to the server
 		Rest.read('monolith', 'hrt/patients', {
 			stage: props.stage,
-			processStatus: props.status
+			processStatus: props.status,
+			droppedReason: props.droppedReason
 		}).done(res => {
 
 			// If there's an error or warning
@@ -126,8 +127,6 @@ function Patients(props) {
 		});
 	}
 
-	console.log(props);
-
 	// If we're still fetching
 	if(!customers) {
 		return <Typography>Loading...</Typography>
@@ -139,7 +138,7 @@ function Patients(props) {
 			custom={{"claim": claimRender}}
 			data={customers}
 			noun=""
-			orderBy="lastName"
+			orderBy="joinDate"
 			remove={false}
 			service=""
 			tree={HrtTree}
@@ -166,14 +165,14 @@ function Stage(props) {
 	// Effects
 	useEffect(() => {
 		patientsSet(
-			props.statuses.reduce((ret, o) => Object.assign(ret, {[o.status]: false}), {})
+			props.statuses.reduce((ret, o) => Object.assign(ret, {[o.title]: false}), {})
 		)
 	}, [props.stage, props.statuses])
 
 	// Show/Hide patients
-	function patientsToggle(status) {
+	function patientsToggle(title) {
 		let oPatients = clone(patients);
-		oPatients[status] = !oPatients[status];
+		oPatients[title] = !oPatients[title];
 		patientsSet(oPatients);
 	}
 
@@ -186,18 +185,19 @@ function Stage(props) {
 			{props.statuses.map(o =>
 				<Paper className="padded">
 					<Grid container spacing={0}>
-						<Grid item xs={8}>{o.status}</Grid>
+						<Grid item xs={8}>{o.title}</Grid>
 						<Grid item xs={2} style={{textAlign: 'right'}}>{o.count}</Grid>
 						<Grid item xs={2} style={{textAlign: 'right'}}>
-							<Button color="primary" variant="contained" onClick={ev => patientsToggle(o.status)}>
-								{patients[o.status] ? 'Hide' : 'Show'}
+							<Button color="primary" variant="contained" onClick={ev => patientsToggle(o.title)}>
+								{patients[o.title] ? 'Hide' : 'Show'}
 							</Button>
 						</Grid>
 						<Grid item xs={12}>
-							{patients[o.status] &&
+							{patients[o.title] &&
 								<Patients
 									stage={props.stage}
 									status={o.status}
+									droppedReason={o.droppedReason}
 									user={props.user}
 								/>
 							}
@@ -275,7 +275,9 @@ export default function HRT(props) {
 					// Increase the count and store the status
 					oStats[o.stage].count += o.count;
 					oStats[o.stage].statuses.push({
+						droppedReason: o.dropped_reason,
 						status: o.processStatus,
+						title: o.processStatus + (o.dropped_reason ? ' - ' + o.reason : ''),
 						count: o.count
 					});
 				}
@@ -283,7 +285,7 @@ export default function HRT(props) {
 				// Store the tree
 				statsSet(oStats);
 			}
-		})
+		});
 	}
 
 	// When selected tab changes

@@ -299,23 +299,25 @@ export default function HRT(props) {
 	// Render
 	return (
 		<Box id="hrt" className="page">
-			<AppBar position="static" color="default">
-				<Tabs
-					onChange={tabChange}
-					value={tab.index}
-					variant="fullWidth"
-				>
-				{omap(stats, (o, k) =>
-					<Tab label={k + ' (' + o.count + ')'} />
-				)}
-				</Tabs>
-			</AppBar>
 			{tab &&
-				<Stage
-					stage={tab.stage}
-					user={props.user}
-					{...stats[tab.stage]}
-				/>
+				<React.Fragment>
+					<AppBar position="static" color="default">
+						<Tabs
+							onChange={tabChange}
+							value={tab.index}
+							variant="fullWidth"
+						>
+						{omap(stats, (o, k) =>
+							<Tab key={k} label={k + ' (' + o.count + ')'} />
+						)}
+						</Tabs>
+					</AppBar>
+					<Stage
+						stage={tab.stage}
+						user={props.user}
+						{...stats[tab.stage]}
+					/>
+				</React.Fragment>
 			}
 		</Box>
 	);

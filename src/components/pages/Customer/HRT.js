@@ -238,6 +238,11 @@ function Patient(props) {
 			// If there's data
 			if('data' in res) {
 				patientSet(res.data);
+
+				// If dropped is set, but there's no reason
+				if(res.data.stage === 'Dropped' && res.data.dropped_reason === null) {
+					dropShow();
+				}
 			}
 		});
 	}

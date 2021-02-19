@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.26.0', 'February 19th, 2021', [
+		'Can now view HRT Assessment Levels from the Customer HRT tab.'
+	]],
 	['1.25.0', 'February 8th, 2021', [
 		'Can now drop HRT patients from the Customer HRT tab.'
 	]],

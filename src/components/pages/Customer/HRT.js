@@ -19,6 +19,9 @@ import Paper from '@material-ui/core/Paper';
 import Select from '@material-ui/core/Select';
 import Typography from '@material-ui/core/Typography';
 
+// Shared components
+import HormoneSymptoms from 'shared/components/monolith/HormoneSymptoms';
+
 // Shared communications modules
 import Rest from 'shared/communication/rest';
 
@@ -251,7 +254,7 @@ function Patient(props) {
 	return (
 		<Box className="patient">
 			<Box className="sectionHeader">
-				<Box className="title">HRT Patient</Box>
+				<Box className="title">HRT Status</Box>
 			</Box>
 			{patient === 0 ?
 				<Typography>Loading...</Typography>
@@ -328,6 +331,13 @@ export default function HRT(props) {
 			<LabResults
 				customerId={props.customerId}
 				user={props.user}
+			/>
+			<Box className="sectionHeader">
+				<Box className="title">HRT Assessment Levels</Box>
+			</Box>
+			<HormoneSymptoms
+				className="hrtAssessmentLevels"
+				customerId={props.customerId.toString()}
 			/>
 		</Box>
 	);

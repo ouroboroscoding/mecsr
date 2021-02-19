@@ -297,6 +297,97 @@
 		.patient, .labResults {
 			margin-bottom: 10px;
 		}
+
+		.hrtAssessmentLevels {
+
+			.container {
+				max-height: 400px
+			}
+
+			tr.dates {
+
+				.empty {
+					background-color: #fff
+				}
+
+				.even, .odd {
+					background-color: #000;
+					color: #fff;
+					font-weight: bold;
+					text-align: center
+				}
+			}
+
+			tr.category {
+
+				td.title {
+					background-color: inherit;
+					display: flex;
+
+					.text {
+						flex-basis: 0;
+						flex-shrink: 1;
+						flex-grow: 1;
+						font-weight: bold
+					}
+
+					.action {
+						flex-basis: auto;
+						flex-shrink: 0;
+						flex-grow: 0;
+						padding: 0;
+
+						.open {
+							color: green;
+						}
+
+						.close {
+							color: red;
+						}
+					}
+				}
+			}
+
+			tr.category.odd {
+				background-color: #dfdfdf;
+			}
+
+			tr.category.even {
+				background-color: #fff;
+			}
+
+			tr.question {
+
+				td.title {
+					padding-left: 50px;
+				}
+
+				td {
+					color: #1155cc;
+				}
+			}
+
+			tr.question.odd {
+				background-color: #cfe2f3;
+			}
+
+			tr.question.even {
+				background-color: #f2f7ff;
+			}
+
+			td.title {
+				background-color: inherit;
+				left: 0;
+				position: -webkit-sticky;
+				position: sticky;
+				z-index: 1;
+			}
+
+			td.date {
+				min-width: 105px;
+				text-align: center;
+			}
+		}
 	}
 
 	.misc {

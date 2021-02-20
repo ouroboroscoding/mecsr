@@ -79,7 +79,7 @@ function LabResults(props) {
 	return (
 		<Box className="labResults">
 			<Box className="sectionHeader">
-				<Box className="title">HRT Lab Results</Box>
+				<Box className="title">Lab Results</Box>
 			</Box>
 			{results === 0 ?
 				<Typography>Loading...</Typography>
@@ -254,7 +254,7 @@ function Patient(props) {
 	return (
 		<Box className="patient">
 			<Box className="sectionHeader">
-				<Box className="title">HRT Status</Box>
+				<Box className="title">Status</Box>
 			</Box>
 			{patient === 0 ?
 				<Typography>Loading...</Typography>
@@ -333,7 +333,7 @@ export default function HRT(props) {
 				user={props.user}
 			/>
 			<Box className="sectionHeader">
-				<Box className="title">HRT Assessment Levels</Box>
+				<Box className="title">Assessment Levels</Box>
 			</Box>
 			<HormoneSymptoms
 				className="hrtAssessmentLevels"

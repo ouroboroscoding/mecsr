@@ -156,7 +156,7 @@ export default function Calls(props) {
 						open={true}
 					>
 						<DialogContent>
-							<iframe className="justcall" src={info} />
+							<iframe title="JustCall Info" className="justcall" src={info} />
 						</DialogContent>
 					</Dialog>
 				}

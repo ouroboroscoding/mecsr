@@ -5,7 +5,7 @@
 		flex-shrink: 0;
 	}
 
-	.messaging, .konnektive, .mip, .notes, .prescriptions, .hrtTab, .misc {
+	.messaging, .callsTab, .konnektive, .mip, .notes, .prescriptions, .hrtTab, .misc {
 		flex-basis: 0;
 		flex-grow: 1;
 		flex-shrink: 1;
@@ -196,6 +196,64 @@
 			button {
 				flex-grow: 0;
 				width: 150px;
+			}
+		}
+	}
+
+	.callsTab {
+		display: flex;
+		flex-direction: column;
+
+		.calls {
+			flex-basis: 0;
+			flex-shrink: 1;
+			flex-grow: 1;
+			overflow: auto;
+			padding: 10px;
+
+			.message {
+				border-radius: 10px;
+				margin-bottom: 10px;
+				padding: 10px;
+				position: relative;
+				width: 60%;
+
+				.content {
+					p {
+						font-size: 125%;
+					}
+				}
+			}
+
+			.Incoming {
+				background-color: #a8ddfd;
+				border: 1px solid #97c6e3;
+
+				a {
+					color: #6392B0;
+				}
+
+				a:hover {
+					color: #b08851;
+				}
+			}
+
+			.Outgoing {
+				background-color: #f8e896;
+				border: 1px solid #dfd087;
+				margin-left: calc(40% - 0px);
+
+				.footer {
+					text-align: right;
+				}
+
+				a {
+					color: #6392B0;
+				}
+
+				a:hover {
+					color: #b08851;
+				}
 			}
 		}
 	}
@@ -423,4 +481,9 @@
 			min-width: 0;
 		}
 	}
+}
+
+iframe.justcall {
+	height: calc(100vh - 150px);
+	width: 100%;
 }

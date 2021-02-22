@@ -20,6 +20,7 @@ import Tab from '@material-ui/core/Tab';
 // Material UI Icons
 import AccessibilityNewIcon from '@material-ui/icons/AccessibilityNew';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
+import CallEndIcon from '@material-ui/icons/CallEnd';
 import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import LocalPharmacyIcon from '@material-ui/icons/LocalPharmacy';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
@@ -27,6 +28,7 @@ import NotesIcon from '@material-ui/icons/Notes';
 import SmsIcon from '@material-ui/icons/Sms';
 
 // Customer components
+import Calls from './Calls';
 import KNK from './KNK';
 import HRT from './HRT';
 import MIP from './MIP';
@@ -590,6 +592,7 @@ export default class Customer extends React.Component {
 							variant="fullWidth"
 						>
 							<Tab icon={<SmsIcon />} />
+							<Tab icon={<CallEndIcon />} />
 							<Tab icon={<MonetizationOnIcon />} />
 							<Tab icon={<LocalHospitalIcon />} />
 							<Tab icon={<NotesIcon />} />
@@ -604,6 +607,7 @@ export default class Customer extends React.Component {
 							variant="fullWidth"
 						>
 							<Tab label="SMS" />
+							<Tab label="Calls" />
 							<Tab label="KNK" />
 							<Tab label="MIP" />
 							<Tab label="Notes" />
@@ -626,7 +630,14 @@ export default class Customer extends React.Component {
 						user={this.props.user}
 					/>
 				</div>
-				<div className="konnektive" style={{display: this.state.tab === 1 ? 'block' : 'none'}}>
+				{this.state.tab === 1 &&
+					<Calls
+						phoneNumber={this.props.phoneNumber}
+						readOnly={this.props.readOnly}
+						user={this.props.user}
+					/>
+				}
+				<div className="konnektive" style={{display: this.state.tab === 2 ? 'block' : 'none'}}>
 					<KNK
 						customer={this.state.customer}
 						orders={this.state.orders}
@@ -636,7 +647,7 @@ export default class Customer extends React.Component {
 						tracking={this.state.shipping}
 					/>
 				</div>
-				<div className="mip" style={{display: this.state.tab === 2 ? 'block' : 'none'}}>
+				<div className="mip" style={{display: this.state.tab === 3 ? 'block' : 'none'}}>
 					<MIP
 						customer={this.state.customer}
 						mips={this.state.mips}
@@ -644,7 +655,7 @@ export default class Customer extends React.Component {
 						user={this.props.user}
 					/>
 				</div>
-				<div className="notes" style={{display: this.state.tab === 3 ? 'flex' : 'none'}}>
+				<div className="notes" style={{display: this.state.tab === 4 ? 'flex' : 'none'}}>
 					<Notes
 						customerId={this.props.customerId}
 						readOnly={this.props.readOnly}
@@ -652,7 +663,7 @@ export default class Customer extends React.Component {
 						visible={this.state.tab === 3}
 					/>
 				</div>
-				<div className="prescriptions" style={{display: this.state.tab === 4 ? 'block' : 'none'}}>
+				<div className="prescriptions" style={{display: this.state.tab === 5 ? 'block' : 'none'}}>
 					<RX
 						details={this.state.patient_details}
 						hrtLabs={this.state.hrtLabs}
@@ -670,14 +681,14 @@ export default class Customer extends React.Component {
 						user={this.props.user}
 					/>
 				</div>
-				{this.state.tab === 5 &&
+				{this.state.tab === 6 &&
 					<HRT
 						customerId={this.props.customerId}
 						readOnly={this.props.readOnly}
 						user={this.props.user}
 					/>
 				}
-				{this.state.tab === 6 &&
+				{this.state.tab === 7 &&
 					<Misc
 						crm_id={this.props.customerId}
 						patient_id={this.props.patient_id}

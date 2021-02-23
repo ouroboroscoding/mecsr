@@ -30,7 +30,7 @@ const _encounter = {
 export default function CustomerSummary(props) {
 
 	function claim() {
-		props.onClaim(props.customerId, props.orderId, props.customerName, props.customerPhone);
+		props.onClaim(props.customerId, props.orderId, props.continuous || 0, props.customerName, props.customerPhone);
 	}
 
 	// If we're the one who claimed it
@@ -56,13 +56,13 @@ export default function CustomerSummary(props) {
 					<Typography variant="h6">Customer</Typography>
 					<p>{props.customerId}</p>
 					<p>{props.customerName}</p>
-					<p>{props.shipCity + ', ' + props.shipState + (props.type === '' ? '' : ' / ' + _encounter[props.type])}</p>
+					<p>{props.shipCity + ', ' + props.shipState + (props.encounter === '' ? '' : ' / ' + _encounter[props.encounter])}</p>
 				</Grid>
 				<Grid item xs={12} sm={5} className="messages">
 					<Typography variant="h6">Order</Typography>
-					<p>{props.orderId}</p>
+					<p>{props.continuous && 'C-'}{props.type.toUpperCase()} - {props.orderId}</p>
 					<p>{sLabel}</p>
-					<p>{props.dateCreated}</p>
+					<p>{props.createdAt}</p>
 				</Grid>
 			</Grid>
 		</Paper>

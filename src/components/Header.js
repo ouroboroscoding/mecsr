@@ -51,6 +51,7 @@ import ViewListIcon from '@material-ui/icons/ViewList';
 
 // Composite components
 import Account from './composites/Account';
+import CancelContinuous from './composites/CancelContinuous';
 import Decline from './composites/Decline';
 import Provider from './composites/Provider';
 import Resolve from './composites/Resolve';
@@ -79,6 +80,7 @@ import Utils from 'utils';
 function CustomerItem(props) {
 
 	// State
+	let [cancel, cancelSet] = useState(false);
 	let [decline, declineSet] = useState(false);
 	let [list, listSet] = useState(false);
 	let [provider, providerSet] = useState(false);
@@ -94,6 +96,53 @@ function CustomerItem(props) {
 		listSet(true);
 	}
 
+	// Cancel click
+	function cancelClick(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
+		cancelSet(true);
+	}
+
+	// Cancel submit
+	function cancelSubmit(swap) {
+
+		// Hide the dialog
+		declineSet(false);
+
+		// Delete the claim
+		claimed.remove(props.customerPhone).then(res => {
+			// Trigger the claimed being removed
+			Events.trigger('claimedRemove', props.customerPhone, props.selected);
+		}, error => {
+			Events.trigger('error', JSON.stringify(error));
+		});
+
+		// If we're swapping
+		if(swap) {
+
+			// Get the claimed add promise
+			claimed.add(props.customerPhone).then(res => {
+				Events.trigger('claimedAdd', props.customerPhone, props.customerName, props.customerId);
+			}, error => {
+				// If we got a duplicate
+				if(error.code === 1101) {
+					Events.trigger('error', 'Customer has already been claimed.');
+				} else {
+					Events.trigger('error', JSON.stringify(error));
+				}
+			});
+		}
+
+		// Else, switch page
+		else {
+
+			// If we're currently selected, change the page
+			if(props.selected) {
+				history.push(props.provider !== null ? '/pending' : '/unclaimed');
+			}
+		}
+	}
+
 	// Click event
 	function click(ev) {
 		props.onClick(
@@ -102,12 +151,14 @@ function CustomerItem(props) {
 		)
 	}
 
+	// Decline click
 	function declineClick(ev) {
 		ev.stopPropagation();
 		ev.preventDefault();
 		declineSet(true);
 	}
 
+	// Decline submit
 	function declineSubmit() {
 
 		// Hide the dialog
@@ -257,11 +308,19 @@ function CustomerItem(props) {
 								<span className="customerActions">
 									{props.provider !== null ?
 										<span className="tooltip">
-											<Tooltip title="Decline Order">
-												<IconButton className="close" onClick={declineClick}>
-													<CancelIcon />
-												</IconButton>
-											</Tooltip>
+											{props.continuous ?
+												<Tooltip title="Cancel Recurring">
+													<IconButton className="close" onClick={cancelClick}>
+														<CancelIcon />
+													</IconButton>
+												</Tooltip>
+											:
+												<Tooltip title="Decline Order">
+													<IconButton className="close" onClick={declineClick}>
+														<CancelIcon />
+													</IconButton>
+												</Tooltip>
+											}
 										</span>
 									:
 										<span className="tooltip">
@@ -337,6 +396,14 @@ function CustomerItem(props) {
 					onClose={e => providerSet(false)}
 					onTransfer={providerTransfer}
 					{...props}
+				/>
+			}
+			{cancel &&
+				<CancelContinuous
+					customerId={props.customerId}
+					orderId={props.orderId}
+					onClose={e => cancelSet(false)}
+					onSubmit={cancelSubmit}
 				/>
 			}
 			{decline &&
@@ -621,7 +688,7 @@ export default class Header extends React.Component {
 		this.setState({"account": !this.state.account});
 	}
 
-	claimedAdd(number, name, customer_id, order_id, provider=null) {
+	claimedAdd(number, name, customer_id, order_id=null, continuous=null, provider=null) {
 
 		// Clone the claimed state
 		let lClaimed = clone(this.state.claimed);
@@ -632,6 +699,7 @@ export default class Header extends React.Component {
 			customerName: name,
 			customerPhone: number,
 			orderId: order_id,
+			continuous: continuous,
 			provider: provider,
 			viewed: true
 		});

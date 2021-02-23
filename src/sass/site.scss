@@ -10,6 +10,7 @@ $menu-width: 250px;
 @import 'header';
 
 /* composites */
+@import 'composites/cancelContinuous';
 @import 'composites/custom_lists';
 @import 'composites/decline';
 @import 'composites/dialogs';

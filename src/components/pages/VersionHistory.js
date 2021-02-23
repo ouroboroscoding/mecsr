@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.28.0', 'February 23th, 2021', [
+		'Added Continuous/Expiring orders to Pending list if customer is unhappy with the medication so that Agents can handle any issues before Providers.'
+	]],
 	['1.27.0', 'February 22th, 2021', [
 		'New Calls tab in Customer page, shows the JustCall logs for the given customer\'s phone number.'
 	]],

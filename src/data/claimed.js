@@ -23,10 +23,11 @@ import Events from 'shared/generic/events';
  * @public
  * @param String number The conversation phone number
  * @param String order The orderId associated
+ * @param Boolean continuius
  * @param Number provider The ID of the provider associated
  * @return Promise
  */
-export function add(number, order=null, provider=null) {
+export function add(number, order=null, continuous=null, provider=null) {
 
 	// Return promise
 	return new Promise((resolve, reject) => {
@@ -35,6 +36,7 @@ export function add(number, order=null, provider=null) {
 		Rest.create('monolith', 'customer/claim', {
 			phoneNumber: number,
 			orderId: order,
+			continuous: continuous,
 			provider: provider
 		}).done(res => {
 

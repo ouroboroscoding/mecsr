@@ -69,11 +69,11 @@ export default class Pending extends React.Component {
 		Events.remove('Pending', this.fetch);
 	}
 
-	claim(customer_id, order_id, name, phone) {
+	claim(customer_id, order_id, continuous, name, phone) {
 
 		// Get the claimed add promise
-		claimed.add(phone, order_id, 0).then(res => {
-			Events.trigger('claimedAdd', phone, name, customer_id, order_id, 0);
+		claimed.add(phone, order_id, continuous, 0).then(res => {
+			Events.trigger('claimedAdd', phone, name, customer_id, order_id, continuous, 0);
 		}, error => {
 			// If we got a duplicate
 			if(error.code === 1101) {

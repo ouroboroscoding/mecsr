@@ -1,11 +1,11 @@
 /**
- * Decline
+ * CancelContinuous
  *
- * Handles decline dialog
+ * Handles cancel dialog for continuous orders
  *
  * @author Chris Nasr <bast@maleexcel.com>
  * @copyright MaleExcelMedical
- * @created 2020-12-12
+ * @created 2021-02-23
  */
 
 // NPM modules
@@ -27,14 +27,15 @@ import Rest from 'shared/communication/rest';
 // Shared generic modules
 import Events from 'shared/generic/events';
 
-// Decline
-export default function Decline(props) {
+// CancelContinuous
+export default function CancelContinuous(props) {
 
 	// Submite notes / resolve conversation
 	function submit(reason) {
 
-		// Decline the order
-		Rest.update('monolith', 'order/decline', {
+		// CancelContinuous the order
+		Rest.update('monolith', 'order/continuous/cancel', {
+			customerId: props.customerId,
 			orderId: props.orderId,
 			reason: reason
 		}).done(res => {
@@ -42,7 +43,7 @@ export default function Decline(props) {
 			// If there's an error or warning
 			if(res.error && !res._handled) {
 				if(res.error.code === 1103) {
-					Events.trigger('error', 'Failed to update order status in Konnektive, please try again or contact support');
+					Events.trigger('error', 'Failed to cancel purchase in Konnektive, please try again or contact support');
 				} else {
 					Events.trigger('error', JSON.stringify(res.error));
 				}
@@ -53,14 +54,14 @@ export default function Decline(props) {
 
 			// If there's data
 			if(res.data) {
-				props.onSubmit();
+				props.onSubmit(reason === 'Medication Switch');
 			}
 		});
 	}
 
 	return (
 		<Dialog
-			id="decline"
+			id="cancel"
 			fullWidth={true}
 			maxWidth="md"
 			open={true}
@@ -69,30 +70,27 @@ export default function Decline(props) {
 				className: "resolve"
 			}}
 		>
-			<DialogTitle id="confirmation-dialog-title">QA Order Decline</DialogTitle>
+			<DialogTitle id="confirmation-dialog-title">Recurring Purchase Cancel</DialogTitle>
 			<DialogContent dividers>
-				<Typography>Choose the reason for the decline:</Typography>
+				<Typography>Choose the reason for the cancellation:</Typography>
 				<Grid container spacing={2}>
 					<Grid item xs={12} md={6} xl={3}>
-						<Button color="primary" onClick={props.onSubmit} variant="contained">Ran CC Successfully</Button>
+						<Button color="primary" onClick={e => submit('Current Customer')} variant="contained">Customer Request</Button>
 					</Grid>
 					<Grid item xs={12} md={6} xl={3}>
-						<Button color="primary" onClick={e => submit('Duplicate Order')} variant="contained">Duplicate Order*</Button>
+						<Button color="primary" onClick={e => submit('Contact Attempt')} variant="contained">Contact Attempt</Button>
 					</Grid>
 					<Grid item xs={12} md={6} xl={3}>
-						<Button color="primary" onClick={e => submit('Current Customer')} variant="contained">Customer Request*</Button>
-					</Grid>
-					<Grid item xs={12} md={6} xl={3}>
-						<Button color="primary" onClick={e => submit('Contact Attempt')} variant="contained">Contact Attempt*</Button>
+						<Button color="primary" onClick={e => submit('Medication Switch')} variant="contained">Medication Switch*</Button>
 					</Grid>
 					<Grid item xs={12}>
-						<Typography>* Will cancel QA order in Konnektive</Typography>
+						<Typography>* This will switch the current order claim to a regular customer claim so you can continue with the customer and create the new order</Typography>
 					</Grid>
 				</Grid>
 			</DialogContent>
 			<DialogActions>
 				<Button variant="contained" color="secondary" onClick={props.onClose}>
-					Cancel
+					Do Not Cancel Purchase
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -100,7 +98,8 @@ export default function Decline(props) {
 }
 
 // Valid props
-Decline.propTypes = {
+CancelContinuous.propTypes = {
+	customerId: PropTypes.string.isRequired,
 	orderId: PropTypes.string.isRequired,
 	onClose: PropTypes.func.isRequired,
 	onSubmit: PropTypes.func.isRequired

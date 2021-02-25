@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.28.1', 'February 26th, 2021', [
+		'Replaced old HRT Lab Results for a more useful and clear structure.'
+	]],
 	['1.28.0', 'February 23th, 2021', [
 		'Added Continuous/Expiring orders to Pending list if customer is unhappy with the medication so that Agents can handle any issues before Providers.'
 	]],

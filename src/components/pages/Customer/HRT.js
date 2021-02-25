@@ -21,6 +21,7 @@ import Typography from '@material-ui/core/Typography';
 
 // Shared components
 import HormoneSymptoms from 'shared/components/monolith/HormoneSymptoms';
+import LabResults from 'shared/components/monolith/LabResults';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -28,104 +29,6 @@ import Rest from 'shared/communication/rest';
 // Shared generic modules
 import Events from 'shared/generic/events';
 import { empty } from 'shared/generic/tools';
-
-/**
- * Lab Results
- *
- * @name LabResults
- * @access private
- * @param Object props Attributes sent to the component
- * @return React.Component
- */
-function LabResults(props) {
-
-	// State
-	let [results, resultsSet] = useState(0);
-
-	// Mount effect
-	useEffect(() => {
-		if(props.user) {
-			labResultsFetch();
-		} else {
-			resultsSet([]);
-		}
-	// eslint-disable-next-line
-	}, [props.user])
-
-	// Fetch Lab Results
-	function labResultsFetch() {
-
-		//Find the HRT Lab Test Resutls using the customerId
-		Rest.read('monolith', 'customer/hrtLabs', {
-			customerId: props.customerId.toString()
-		}).done(res => {
-
-			// If there's an error or warning
-			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
-			}
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If there's data
-			if('data' in res) {
-				resultsSet(res.data);
-			}
-		});
-	}
-
-	// Render
-	return (
-		<Box className="labResults">
-			<Box className="sectionHeader">
-				<Box className="title">Lab Results</Box>
-			</Box>
-			{results === 0 ?
-				<Typography>Loading...</Typography>
-			:
-				<React.Fragment>
-					{results.length === 0 ?
-						<Typography>No results found for this customer</Typography>
-					:
-						<React.Fragment>
-							{results.map(o =>
-								<Paper key={o.id} className='padded'>
-									<Grid container spacing={2}>
-										<Grid item xs={12} md={4}>
-											<strong>Sample Collection Date: </strong>
-											<span>{new Date(o.sampleCollection).toLocaleString()}</span>
-										</Grid>
-										<Grid item xs={12} md={4}>
-											<strong>Name: </strong>
-											<span>{o.name}</span>
-										</Grid>
-										<Grid item xs={12} md={4}>
-											<strong>Code: </strong>
-											<span>{o.code}</span>
-										</Grid>
-										<Grid item xs={12} md={4}>
-											<strong>Result: </strong>
-											<span>{o.result} {o.unitOfMeasure}</span>
-										</Grid>
-										<Grid item xs={12} md={4}>
-											<strong>Range: </strong>
-											<span>{o.range}</span>
-										</Grid>
-										<Grid item xs={12} md={4}>
-											<strong>Result Level: </strong>
-											<span>{o.resultLevel}</span>
-										</Grid>
-									</Grid>
-								</Paper>
-							)}
-						</React.Fragment>
-					}
-				</React.Fragment>
-			}
-		</Box>
-	);
-}
 
 /**
  * Patient
@@ -328,9 +231,12 @@ export default function HRT(props) {
 				customerId={props.customerId}
 				user={props.user}
 			/>
+			<Box className="sectionHeader">
+				<Box className="title">Lab Results</Box>
+			</Box>
 			<LabResults
-				customerId={props.customerId}
-				user={props.user}
+				className="hrtLabResults"
+				customerId={props.customerId.toString()}
 			/>
 			<Box className="sectionHeader">
 				<Box className="title">Assessment Levels</Box>

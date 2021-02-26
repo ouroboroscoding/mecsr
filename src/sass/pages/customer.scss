@@ -352,14 +352,84 @@
 
 	.hrtTab {
 
-		.patient, .labResults {
+		.patient, .hrtLabResults {
 			margin-bottom: 10px;
+		}
+
+		.hrtLabResults {
+
+			.container {
+				max-height: 400px
+			}
+
+			tr.dates {
+
+				.empty {
+					background-color: #fff
+				}
+
+				.even, .odd {
+					background-color: #000;
+					color: #fff;
+					font-weight: bold;
+					text-align: center
+				}
+			}
+
+			tr.test {
+
+				td.title {
+					background-color: inherit;
+				}
+			}
+
+			tr.test.odd {
+				background-color: #dfdfdf;
+			}
+
+			tr.test.even {
+				background-color: #fff;
+			}
+
+			td.title {
+				background-color: inherit;
+				left: 0;
+				position: -webkit-sticky;
+				position: sticky;
+				z-index: 1;
+			}
+
+			td.date {
+				width: 220px;
+				text-align: center;
+
+				.result {
+					display: flex;
+
+					.left {
+						flex-basis: auto;
+						flex-shrink: 0;
+						flex-grow: 0;
+						font-weight: bold;
+						padding-right: 5px;
+						text-align: right;
+					}
+
+					.right {
+						flex-basis: 0;
+						flex-shrink: 1;
+						flex-grow: 1;
+						padding-left: 5px;
+						text-align: left;
+					}
+				}
+			}
 		}
 
 		.hrtAssessmentLevels {
 
 			.container {
-				max-height: 400px
+				max-height: 420px
 			}
 
 			tr.dates {
@@ -436,6 +506,7 @@
 			td.title {
 				background-color: inherit;
 				left: 0;
+				min-width: 230px;
 				position: -webkit-sticky;
 				position: sticky;
 				z-index: 1;

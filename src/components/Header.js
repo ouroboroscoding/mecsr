@@ -279,7 +279,11 @@ function CustomerItem(props) {
 			Events.trigger('claimedRemove', props.customerPhone, props.selected);
 
 		}, error => {
-			Events.trigger('error', JSON.stringify(error));
+			if(error.code === 1104) {
+				Events.trigger('error', 'Claim no longer exists, can not transfer.');
+			} else {
+				Events.trigger('error', JSON.stringify(error));
+			}
 		});
 	}
 
@@ -509,7 +513,11 @@ function ViewItem(props) {
 			}
 
 		}, error => {
-			Events.trigger('error', JSON.stringify(error));
+			if(error.code === 1104) {
+				Events.trigger('error', 'Claim no longer exists, can not transfer.');
+			} else {
+				Events.trigger('error', JSON.stringify(error));
+			}
 		});
 	}
 
@@ -1555,6 +1563,7 @@ export default class Header extends React.Component {
 						res.data['viewed'] = data.claim.viewed;
 						res.data['orderId'] = data.claim.orderId;
 						res.data['provider'] = data.claim.provider;
+						res.data['continuous'] = data.claim.continuous;
 
 						// Push the transfer to the top
 						lClaimed.unshift(res.data);

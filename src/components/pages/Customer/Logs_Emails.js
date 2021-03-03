@@ -38,16 +38,16 @@ import { datetime, ucfirst } from 'shared/generic/tools';
 function locationPretty(location) {
 
 	let l = [];
-	if(location.city && location.city !== '' && location.city != 'Unknown') {
+	if(location.city && location.city !== '' && location.city !== 'Unknown') {
 		l.push(ucfirst(location.city));
 	}
-	if(location.state && location.state !== '' && location.state != 'Unknown') {
+	if(location.state && location.state !== '' && location.state !== 'Unknown') {
 		l.push(ucfirst(location.state));
 	}
-	if(location.country && location.country !== '' && location.country != 'Unknown') {
+	if(location.country && location.country !== '' && location.country !== 'Unknown') {
 		l.push(ucfirst(location.country));
 	}
-	if(location.zipcode && location.zipcode !== '' && location.zipcode != 'Unknown') {
+	if(location.zipcode && location.zipcode !== '' && location.zipcode !== 'Unknown') {
 		l.push(location.zipcode);
 	}
 
@@ -123,6 +123,12 @@ function Email(props) {
 							<Typography>{locationPretty(props.CLICK.location)}</Typography>
 							<Typography>{props.CLICK.url}</Typography>
 						</Grid>
+					</React.Fragment>
+				}
+				{props.SPAMREPORT &&
+					<React.Fragment>
+						<Grid item xs={3} md={1} className="emailLeft"><Typography>SPAM</Typography></Grid>
+						<Grid item xs={9} md={11} className="emailRight"><Typography>{datetime(props.SPAMREPORT.created, '-')}</Typography></Grid>
 					</React.Fragment>
 				}
 			</Grid>

@@ -84,8 +84,12 @@ function Email(props) {
 				}
 				{props.DROPPED &&
 					<React.Fragment>
-						<Grid item xs={3} md={1} className="emailLeft"><Typography>Sent</Typography></Grid>
-						<Grid item xs={9} md={11} className="emailRight"><Typography>{datetime(props.DROPPED.created, '-')}</Typography></Grid>
+						<Grid item xs={3} md={1} className="emailLeft"><Typography>Dropped</Typography></Grid>
+						<Grid item xs={9} md={11} className="emailRight">
+							<Typography>{datetime(props.DROPPED.created, '-')}</Typography>
+							<Typography>{props.DROPPED.dropReason}</Typography>
+							<Typography>{props.DROPPED.dropMessage}</Typography>
+						</Grid>
 					</React.Fragment>
 				}
 				{props.DELIVERED &&

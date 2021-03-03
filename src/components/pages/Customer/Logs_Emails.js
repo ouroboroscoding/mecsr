@@ -26,6 +26,40 @@ import Events from 'shared/generic/events';
 import { datetime, ucfirst } from 'shared/generic/tools';
 
 /**
+ * Location Pretty
+ *
+ * Returns a string with whatever info is available in the location object
+ *
+ * @name locationPretty
+ * @access private
+ * @param Object location The location object from HubSpot
+ * @returns String
+ */
+function locationPretty(location) {
+
+	let l = [];
+	if(location.city && location.city !== '') {
+		l.push(ucfirst(location.city));
+	}
+	if(location.state && location.state !== '') {
+		l.push(ucfirst(location.state));
+	}
+	if(location.country && location.country !== '') {
+		l.push(ucfirst(location.country));
+	}
+	if(location.zipcode && location.zipcode !== '') {
+		l.push(location.zipcode);
+	}
+
+	// If there's nothing
+	if(l.length === 0) {
+		return 'No location data found';
+	} else {
+		return l.join(', ');
+	}
+}
+
+/**
  * Email
  *
  * Display a single email event
@@ -71,7 +105,8 @@ function Email(props) {
 						<Grid item xs={3} md={1} className="emailLeft"><Typography>Opened</Typography></Grid>
 						<Grid item xs={9} md={11} className="emailRight">
 							<Typography>{datetime(props.OPEN.created, '-')}</Typography>
-							<Typography>{ucfirst(props.OPEN.deviceType)} / {ucfirst(props.OPEN.location.city + ' ' + props.OPEN.location.state + ' ' + props.OPEN.location.country)}</Typography>
+							<Typography>{ucfirst(props.OPEN.deviceType)} Device</Typography>
+							<Typography>{locationPretty(props.OPEN.location)}</Typography>
 						</Grid>
 					</React.Fragment>
 				}
@@ -80,7 +115,8 @@ function Email(props) {
 						<Grid item xs={3} md={1} className="emailLeft"><Typography>Clicked</Typography></Grid>
 						<Grid item xs={9} md={11} className="emailRight">
 							<Typography>{datetime(props.CLICK.created, '-')}</Typography>
-							<Typography>{ucfirst(props.CLICK.deviceType)} / {ucfirst(props.CLICK.location.city + ' ' + props.CLICK.location.state + ' ' + props.OPEN.location.country)}</Typography>
+							<Typography>{ucfirst(props.CLICK.deviceType)} Device</Typography>
+							<Typography>{locationPretty(props.CLICK.location)}</Typography>
 							<Typography>{props.CLICK.url}</Typography>
 						</Grid>
 					</React.Fragment>

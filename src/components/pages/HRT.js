@@ -26,7 +26,7 @@ import Typography from '@material-ui/core/Typography';
 import claimed from 'data/claimed';
 
 // Shared Components
-import ResultsComponent from 'shared/components/format/Results';
+import { Results } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -134,7 +134,7 @@ function Patients(props) {
 
 	// Render
 	return (
-		<ResultsComponent
+		<Results
 			custom={{"claim": claimRender}}
 			data={customers}
 			noun=""

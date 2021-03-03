@@ -20,17 +20,17 @@ import Tab from '@material-ui/core/Tab';
 // Material UI Icons
 import AccessibilityNewIcon from '@material-ui/icons/AccessibilityNew';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
-import CallEndIcon from '@material-ui/icons/CallEnd';
 import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import LocalPharmacyIcon from '@material-ui/icons/LocalPharmacy';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 import NotesIcon from '@material-ui/icons/Notes';
 import SmsIcon from '@material-ui/icons/Sms';
+import ViewListIcon from '@material-ui/icons/ViewList';
 
 // Customer components
-import Calls from './Calls';
-import KNK from './KNK';
 import HRT from './HRT';
+import KNK from './KNK';
+import Logs from './Logs';
 import MIP from './MIP';
 import Misc from './Misc';
 import Notes from './Notes';
@@ -592,7 +592,7 @@ export default class Customer extends React.Component {
 							variant="fullWidth"
 						>
 							<Tab icon={<SmsIcon />} />
-							<Tab icon={<CallEndIcon />} />
+							<Tab icon={<ViewListIcon />} />
 							<Tab icon={<MonetizationOnIcon />} />
 							<Tab icon={<LocalHospitalIcon />} />
 							<Tab icon={<NotesIcon />} />
@@ -607,7 +607,7 @@ export default class Customer extends React.Component {
 							variant="fullWidth"
 						>
 							<Tab label="SMS" />
-							<Tab label="Calls" />
+							<Tab label="Logs" />
 							<Tab label="KNK" />
 							<Tab label="MIP" />
 							<Tab label="Notes" />
@@ -631,7 +631,8 @@ export default class Customer extends React.Component {
 					/>
 				</div>
 				{this.state.tab === 1 &&
-					<Calls
+					<Logs
+						emailAddress={this.state.customer ? this.state.customer.email : ''}
 						phoneNumber={this.props.phoneNumber}
 						readOnly={this.props.readOnly}
 						user={this.props.user}

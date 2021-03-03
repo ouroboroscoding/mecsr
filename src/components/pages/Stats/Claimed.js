@@ -22,7 +22,7 @@ import Typography from '@material-ui/core/Typography';
 import RefreshIcon from '@material-ui/icons/Refresh';
 
 // Format Components
-import ResultsComponent from 'shared/components/format/Results';
+import { Results } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -101,7 +101,7 @@ export default function Claimed(props) {
 	} else if(records === -1) {
 		results = <div>You lack the rights to view Claimed stats.</div>
 	} else {
-		results = <ResultsComponent
+		results = <Results
 					data={records}
 					noun="stats/claims"
 					orderBy="name"

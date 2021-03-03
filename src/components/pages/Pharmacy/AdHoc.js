@@ -17,7 +17,7 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 
 // Format Components
-import ResultsComponent from 'shared/components/format/Results';
+import { Results } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -139,7 +139,7 @@ export default function AdHoc(props) {
 	} else if(records === -1) {
 		results = <div>You lack the rights to view AdHoc records.</div>
 	} else {
-		results = <ResultsComponent
+		results = <Results
 					data={records}
 					noun="adhoc"
 					orderBy="title"

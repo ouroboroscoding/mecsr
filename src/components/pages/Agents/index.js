@@ -35,8 +35,7 @@ import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import Permissions from './Permissions';
 
 // Format Components
-import ResultsComponent from 'shared/components/format/Results';
-import FormComponent from 'shared/components/format/Form';
+import { Form, Results } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -278,7 +277,7 @@ export default function Agents(props) {
 				</Box>
 				{create &&
 					<Paper className="padded">
-						<FormComponent
+						<Form
 							cancel={ev => createSet(b => !b)}
 							errors={{
 								1501: "Username already in use",
@@ -297,7 +296,7 @@ export default function Agents(props) {
 				{agents === null ?
 					<div>Loading...</div>
 				:
-					<ResultsComponent
+					<Results
 						actions={[
 							{"tooltip": "Edit Agent's permissions", "icon": HttpsIcon, "callback": permissionsShow},
 							{"tooltip": "Change Agent's password", "icon": VpnKeyIcon, "callback": agent_id => passwordSet(agent_id)}

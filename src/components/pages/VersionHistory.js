@@ -18,6 +18,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.29.0', 'March 3rd, 2021', [
+		'Replaced Customer Calls tab with Logs.',
+		'Customer Logs tab displays JustCall (calls) and HubSpot (email) logs.'
+	]],
 	['1.28.1', 'February 26th, 2021', [
 		'Replaced old HRT Lab Results for a more useful and clear structure.'
 	]],

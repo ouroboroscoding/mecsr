@@ -18,7 +18,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Typography from '@material-ui/core/Typography';
 
 // Format Components
-import ResultsComponent from 'shared/components/format/Results';
+import { Results } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -190,7 +190,7 @@ export default function FillError(props) {
 	} else if(records === -1) {
 		results = <div>You lack the rights to view Fill Error records.</div>
 	} else {
-		results = <ResultsComponent
+		results = <Results
 					custom={{"ready": readyRender}}
 					data={records}
 					noun="pharmacy/fill/error"

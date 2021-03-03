@@ -21,7 +21,7 @@ import Typography from '@material-ui/core/Typography';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 // Format Components
-import ResultsComponent from 'shared/components/format/Results';
+import { Results } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -226,7 +226,7 @@ export default function Outbound(props) {
 						[{"tooltip": "AdHoc (Remove Error)", "icon": ArrowBackIcon, "callback": adhocSwitch}] :
 						[];
 
-		results = <ResultsComponent
+		results = <Results
 					actions={lActions}
 					custom={{"ready": readyRender}}
 					data={records}

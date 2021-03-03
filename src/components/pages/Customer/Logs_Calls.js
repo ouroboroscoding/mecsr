@@ -9,6 +9,7 @@
  */
 
 // NPM modules
+import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
 
 // Material UI
@@ -121,46 +122,43 @@ export default function Calls(props) {
 		});
 	}
 
-	// If we're loading
-	if(logs === null) {
-		return (
-			<Box className="callsTab">
-
-			</Box>
-		);
-	}
-
 	// Render
 	return (
-		<Box className="callsTab">
-			<Box className="calls">
-				{logs === null &&
-					<Typography>Loading...</Typography>
-				}
-				{logs.length === 0 &&
-					<Typography>No logs found for this phone number</Typography>
-				}
-				{logs.length > 0 && logs.map(o =>
-					<Call
-						info={infoSet}
-						key={o.id}
-						{...o}
-					/>
-				)}
-				<Box className="scroll" ref={refScroll} />
-				{info &&
-					<Dialog
-						fullWidth={true}
-						maxWidth="sm"
-						onClose={ev => infoSet(false)}
-						open={true}
-					>
-						<DialogContent>
-							<iframe title="JustCall Info" className="justcall" src={info} />
-						</DialogContent>
-					</Dialog>
-				}
-			</Box>
-		</Box>
+		<React.Fragment>
+			{logs === null ?
+				<Typography>Loading...</Typography>
+			:
+				<React.Fragment>
+					{logs.length === 0 &&
+						<Typography>No logs found for this phone number</Typography>
+					}
+					{logs.length > 0 && logs.map(o =>
+						<Call
+							info={infoSet}
+							key={o.id}
+							{...o}
+						/>
+					)}
+					<Box className="scroll" ref={refScroll} />
+				</React.Fragment>
+			}
+			{info &&
+				<Dialog
+					fullWidth={true}
+					maxWidth="sm"
+					onClose={ev => infoSet(false)}
+					open={true}
+				>
+					<DialogContent>
+						<iframe title="JustCall Info" className="justcall" src={info} />
+					</DialogContent>
+				</Dialog>
+			}
+		</React.Fragment>
 	);
+}
+
+// Valid types
+Calls.propTypes = {
+	phoneNumber: PropTypes.string.isRequired
 }

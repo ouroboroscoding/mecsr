@@ -24,7 +24,7 @@ import Typography from '@material-ui/core/Typography';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 
 // Shared format Components
-import ResultsComponent from 'shared/components/format/Results';
+import { Results } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -235,7 +235,7 @@ export default function NeverStarted(props) {
 	} else if(records === -1) {
 		results = <div>You lack the rights to view Never Started records.</div>
 	} else {
-		results = <ResultsComponent
+		results = <Results
 					custom={{"ready": readyRender}}
 					data={records}
 					noun="never/started"

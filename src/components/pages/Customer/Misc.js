@@ -33,7 +33,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 
 // Shared Format Components
-import FormComponent from 'shared/components/format/Form';
+import { Form } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -466,7 +466,7 @@ export default function Misc(props) {
 			inner = (
 				<React.Fragment>
 					{patientUpdate ?
-						<FormComponent
+						<Form
 							cancel={() => patientUpdateSet(false)}
 							noun="setup/update"
 							service="patient"

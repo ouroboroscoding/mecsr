@@ -31,8 +31,7 @@ import Typography from '@material-ui/core/Typography';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 
 // Format Components
-import ResultsComponent from 'shared/components/format/Results';
-import FormComponent from 'shared/components/format/Form';
+import { Form, Results } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -153,7 +152,7 @@ function GenericTemplates(props) {
 			</Box>
 			{create &&
 				<Paper className="padded">
-					<FormComponent
+					<Form
 						cancel={createToggle}
 						noun={props.noun}
 						service="csr"
@@ -168,7 +167,7 @@ function GenericTemplates(props) {
 			{templates === null ?
 				<div>Loading...</div>
 			:
-				<ResultsComponent
+				<Results
 					data={templates}
 					noun={props.noun}
 					orderBy="title"

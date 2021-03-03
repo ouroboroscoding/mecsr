@@ -38,16 +38,16 @@ import { datetime, ucfirst } from 'shared/generic/tools';
 function locationPretty(location) {
 
 	let l = [];
-	if(location.city && location.city !== '') {
+	if(location.city && location.city !== '' && location.city != 'Unknown') {
 		l.push(ucfirst(location.city));
 	}
-	if(location.state && location.state !== '') {
+	if(location.state && location.state !== '' && location.state != 'Unknown') {
 		l.push(ucfirst(location.state));
 	}
-	if(location.country && location.country !== '') {
+	if(location.country && location.country !== '' && location.country != 'Unknown') {
 		l.push(ucfirst(location.country));
 	}
-	if(location.zipcode && location.zipcode !== '') {
+	if(location.zipcode && location.zipcode !== '' && location.zipcode != 'Unknown') {
 		l.push(location.zipcode);
 	}
 

@@ -168,14 +168,14 @@ function Patient(props) {
 					:
 						<Paper className="padded">
 							<Grid container spacing={2}>
-								<Grid item xs={12} md={6} lg={3}><strong>Joined Date: </strong>{patient.joinDate}</Grid>
+								<Grid item xs={12} md={6} lg={3}><strong>Joined Date: </strong>{patient.joinDate ? patient.joinDate.split(' ')[0] : ''}</Grid>
 								<Grid item xs={12} md={6} lg={3}><strong>Stage: </strong>{patient.stage}</Grid>
 								<Grid item xs={12} md={6} lg={3}><strong>Status: </strong>{patient.processStatus}</Grid>
 								{patient.labSentAt &&
 									<Grid item xs={12} md={6} lg={3}><strong>First Lab Sent: </strong>{patient.labSentAt.split(' ')[0]}</Grid>
 								}
 								{patient.treatment_cycle &&
-									<Grid item xs={12} md={6} lg={3}><strong>Next CHRT: </strong>{patient.treatment_cycle.split(' ')[0]}</Grid>
+									<Grid item xs={12} md={6} lg={3}><strong>CHRT Due: </strong>{patient.treatment_cycle.split(' ')[0]}</Grid>
 								}
 								{patient.stage === 'Dropped' &&
 									<Grid item xs={12} md={6} lg={3}><strong>Dropped Reason: </strong>{patient.reason}</Grid>

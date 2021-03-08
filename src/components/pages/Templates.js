@@ -271,6 +271,10 @@ export default function Templates(props) {
 							<TableCell>https://www.maleexcelmip.com/mip/form/CHRT?landing_id=Kent-ckent@domain.com-2020-07-12-MIP-H1&formId=MIP-H1</TableCell>
 						</TableRow>
 						<TableRow>
+							<TableCell>{"{ihrt_link}"}</TableCell>
+							<TableCell>https://www.maleexcelmip.com/hormone-assessment/ihrt?ktCustomerId=321456</TableCell>
+						</TableRow>
+						<TableRow>
 							<TableCell>{"{email}"}</TableCell>
 							<TableCell>jsmith@gmail.com</TableCell>
 						</TableRow>

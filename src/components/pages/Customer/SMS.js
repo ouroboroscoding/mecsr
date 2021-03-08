@@ -1010,6 +1010,14 @@ export default class SMS extends React.Component {
 					}
 					break;
 
+				case 'ihrt_link':
+					if(!this.props.customer) {
+						Events.trigger('error', 'Can not use template without KNK data');
+						return;
+					}
+					sReplacement = `https://www.maleexcelmip.com/hormone-assessment/ihrt?ktCustomerId=${this.props.customer.customerId}`
+					break;
+
 				// Email
 				case 'email':
 					if(!this.props.customer) {

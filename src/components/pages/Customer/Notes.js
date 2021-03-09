@@ -104,7 +104,7 @@ export default class Notes extends React.Component {
 
 		// Fetch existing messages
 		if(this.props.user && this.props.customerId) {
-			this.fetch();
+			this.fetch('auto');
 		}
 	}
 
@@ -117,7 +117,7 @@ export default class Notes extends React.Component {
 		if(prevProps.visible !== this.props.visible &&
 			this.props.visible &&
 			!this.scrolled) {
-			this.scrollToBottom("auto");
+			this.scrollToBottom('auto');
 			this.scrolled = true;
 		}
 	}

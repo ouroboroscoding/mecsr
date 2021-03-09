@@ -661,7 +661,7 @@ export default class Customer extends React.Component {
 						customerId={this.props.customerId}
 						readOnly={this.props.readOnly}
 						user={this.props.user}
-						visible={this.state.tab === 3}
+						visible={this.state.tab === 4}
 					/>
 				</div>
 				<div className="prescriptions" style={{display: this.state.tab === 5 ? 'block' : 'none'}}>

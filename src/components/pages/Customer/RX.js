@@ -180,7 +180,7 @@ function DoseSpot(props) {
 	return (
 		<Box>
 			<Box className="section_header">
-				<Typography ref={rxTitle}>DoseSpot</Typography>
+				<Typography className="title" ref={rxTitle}>DoseSpot</Typography>
 				{bSSO &&
 					<Box className="actions">
 						{!sso &&

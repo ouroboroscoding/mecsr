@@ -15,9 +15,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import Select from '@material-ui/core/Select';
+import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
+
+// Material UI Icons
+import AddIcon from '@material-ui/icons/Add';
+
+// Local modules
+import LabResultAdd from './HRT_LabResultAdd';
 
 // Shared components
 import HormoneSymptoms from 'shared/components/monolith/HormoneSymptoms';
@@ -156,8 +164,8 @@ function Patient(props) {
 	// Render
 	return (
 		<Box className="patient">
-			<Box className="sectionHeader">
-				<Box className="title">Status</Box>
+			<Box className="section_header">
+				<Typography className="title">Status</Typography>
 			</Box>
 			{patient === 0 ?
 				<Typography>Loading...</Typography>
@@ -226,6 +234,9 @@ function Patient(props) {
  */
 export default function HRT(props) {
 
+	// State
+	let [labCreate, labCreateSet] = useState(false);
+
 	// Render
 	return (
 		<Box className="hrtTab">
@@ -233,15 +244,30 @@ export default function HRT(props) {
 				customerId={props.customerId}
 				user={props.user}
 			/>
-			<Box className="sectionHeader">
-				<Box className="title">Lab Results</Box>
+			<Box className="section_header">
+				<Typography className="title">Lab Results</Typography>
+				<Box className="actions">
+					<Tooltip title="Add Lab Results">
+						<IconButton onClick={ev => labCreateSet(val => !val)}>
+							<AddIcon />
+						</IconButton>
+					</Tooltip>
+				</Box>
 			</Box>
-			<LabResults
-				className="hrtLabResults"
-				customerId={props.customerId.toString()}
-			/>
-			<Box className="sectionHeader">
-				<Box className="title">Assessment Levels</Box>
+			{labCreate ?
+				<LabResultAdd
+					cancel={ev => labCreateSet(false)}
+					customerId={props.customerId}
+					success={() => labCreateSet(false)}
+				/>
+			:
+				<LabResults
+					className="hrtLabResults"
+					customerId={props.customerId.toString()}
+				/>
+			}
+			<Box className="section_header">
+				<Typography className="title">Assessment Levels</Typography>
 			</Box>
 			<HormoneSymptoms
 				className="hrtAssessmentLevels"

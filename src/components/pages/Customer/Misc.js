@@ -392,7 +392,7 @@ export default function Misc(props) {
 		// Header + content
 		calendlyElement = (
 			<React.Fragment key="calendly">
-				<div className="page_header">
+				<div className="section_header">
 					<Typography className="title">Calendly Appointments</Typography>
 				</div>
 				<Paper className="padded">
@@ -433,7 +433,7 @@ export default function Misc(props) {
 		// Header + content
 		stopsElement = (
 			<React.Fragment key="stops">
-				<div className="page_header">
+				<div className="section_header">
 					<Typography className="title">SMS Stop flags (Twilio)</Typography>
 				</div>
 				<Paper className="padded">
@@ -529,7 +529,7 @@ export default function Misc(props) {
 		// Header + content
 		patientElement = (
 			<Box key="patient" className="patient">
-				<div className="page_header">
+				<div className="section_header">
 					<Typography className="title">Patient Portal&nbsp;</Typography>
 					{patient && !patient.activated && Utils.hasRight(props.user, 'patient_account', 'update') &&
 						<Tooltip title="Edit Setup Values">

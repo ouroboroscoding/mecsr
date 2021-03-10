@@ -179,7 +179,7 @@ function DoseSpot(props) {
 	// Render
 	return (
 		<Box>
-			<Box className="sectionHeader">
+			<Box className="section_header">
 				<Typography ref={rxTitle}>DoseSpot</Typography>
 				{bSSO &&
 					<Box className="actions">
@@ -280,7 +280,9 @@ function PharmacyFill(props) {
 	if(props.fills.length > 0 || lManualOrders.length > 0) {
 		fill = (
 			<React.Fragment key="fills">
-				<Box className="title">Manual Pharmacy Fill</Box>
+				<Box className="section_header">
+					<Typography className="title">Manual Pharmacy Fill</Typography>
+				</Box>
 				{props.fills.map(o =>
 					<Paper key={o._id} className="padded">
 						<Grid container spacing={2}>
@@ -312,7 +314,9 @@ function PharmacyFill(props) {
 	if(props.errors.length > 0) {
 		errors = (
 			<React.Fragment>
-				<Box className="title">Pharmacy Fill Errors</Box>
+				<Box className="section_header">
+					<Typography className="title">Pharmacy Fill Errors</Typography>
+				</Box>
 				{props.errors.map(o =>
 					<Paper key={o._id} className="padded">
 						<Grid container spacing={2}>
@@ -444,7 +448,9 @@ function Triggers(props) {
 	// Render
 	return (
 		<React.Fragment>
-			<Box className="title">WellDyneRX Triggers</Box>
+			<Box className="section_header">
+				<Typography className="title">WellDyneRX Triggers</Typography>
+			</Box>
 			{props.triggers.map(o =>
 				<Trigger
 					key={o._id}

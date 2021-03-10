@@ -55,28 +55,6 @@ p {
 	margin-bottom: 10px;
 }
 
-span.title {
-	display: inline-block;
-	font-weight: bold;
-	font-size: 110%;
-	margin: 10px 10px 10px 0;
-	vertical-align: middle;
-}
-
-div.title {
-	display: block;
-	font-size: 2rem;
-	font-weight: 400;
-	margin: 0 0 10px 0;
-}
-
-div.subtitle {
-	display: block;
-	font-size: 1.5rem;
-	font-weight: 400;
-	margin: 0 0 8px 0;
-}
-
 td {
 	vertical-align: top !important;
 }
@@ -174,12 +152,17 @@ td {
 
 .page_header {
 	display: flex;
+	margin: 0 0 10px 0;
+
+	.MuiTypography-root {
+		flex-basis: 0;
+		flex-shrink: 1;
+		flex-grow: 1;
+	}
 
 	.title {
-		flex-grow: 1;
 		font-size: 2rem;
 		font-weight: 400;
-		margin: 0 0 10px 0;
 	}
 
 	button {
@@ -196,26 +179,60 @@ td {
 	margin: 10px 20px 10px 0;
 }
 
-.sectionHeader {
+.section_header {
 	display: flex;
+	margin-bottom: 10px;
 
 	.MuiTypography-root {
 		flex-basis: 0;
 		flex-shrink: 1;
 		flex-grow: 1;
-		font-size: 2rem;
-		font-weight: 400;
+	}
+
+	.title {
+		font-size: 1.75rem;
+		font-weight: 600;
+	}
+
+	.sub-title {
+		font-size: 1.5rem;
+		font-weight: 600;
 	}
 
 	.actions {
 
 		button {
 			position: relative;
-			top: -5px;
+			top: -10px;
 
 			.MuiSvgIcon-root {
 				font-size: 1.5rem;
 			}
 		}
+	}
+}
+
+.flexColumns {
+	display: flex;
+	flex-direction: row;
+}
+
+.flexRows {
+	display: flex;
+	flex-direction: column;
+}
+
+.flexColumns, .flexRows {
+
+	.grow {
+		flex-basis: 0;
+		flex-grow: 1;
+		flex-shrink: 1;
+	}
+
+	.static {
+		flex-basis: auto;
+		flex-grow: 0;
+		flex-shrink: 0;
 	}
 }

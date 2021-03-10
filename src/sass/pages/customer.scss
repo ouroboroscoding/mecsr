@@ -26,13 +26,21 @@
 			flex-shrink: 0;
 			padding: 10px;
 
+			.title {
+				display: inline-block;
+				font-weight: 700;
+				font-size: 110%;
+				margin: 10px 10px 10px 0;
+				vertical-align: middle;
+			}
+
 			.MuiIconButton-root {
 				margin-top: -5px;
 				padding: 9px;
 			}
 
 			.MuiSvgIcon-root {
-				font-size: 70%;
+				font-size: 1.0rem;
 			}
 		}
 

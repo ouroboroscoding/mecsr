@@ -167,14 +167,14 @@ function Patient(props) {
 			<Box className="section_header">
 				<Typography className="title">Status</Typography>
 			</Box>
-			{patient === 0 ?
-				<Typography>Loading...</Typography>
-			:
-				<React.Fragment>
-					{empty(patient) ?
-						<Typography>No record found for this customer</Typography>
-					:
-						<Paper className="padded">
+			<Paper className="padded">
+				{patient === 0 ?
+					<Typography>Loading...</Typography>
+				:
+					<React.Fragment>
+						{empty(patient) ?
+							<Typography>No record found for this customer.</Typography>
+						:
 							<Grid container spacing={2}>
 								<Grid item xs={12} md={6} lg={3}><strong>Joined Date: </strong>{patient.joinDate ? patient.joinDate.split(' ')[0] : ''}</Grid>
 								<Grid item xs={12} md={6} lg={3}><strong>Stage: </strong>{patient.stage}</Grid>
@@ -214,10 +214,10 @@ function Patient(props) {
 									</Grid>
 								}
 							</Grid>
-						</Paper>
-					}
-				</React.Fragment>
-			}
+						}
+					</React.Fragment>
+				}
+			</Paper>
 		</Box>
 	);
 }

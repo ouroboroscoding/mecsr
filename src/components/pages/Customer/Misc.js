@@ -220,7 +220,7 @@ function EVerify(props) {
 			}
 
 			// If there's data
-			if(res.data) {
+			if('data' in res) {
 				resultsSet(res.data);
 			}
 		});
@@ -238,7 +238,7 @@ function EVerify(props) {
 		inner = <span>Loading...</span>
 	} else if(results === -1) {
 		inner = <span>No rights to view e-verification</span>
-	} else if(empty(results)) {
+	} else if(results === false) {
 		inner = <span>No information found</span>
 	} else {
 		inner = (

@@ -220,8 +220,8 @@ function EVerify(props) {
 			}
 
 			// If there's data
-			if(res.data) {
-				resultsSet(res.data);
+			if('data' in res) {
+				resultsSet(res.data || {});
 			}
 		});
 	}

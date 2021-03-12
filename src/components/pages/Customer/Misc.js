@@ -37,13 +37,16 @@ import { Form } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
+import Rights from 'shared/communication/rights';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
-import { clone } from 'shared/generic/tools';
-
-// Local modules
-import Utils from 'utils';
+import {
+	clone,
+	datetime,
+	empty,
+	nicePhone
+} from 'shared/generic/tools';
 
 // Agent Definition
 import SetupDef from 'definitions/patient/account_setup';
@@ -72,42 +75,41 @@ const _STOP_FLAGS = [
 	{flag: 'doctor', title: 'Provider'}
 ]
 
-// Misc component
-export default function Misc(props) {
+/**
+ * Calendly
+ *
+ * Displays calendly appointments
+ *
+ * @name Calendly
+ * @access private
+ * @param Object props Attributes sent to the component
+ * @returns React.Component
+ */
+function Calendly(props) {
 
 	// State
-	let [attempts, attemptsSet] = useState([]);
-	let [calendly, calendlySet] = useState(null);
-	let [patient, patientSet] = useState(null);
-	let [patientUpdate, patientUpdateSet] = useState(false);
-	let [stops, stopsSet] = useState(null);
+	let [results, resultsSet] = useState(null);
 
-	// Effects
+	// User effect
 	useEffect(() => {
-
-		// If we have a user
 		if(props.user) {
-			if(Utils.hasRight(props.user, 'patient_account', 'read')) {
-				patientFetch();
-			}
-			if(Utils.hasRight(props.user, 'csr_messaging', 'create')) {
-				stopsFetch();
-			}
-			if(Utils.hasRight(props.user, 'calendly', 'read')) {
-				calendlyFetch();
+			if(Rights.has('calendly', 'read')) {
+				fetch();
+			} else {
+				resultsSet(-1);
 			}
 		} else {
-			calendlySet([]);
+			resultsSet(null);
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [props.user]); // React to user changes
+	}, [props.user]);
 
-	// Fetch any calendly appointments associated with the current customer
-	function calendlyFetch() {
+	// Fetch calendly appointments
+	function fetch() {
 
 		// Request the appointments
 		Rest.read('monolith', 'customer/calendly', {
-			customerId: props.crm_id
+			customerId: props.customerId
 		}).done(res => {
 
 			// If there's an error or warning
@@ -120,10 +122,257 @@ export default function Misc(props) {
 
 			// If there's data, set the state
 			if('data' in res) {
-				calendlySet(res.data);
+				resultsSet(res.data);
 			}
 		});
 	}
+
+	// If we're still loading
+	let inner = null
+	if(results === null) {
+		inner = <span>Loading...</span>
+	} else if(results === -1) {
+		inner = <span>No rights to view appointments</span>
+	} else if(results.length === 0) {
+		inner = <span>No appointments found</span>
+	} else {
+		inner = (
+			<Table stickyHeader aria-label="sticky table">
+				<TableHead>
+					<TableRow>
+						<TableCell>Starts at</TableCell>
+						<TableCell>Ends at</TableCell>
+						<TableCell>Provider Name</TableCell>
+						<TableCell>Provider E-mail</TableCell>
+					</TableRow>
+				</TableHead>
+				<TableBody>
+					{results.map(o =>
+						<TableRow key={o.id}>
+							<TableCell>{o.start}</TableCell>
+							<TableCell>{o.end}</TableCell>
+							<TableCell>{o.prov_name}</TableCell>
+							<TableCell>{o.prov_emailAddress}</TableCell>
+						</TableRow>
+					)}
+				</TableBody>
+			</Table>
+		)
+	}
+
+	// Render
+	return (
+		<Box className="calendly">
+			<Box className="section_header">
+				<Typography className="title">Calendly Appointments</Typography>
+			</Box>
+			<Paper className="padded">
+				{inner}
+			</Paper>
+		</Box>
+	);
+}
+
+/**
+ * EVerify
+ *
+ * Displays E-Verifications info and photos
+ *
+ * @name EVerify
+ * @access private
+ * @param Object props Attributes sent to the component
+ * @returns React.Component
+ */
+function EVerify(props) {
+
+	// State
+	let [results, resultsSet] = useState(null);
+	let [ssn, ssnSet] = useState(false);
+
+	// User effect
+	useEffect(() => {
+		if(props.user) {
+			if(Rights.has('everify', 'read')) {
+				fetch();
+			} else {
+				resultsSet(-1);
+			}
+		} else {
+			resultsSet(null);
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [props.user])
+
+	// Fetch the e-verification data
+	function fetch() {
+
+		// Request the data from the server
+		Rest.read('monolith', 'customer/everify', {
+			customerId: props.customerId.toString()
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !res._handled) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data
+			if('data' in res) {
+				resultsSet(res.data);
+			}
+		});
+	}
+
+	// Show SSN then hide it again in 5 seconds
+	function ssnShow() {
+		ssnSet(true);
+		setTimeout(() => ssnSet(false), 5000);
+	}
+
+	// If we're still loading
+	let inner = null
+	if(results === null) {
+		inner = <span>Loading...</span>
+	} else if(results === -1) {
+		inner = <span>No rights to view e-verification</span>
+	} else if(results === false) {
+		inner = <span>No information found</span>
+	} else {
+		inner = (
+			<React.Fragment>
+				<Grid container spacing={2}>
+					<Grid item sm={12} md={2} lg={1}>
+						<Typography><strong>Outcome</strong></Typography>
+					</Grid>
+					<Grid item sm={12} md={5} lg={5}>
+						<Typography>{results.identiFloOutcome}</Typography>
+					</Grid>
+					<Grid item sm={12} md={5} lg={6} style={{color: 'red'}}>{results.identiFloErrorMessage}</Grid>
+					<Grid item sm={12} md={2} lg={1}>
+						<Typography><strong>Last Check</strong></Typography>
+					</Grid>
+					<Grid item sm={12} md={5} lg={5}>
+						<Typography>{results.lastIdentiFloAt}</Typography>
+					</Grid>
+					<Grid item sm={12} md={5} lg={6}>&nbsp;</Grid>
+					<Grid item sm={12} md={2} lg={1}>
+						<Typography><strong>Address</strong></Typography>
+					</Grid>
+					<Grid item sm={12} md={5} lg={5}>
+						<Typography>
+							{results.prefix} {results.firstName} {results.middleName} {results.lastName} {results.suffix}<br />
+							{results.address1} {results.address2 && ', ' + results.address2}<br />
+							{results.city}, {results.state}, {results.country}<br />
+							{results.zipCode}
+						</Typography>
+					</Grid>
+					<Grid item sm={12} md={5} lg={6}>
+						<Typography>{results.idfResultAddress}</Typography>
+					</Grid>
+					<Grid item sm={12} md={2} lg={1}>
+						<Typography><strong>Phone Number</strong></Typography>
+					</Grid>
+					<Grid item sm={12} md={5} lg={5}>
+						<Typography>{nicePhone(results.primaryPhone)}</Typography>
+					</Grid>
+					<Grid item sm={12} md={5} lg={6}>
+						<Typography>{results.idfResultPhone}</Typography>
+					</Grid>
+					<Grid item sm={12} md={2} lg={1}>
+						<Typography><strong>Date Of Birth</strong></Typography>
+					</Grid>
+					<Grid item sm={12} md={5} lg={5}>
+						<Typography>{nicePhone(results.dateOfBirth)}</Typography>
+					</Grid>
+					<Grid item sm={12} md={5} lg={6}>
+						<Typography>{results.idfResultDateOfBirth}</Typography>
+					</Grid>
+					<Grid item sm={12} md={2} lg={1}>
+						<Typography><strong>SSN</strong></Typography>
+					</Grid>
+					<Grid item sm={12} md={5} lg={5}>
+						<Typography>
+							{results.ssn &&
+								<React.Fragment>
+									{ssn ?
+										results.ssn
+									:
+										<Button size="small" onClick={ssnShow}>Show SSN</Button>
+									}
+								</React.Fragment>
+							}
+						</Typography>
+					</Grid>
+					<Grid item sm={12} md={5} lg={6}>
+						<Typography>{results.idfResultSocialSecurity}</Typography>
+					</Grid>
+					<Grid item sm={12} md={2} lg={1}>
+						<Typography><strong>Selfie</strong></Typography>
+					</Grid>
+					<Grid item sm={12} md={10} lg={11}>
+						{results.images.selfie &&
+							<img alt="selfie" src={results.images.selfie} style={{width: '100%'}} />
+						}
+					</Grid>
+					<Grid item sm={12} md={2} lg={1}>
+						<Typography><strong>ID</strong></Typography>
+					</Grid>
+					<Grid item sm={12} md={10} lg={11}>
+						{results.images.idScan &&
+							<img alt="idScan" src={results.images.idScan} style={{width: '100%'}} />
+						}
+					</Grid>
+				</Grid>
+			</React.Fragment>
+		);
+	}
+
+	// Render
+	return (
+		<Box className="everify">
+			<Box className="section_header">
+				<Typography className="title">E-Verification</Typography>
+			</Box>
+			<Paper className="padded">
+				{inner}
+			</Paper>
+		</Box>
+	);
+}
+
+/**
+ * Patient
+ *
+ * Displays patient portal access
+ *
+ * @name Patient
+ * @acces private
+ * @param Object props Attributes sent to the component
+ * @returns React.Component
+ */
+function Patient(props) {
+
+	// State
+	let [attempts, attemptsSet] = useState([]);
+	let [patient, patientSet] = useState(null);
+	let [patientUpdate, patientUpdateSet] = useState(false);
+
+	// User effect
+	useEffect(() => {
+		if(props.user) {
+			if(Rights.has('patient_account', 'read')) {
+				patientFetch();
+			} else {
+				patientSet(-1);
+			}
+		} else {
+			patientSet(null);
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [props.user]);
 
 	// Fetch the failed attempts to setup the account
 	function patientAttempts(key) {
@@ -262,75 +511,203 @@ export default function Misc(props) {
 		patientUpdateSet(false);
 	}
 
-	function stopChange(event, service) {
-
-		// Clone the stops
-		let oStops = clone(stops);
-
-		// If we are adding the stop flag to the service
-		if(event.target.checked) {
-
-			// Send the request to the server
-			Rest.create('monolith', 'customer/stop', {
-				phoneNumber: props.phoneNumber,
-				service: service
-			}).done(res => {
-
-				// If there's an error or warning
-				if(res.error && !res._handled) {
-					Events.trigger('error', JSON.stringify(res.error));
+	// If we're still loading
+	let inner = null
+	if(patient === null) {
+		inner = <span>Loading...</span>
+	} else if(patient === -1) {
+		inner = <span>No rights to view patient portal access.</span>
+	} else if(patient === false) {
+		inner = (
+			<span>
+				Customer has no patient portal access.
+				{(!props.readOnly && Rights.has('patient_account', 'create')) &&
+					<span> <Button color="primary" onClick={patientCreate} variant="contained">Send Setup Email</Button></span>
 				}
-				if(res.warning) {
-					Events.trigger('warning', JSON.stringify(res.warning));
+			</span>
+		);
+	} else {
+		inner = (
+			<React.Fragment>
+				{patientUpdate ?
+					<Form
+						cancel={() => patientUpdateSet(false)}
+						noun="setup/update"
+						service="patient"
+						success={patientUpdated}
+						title={false}
+						tree={SetupTree}
+						type="update"
+						value={patient}
+					/>
+				:
+					<Grid container spacing={2}>
+						<Grid item xs={12} md={6}><strong>CRM: </strong><span>{_CRM_TYPE[patient.crm_type]} / {patient.crm_id}</span></Grid>
+						<Grid item xs={12} md={6}><strong>RX: </strong>{patient.rx_type !== null && <span>{_RX_TYPE[patient.rx_type]} / {patient.rx_id}</span>}</Grid>
+						<Grid item xs={12} md={6}>
+							<span style={{verticalAlign: 'middle'}}>
+								<strong>Activated: </strong>
+								{patient.activated ? 'Yes' : 'No / ' + patient.attempts + ' attempts '}
+							</span>
+							{!patient.activated && patient.attempts > 0 &&
+								<Tooltip title="Reset Attempts">
+									<IconButton onClick={() => patientReset(patient._id)}>
+										<RotateLeftIcon />
+									</IconButton>
+								</Tooltip>
+							}
+						</Grid>
+						<Grid item xs={12} md={6}><strong>Email: </strong><span>{patient.email}</span></Grid>
+						{!patient.activated &&
+							<React.Fragment>
+								<Grid item xs={12} md={6}><strong>Last Name: </strong><span>{patient.lname}</span></Grid>
+								<Grid item xs={12} md={6}><strong>DOB: </strong><span>{patient.dob}</span></Grid>
+								<Grid item xs={12}><strong>Setup Link: </strong><span>{'https://' + process.env.REACT_APP_MEPP_DOMAIN + '/#key=s' + patient._id}</span></Grid>
+							</React.Fragment>
+						}
+						{patient.attempts !== null &&
+							<React.Fragment>
+								<Grid item xs={12}>
+									<strong style={{verticalAlign: 'middle'}}>Failed Attempts: </strong>
+									<Tooltip title="Refresh Attempts List">
+										<IconButton className="nopadding" onClick={() => patientAttempts(patient._id)}>
+											<RefreshIcon />
+										</IconButton>
+									</Tooltip>
+								</Grid>
+								{attempts.map(o =>
+									<React.Fragment>
+										<Grid item xs={12} md={4}><strong>Date:</strong> {datetime(o._created, '-')}</Grid>
+										<Grid item xs={12} md={4}><strong>DOB:</strong> "{o.dob}"</Grid>
+										<Grid item xs={12} md={4}><strong>Last Name:</strong> "{o.lname}"</Grid>
+									</React.Fragment>
+								)}
+							</React.Fragment>
+						}
+					</Grid>
 				}
+			</React.Fragment>
+		);
+	}
 
-				// If there's data, set the state
-				if(res.data) {
-
-					// Add the flag
-					oStops[service] = props.user.id;
-
-					// Set the new state
-					stopsSet(oStops);
+	// Render
+	return (
+		<Box key="patient" className="patient">
+			<Box className="section_header">
+				<Typography className="title">Patient Portal&nbsp;</Typography>
+				{patient && !patient.activated && Rights.has('patient_account', 'update') &&
+					<Tooltip title="Edit Setup Values">
+						<IconButton className="edit" onClick={() => patientUpdateSet(b => !b)}>
+							<EditIcon />
+						</IconButton>
+					</Tooltip>
 				}
-			});
+			</Box>
+			<Paper className="padded">
+				{inner}
+			</Paper>
+		</Box>
+	)
+}
+
+/**
+ * Stops
+ *
+ * Displays STOP flags for the given phone number
+ *
+ * @name Stops
+ * @access private
+ * @param Object props Attributes sent to the component
+ * @returns React.Component
+ */
+function Stops(props) {
+
+	// State
+	let [flags, flagsSet] = useState(null);
+
+	// User effect
+	useEffect(() => {
+		if(props.user) {
+			fetch();
+		} else {
+			flagsSet(null);
 		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [props.user]);
 
-		// Else, we are removing the stop flag from the service
-		else {
+	function change(event, service) {
 
-			// Send the request to the server
-			Rest.delete('monolith', 'customer/stop', {
-				phoneNumber: props.phoneNumber,
-				service: service
-			}).done(res => {
+		// If the user has the right to change the stop
+		if(Rights.has('csr_messaging', 'create')) {
 
-				// If there's an error or warning
-				if(res.error && !res._handled) {
-					if(res.error.code === 1509) {
-						Events.trigger('error', "Can't remove STOP set by customer");
-					} else {
+			// Clone the flags
+			let oFlags = clone(flags);
+
+			// If we are adding the stop flag to the service
+			if(event.target.checked) {
+
+				// Send the request to the server
+				Rest.create('monolith', 'customer/stop', {
+					phoneNumber: props.phoneNumber,
+					service: service
+				}).done(res => {
+
+					// If there's an error or warning
+					if(res.error && !res._handled) {
 						Events.trigger('error', JSON.stringify(res.error));
 					}
-				}
-				if(res.warning) {
-					Events.trigger('warning', JSON.stringify(res.warning));
-				}
+					if(res.warning) {
+						Events.trigger('warning', JSON.stringify(res.warning));
+					}
 
-				// If there's data, set the state
-				if(res.data) {
+					// If there's data, set the state
+					if(res.data) {
 
-					// Remove the flag
-					delete oStops[service];
+						// Add the flag
+						oFlags[service] = props.user.id;
 
-					// Set the new state
-					stopsSet(oStops);
-				}
-			});
+						// Set the new state
+						flagsSet(oFlags);
+					}
+				});
+			}
+
+			// Else, we are removing the stop flag from the service
+			else {
+
+				// Send the request to the server
+				Rest.delete('monolith', 'customer/stop', {
+					phoneNumber: props.phoneNumber,
+					service: service
+				}).done(res => {
+
+					// If there's an error or warning
+					if(res.error && !res._handled) {
+						if(res.error.code === 1509) {
+							Events.trigger('error', "Can't remove STOP set by customer");
+						} else {
+							Events.trigger('error', JSON.stringify(res.error));
+						}
+					}
+					if(res.warning) {
+						Events.trigger('warning', JSON.stringify(res.warning));
+					}
+
+					// If there's data, set the state
+					if(res.data) {
+
+						// Remove the flag
+						delete oFlags[service];
+
+						// Set the new state
+						flagsSet(oFlags);
+					}
+				});
+			}
 		}
 	}
 
-	function stopsFetch() {
+	function fetch() {
 
 		// Request the account
 		Rest.read('monolith', 'customer/stops', {
@@ -347,212 +724,87 @@ export default function Misc(props) {
 
 			// If there's data, set the state
 			if('data' in res) {
-				stopsSet(res.data);
+				flagsSet(res.data);
 			}
 		});
 	}
 
-	// Calendly elements
-	let calendlyElement = null;
-
-	// If the user has rights to view calendly
-	if(Utils.hasRight(props.user, 'calendly', 'read')) {
-
-		// If we're still loading
-		let inner = null
-		if(calendly === null) {
-			inner = <span>Loading...</span>
-		} else if(calendly.length === 0) {
-			inner = <span>No appointments found</span>
-		} else {
-			inner = (
-				<Table stickyHeader aria-label="sticky table">
-					<TableHead>
-						<TableRow>
-							<TableCell>Starts at</TableCell>
-							<TableCell>Ends at</TableCell>
-							<TableCell>Provider Name</TableCell>
-							<TableCell>Provider E-mail</TableCell>
-						</TableRow>
-					</TableHead>
-					<TableBody>
-						{calendly.map(o =>
-							<TableRow key={o.id}>
-								<TableCell>{o.start}</TableCell>
-								<TableCell>{o.end}</TableCell>
-								<TableCell>{o.prov_name}</TableCell>
-								<TableCell>{o.prov_emailAddress}</TableCell>
-							</TableRow>
-						)}
-					</TableBody>
-				</Table>
-			)
-		}
-
-		// Header + content
-		calendlyElement = (
-			<React.Fragment key="calendly">
-				<div className="section_header">
-					<Typography className="title">Calendly Appointments</Typography>
-				</div>
-				<Paper className="padded">
-					{inner}
-				</Paper>
-			</React.Fragment>
-		)
-	}
-
-	// SMS Stop elements
-	let stopsElement = null;
-
-	// If the user has rights to view calendly
-	if(Utils.hasRight(props.user, 'csr_messaging', 'create')) {
-
-		// If we're still loading
-		let inner = null
-		if(stops === null) {
-			inner = <span>Loading...</span>
-		} else {
-			inner = (
-				<Grid container spacing={2}>
-					{_STOP_FLAGS.map(o =>
-						<Grid item xs={12} sm={6} md={3}>
-							<Switch
-								checked={o.flag in stops}
-								disabled={stops[o.flag] === null}
-								color="secondary"
-								onChange={ev => stopChange(ev, o.flag)}
-							/>
-							{o.title}
-						</Grid>
-					)}
-				</Grid>
-			);
-		}
-
-		// Header + content
-		stopsElement = (
-			<React.Fragment key="stops">
-				<div className="section_header">
-					<Typography className="title">SMS Stop flags (Twilio)</Typography>
-				</div>
-				<Paper className="padded">
-					{inner}
-				</Paper>
-			</React.Fragment>
-		)
-	}
-
-	// Patient Portal elements
-	let patientElement = null;
-
-	// If the user has rights to view patient
-	if(Utils.hasRight(props.user, 'patient_account', 'read')) {
-
-		// If we're still loading
-		let inner = null
-		if(patient === null) {
-			inner = <span>Loading...</span>
-		} else if(patient === false) {
-			inner = (
-				<span>
-					Customer has no patient portal access.
-					{(!props.readOnly && Utils.hasRight(props.user, 'patient_account', 'create')) &&
-						<span> <Button color="primary" onClick={patientCreate} variant="contained">Send Setup Email</Button></span>
-					}
-				</span>
-			);
-		} else {
-			inner = (
-				<React.Fragment>
-					{patientUpdate ?
-						<Form
-							cancel={() => patientUpdateSet(false)}
-							noun="setup/update"
-							service="patient"
-							success={patientUpdated}
-							title={false}
-							tree={SetupTree}
-							type="update"
-							value={patient}
+	// If we're still loading
+	let inner = null
+	if(flags === null) {
+		inner = <span>Loading...</span>
+	} else {
+		inner = (
+			<Grid container spacing={2}>
+				{_STOP_FLAGS.map(o =>
+					<Grid key={o.flag} item xs={12} sm={6} md={3}>
+						<Switch
+							checked={o.flag in flags}
+							disabled={flags[o.flag] === null}
+							color="secondary"
+							onChange={ev => change(ev, o.flag)}
 						/>
-					:
-						<Grid container spacing={2}>
-							<Grid item xs={12} md={6}><strong>CRM: </strong><span>{_CRM_TYPE[patient.crm_type]} / {patient.crm_id}</span></Grid>
-							<Grid item xs={12} md={6}><strong>RX: </strong>{patient.rx_type !== null && <span>{_RX_TYPE[patient.rx_type]} / {patient.rx_id}</span>}</Grid>
-							<Grid item xs={12} md={6}>
-								<span style={{verticalAlign: 'middle'}}>
-									<strong>Activated: </strong>
-									{patient.activated ? 'Yes' : 'No / ' + patient.attempts + ' attempts '}
-								</span>
-								{!patient.activated && patient.attempts > 0 &&
-									<Tooltip title="Reset Attempts">
-										<IconButton onClick={() => patientReset(patient._id)}>
-											<RotateLeftIcon />
-										</IconButton>
-									</Tooltip>
-								}
-							</Grid>
-							<Grid item xs={12} md={6}><strong>Email: </strong><span>{patient.email}</span></Grid>
-							{!patient.activated &&
-								<React.Fragment>
-									<Grid item xs={12} md={6}><strong>Last Name: </strong><span>{patient.lname}</span></Grid>
-									<Grid item xs={12} md={6}><strong>DOB: </strong><span>{patient.dob}</span></Grid>
-									<Grid item xs={12}><strong>Setup Link: </strong><span>{'https://' + process.env.REACT_APP_MEPP_DOMAIN + '/#key=s' + patient._id}</span></Grid>
-								</React.Fragment>
-							}
-							{patient.attempts !== null &&
-								<React.Fragment>
-									<Grid item xs={12}>
-										<strong style={{verticalAlign: 'middle'}}>Failed Attempts: </strong>
-										<Tooltip title="Refresh Attempts List">
-											<IconButton className="nopadding" onClick={() => patientAttempts(patient._id)}>
-												<RefreshIcon />
-											</IconButton>
-										</Tooltip>
-									</Grid>
-									{attempts.map(o =>
-										<React.Fragment>
-											<Grid item xs={12} md={4}><strong>Date:</strong> {Utils.datetime(o._created)}</Grid>
-											<Grid item xs={12} md={4}><strong>DOB:</strong> "{o.dob}"</Grid>
-											<Grid item xs={12} md={4}><strong>Last Name:</strong> "{o.lname}"</Grid>
-										</React.Fragment>
-									)}
-								</React.Fragment>
-							}
-						</Grid>
-					}
-				</React.Fragment>
-			);
-		}
-
-		// Header + content
-		patientElement = (
-			<Box key="patient" className="patient">
-				<div className="section_header">
-					<Typography className="title">Patient Portal&nbsp;</Typography>
-					{patient && !patient.activated && Utils.hasRight(props.user, 'patient_account', 'update') &&
-						<Tooltip title="Edit Setup Values">
-							<IconButton className="edit" onClick={() => patientUpdateSet(b => !b)}>
-								<EditIcon />
-							</IconButton>
-						</Tooltip>
-					}
-				</div>
-				<Paper className="padded">
-					{inner}
-				</Paper>
-			</Box>
-		)
+						{o.title}
+					</Grid>
+				)}
+			</Grid>
+		);
 	}
 
 	// Render
 	return (
-		<Box className="misc">{[
-			calendlyElement,
-			stopsElement,
-			patientElement
-		]}
+		<Box className="smsStops">
+			<Box className="section_header">
+				<Typography className="title">SMS Stop flags (Twilio)</Typography>
+			</Box>
+			<Paper className="padded">
+				{inner}
+			</Paper>
+		</Box>
+	);
+}
+
+/**
+ * Misc
+ *
+ * Displays the different sections that don't fit anywhere else in the customer
+ * tabs
+ *
+ * @name Misc
+ * @access public
+ * @param Object props Attributes sent to the component
+ * @returns React.Component
+ */
+export default function Misc(props) {
+
+	// CRM ID
+	let crm_id = props.crm_id || false;
+
+	// Render
+	return (
+		<Box className="misc">
+			{crm_id &&
+				<Calendly
+					customerId={crm_id}
+					user={props.user}
+				/>
+			}
+			<Stops
+				phoneNumber={props.phoneNumber}
+				user={props.user}
+			/>
+			{crm_id &&
+				<Patient
+					crm_id={crm_id}
+					user={props.user}
+				/>
+			}
+			{crm_id &&
+				<EVerify
+					customerId={crm_id}
+					user={props.user}
+				/>
+			}
 		</Box>
 	);
 }

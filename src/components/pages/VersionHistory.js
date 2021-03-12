@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.31.0', 'March 12th, 2021', [
+		'Added E-Verification (Identiflo) data to the Customer Misc. tab.'
+	]],
 	['1.30.0', 'March 9th, 2021', [
 		'Updated Customer HRT tab with a form to manually add new Lab Results.'
 	]],

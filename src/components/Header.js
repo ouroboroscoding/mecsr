@@ -23,10 +23,13 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
+import AddAlertIcon from '@material-ui/icons/AddAlert';
 import AddIcon from '@material-ui/icons/Add';
 import AllInboxIcon from '@material-ui/icons/AllInbox';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
@@ -43,6 +46,7 @@ import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import LocalPharmacyIcon from '@material-ui/icons/LocalPharmacy';
 import MenuIcon from '@material-ui/icons/Menu';
 import MergeTypeIcon from '@material-ui/icons/MergeType';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 import NewReleasesIcon from '@material-ui/icons/NewReleases';
 import PeopleIcon from '@material-ui/icons/People';
 import PermIdentityIcon from '@material-ui/icons/PermIdentity';
@@ -54,6 +58,7 @@ import Account from './composites/Account';
 import CancelContinuous from './composites/CancelContinuous';
 import Decline from './composites/Decline';
 import Provider from './composites/Provider';
+import Reminder from './composites/Reminder';
 import Resolve from './composites/Resolve';
 import Transfer from './composites/Transfer';
 import { CustomListsDialog } from './composites/CustomLists';
@@ -63,6 +68,7 @@ import Loader from './Loader';
 
 // Data modules
 import claimed from 'data/claimed';
+import reminders from 'data/reminders';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -83,17 +89,29 @@ function CustomerItem(props) {
 	let [cancel, cancelSet] = useState(false);
 	let [decline, declineSet] = useState(false);
 	let [list, listSet] = useState(false);
+	let [more, moreSet] = useState(null);
 	let [provider, providerSet] = useState(false);
+	let [reminder, reminderSet] = useState(false);
 	let [resolve, resolveSet] = useState(false);
 	let [transfer, transferSet] = useState(false);
 
 	// Hooks
 	let history = useHistory();
 
-	function addToListClick(ev) {
+	// Add the claimed customer to a list
+	function addToList(ev) {
 		ev.stopPropagation();
 		ev.preventDefault();
 		listSet(true);
+		moreSet(null);
+	}
+
+	// Add the claimed customer to a reminder
+	function addToReminders(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
+		reminderSet(true);
+		moreSet(null);
 	}
 
 	// Cancel click
@@ -178,12 +196,28 @@ function CustomerItem(props) {
 		}
 	}
 
+	// More icon click
+	function moreClick(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
+		moreSet(ev.currentTarget);
+	}
+
+	// More menu close
+	function moreClose(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
+		moreSet(null);
+	}
+
+	// Provider click
 	function providerClick(ev) {
 		ev.stopPropagation();
 		ev.preventDefault();
 		providerSet(props.user.id);
 	}
 
+	// Transfer to provider
 	function providerTransfer() {
 
 		// Hide the dialog
@@ -336,13 +370,6 @@ function CustomerItem(props) {
 										</span>
 									}
 									<span className="tooltip">
-										<Tooltip title="Add to List">
-											<IconButton className="list" onClick={addToListClick}>
-												<ViewListIcon />
-											</IconButton>
-										</Tooltip>
-									</span>
-									<span className="tooltip">
 										<Tooltip title="Transfer">
 											<IconButton className="transfer" onClick={transferClick}>
 												<MergeTypeIcon />
@@ -363,6 +390,31 @@ function CustomerItem(props) {
 												</IconButton>
 											</Tooltip>
 										}
+									</span>
+									<span className="tooltip">
+										<Tooltip title="More">
+											<IconButton onClick={moreClick}>
+												<MoreVertIcon />
+											</IconButton>
+										</Tooltip>
+										<Menu
+											anchorEl={more}
+											open={Boolean(more)}
+											onClose={moreClose}
+										>
+											<MenuItem onClick={addToList}>
+												<ListItemIcon>
+													<ViewListIcon />
+												</ListItemIcon>
+												<ListItemText primary="Add to List" />
+											</MenuItem>
+											<MenuItem onClick={addToReminders}>
+												<ListItemIcon>
+													<AddAlertIcon />
+												</ListItemIcon>
+												<ListItemText primary="Add to Reminders" />
+											</MenuItem>
+										</Menu>
 									</span>
 								</span>
 							</React.Fragment>
@@ -386,6 +438,14 @@ function CustomerItem(props) {
 					name={props.customerName}
 					number={props.customerPhone}
 					onClose={() => listSet(false)}
+				/>
+			}
+			{reminder &&
+				<Reminder
+					customerId={props.customerId.toString()}
+					name={props.customerName}
+					number={props.customerPhone}
+					onClose={e => reminderSet(false)}
 				/>
 			}
 			{resolve &&
@@ -426,15 +486,27 @@ function ViewItem(props) {
 
 	// State
 	let [list, listSet] = useState(false);
+	let [more, moreSet] = useState(null);
+	let [reminder, reminderSet] = useState(false);
 	let [transfer, transferSet] = useState(false);
 
 	// Hooks
 	let history = useHistory();
 
-	function addToListClick(ev) {
+	// Add the claimed customer to a list
+	function addToList(ev) {
 		ev.stopPropagation();
 		ev.preventDefault();
 		listSet(true);
+		moreSet(null);
+	}
+
+	// Add the claimed customer to a reminder
+	function addToReminders(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
+		reminderSet(true);
+		moreSet(null);
 	}
 
 	// Claim
@@ -463,6 +535,20 @@ function ViewItem(props) {
 			Utils.viewedPath(props.phone, props.id),
 			props.phone
 		)
+	}
+
+	// More icon click
+	function moreClick(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
+		moreSet(ev.currentTarget);
+	}
+
+	// More menu close
+	function moreClose(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
+		moreSet(null);
 	}
 
 	// X click
@@ -549,13 +635,6 @@ function ViewItem(props) {
 										</Tooltip>
 									</span>
 									<span className="tooltip">
-										<Tooltip title="Add to List">
-											<IconButton className="list" onClick={addToListClick}>
-												<ViewListIcon />
-											</IconButton>
-										</Tooltip>
-									</span>
-									<span className="tooltip">
 										{(props.claimed && props.overwrite) &&
 											<Tooltip title="Transfer">
 												<IconButton className="transfer" onClick={transferClick}>
@@ -570,6 +649,31 @@ function ViewItem(props) {
 												</IconButton>
 											</Tooltip>
 										}
+									</span>
+									<span className="tooltip">
+										<Tooltip title="More">
+											<IconButton onClick={moreClick}>
+												<MoreVertIcon />
+											</IconButton>
+										</Tooltip>
+										<Menu
+											anchorEl={more}
+											open={Boolean(more)}
+											onClose={moreClose}
+										>
+											<MenuItem onClick={addToList}>
+												<ListItemIcon>
+													<ViewListIcon />
+												</ListItemIcon>
+												<ListItemText primary="Add to List" />
+											</MenuItem>
+											<MenuItem onClick={addToReminders}>
+												<ListItemIcon>
+													<AddAlertIcon />
+												</ListItemIcon>
+												<ListItemText primary="Add to Reminders" />
+											</MenuItem>
+										</Menu>
 									</span>
 								</span>
 							</React.Fragment>
@@ -594,6 +698,15 @@ function ViewItem(props) {
 					onClose={() => listSet(false)}
 				/>
 			}
+			{reminder &&
+				<Reminder
+					customerId={props.id.toString()}
+					name={props.name}
+					number={props.phone}
+					onClose={e => reminderSet(false)}
+				/>
+			}
+
 		</React.Fragment>
 	);
 }
@@ -608,18 +721,19 @@ export default class Header extends React.Component {
 
 		// Initialise the state
 		this.state = {
-			"account": false,
-			"claimed": [],
-			"claimed_open": true,
-			"menu": false,
-			"newMsgs": safeLocalStorageJSON('newMsgs', {}),
-			"overwrite": props.user ? Utils.hasRight(props.user, 'csr_overwrite', 'create') : false,
-			"path": window.location.pathname,
-			"pending": 0,
-			"unclaimed": 0,
-			"user": props.user || false,
-			"viewed": [],
-			"viewed_open": true
+			account: false,
+			claimed: [],
+			claimed_open: true,
+			menu: false,
+			newMsgs: safeLocalStorageJSON('newMsgs', {}),
+			overwrite: props.user ? Utils.hasRight(props.user, 'csr_overwrite', 'create') : false,
+			path: window.location.pathname,
+			pending: 0,
+			reminders: 0,
+			unclaimed: 0,
+			user: props.user || false,
+			viewed: [],
+			viewed_open: true
 		}
 
 		// Timers
@@ -635,6 +749,7 @@ export default class Header extends React.Component {
 		this.menuItem = this.menuItem.bind(this);
 		this.menuToggle = this.menuToggle.bind(this);
 		this.newMessages = this.newMessages.bind(this);
+		this.reminderCount = this.reminderCount.bind(this);
 		this.signedIn = this.signedIn.bind(this);
 		this.signedOut = this.signedOut.bind(this);
 		this.signout = this.signout.bind(this);
@@ -660,6 +775,9 @@ export default class Header extends React.Component {
 		// Track document visibility
 		PageVisibility.add(this.visibilityChange);
 
+		// Track reminder count
+		reminders.subscribe(this.reminderCount);
+
 		// Check for a direct view
 		let lPath = Utils.parsePath(this.state.path);
 		if(lPath[0] === 'view' && !this.state.viewed.length) {
@@ -678,8 +796,11 @@ export default class Header extends React.Component {
 		Events.remove('viewedDuplicate', this.viewedDuplicate);
 		Events.remove('viewedRemove', this.viewedRemove);
 
-		// Track document visibility
+		// Stop tracking document visibility
 		PageVisibility.remove(this.visibilityChange);
+
+		// Stop tracking reminder count
+		reminders.unsubscribe(this.reminderCount);
 
 		// Stop checking for new messages and unclaimed counts
 		if(this.iUpdates) {
@@ -968,29 +1089,33 @@ export default class Header extends React.Component {
 		});
 	}
 
+	reminderCount(count) {
+		this.setState({reminders: count});
+	}
+
 	render() {
 
 		// Create the drawer items
 		let drawer = (
 			<React.Fragment>
 				<List className="pages">
-					{Utils.hasRight(this.state.user, 'csr_agents', 'read') &&
-						<React.Fragment>
-							<Link to="/agents" onClick={this.menuClick}>
-								<ListItem button selected={this.state.path === "/agents"}>
-									<ListItemIcon><PeopleIcon /></ListItemIcon>
-									<ListItemText primary="Agents" />
-								</ListItem>
-							</Link>
-							<Divider />
-						</React.Fragment>
-					}
 					{Utils.hasRight(this.state.user, 'manual_adhoc', 'read') &&
 						<React.Fragment>
 							<Link to="/manualad" onClick={this.menuClick}>
 								<ListItem button selected={this.state.path === "/manualad"}>
 									<ListItemIcon><DeveloperModeIcon /></ListItemIcon>
 									<ListItemText primary="Manual AdHoc" />
+								</ListItem>
+							</Link>
+							<Divider />
+						</React.Fragment>
+					}
+					{Utils.hasRight(this.state.user, 'csr_agents', 'read') &&
+						<React.Fragment>
+							<Link to="/agents" onClick={this.menuClick}>
+								<ListItem button selected={this.state.path === "/agents"}>
+									<ListItemIcon><PeopleIcon /></ListItemIcon>
+									<ListItemText primary="Agents" />
 								</ListItem>
 							</Link>
 							<Divider />
@@ -1007,13 +1132,6 @@ export default class Header extends React.Component {
 							<Divider />
 						</React.Fragment>
 					}
-					<Link to="/hrt" onClick={this.menuClick}>
-						<ListItem button selected={this.state.path === "/hrt"}>
-							<ListItemIcon><AssessmentIcon /></ListItemIcon>
-							<ListItemText primary="HRT Patients" />
-						</ListItem>
-					</Link>
-					<Divider />
 					{Utils.hasRight(this.state.user, 'csr_templates', 'read') &&
 						<React.Fragment>
 							<Link to="/templates" onClick={this.menuClick}>
@@ -1038,6 +1156,20 @@ export default class Header extends React.Component {
 							<Divider />
 						</React.Fragment>
 					}
+					<Link to="/reminders" onClick={this.menuClick}>
+						<ListItem button selected={this.state.path === "/reminders"}>
+							<ListItemIcon><AddAlertIcon /></ListItemIcon>
+							<ListItemText primary={'Reminders (' + this.state.reminders + ')'} />
+						</ListItem>
+					</Link>
+					<Divider />
+					<Link to="/hrt" onClick={this.menuClick}>
+						<ListItem button selected={this.state.path === "/hrt"}>
+							<ListItemIcon><AssessmentIcon /></ListItemIcon>
+							<ListItemText primary="HRT Patients" />
+						</ListItem>
+					</Link>
+					<Divider />
 					<React.Fragment>
 						<Link to="/pending" onClick={this.menuClick}>
 							<ListItem button selected={this.state.path === "/pending"}>

@@ -22,6 +22,7 @@ $menu-width: 250px;
 @import 'pages/hrt';
 @import 'pages/pending';
 @import 'pages/pharmacy';
+@import 'pages/reminders';
 @import 'pages/search';
 @import 'pages/stats';
 @import 'pages/templates';
@@ -118,11 +119,6 @@ td {
 	margin-bottom: 10px !important;
 }
 
-.MuiTypography-root.title {
-	font-size: 110%;
-	font-weight: bold;
-}
-
 .MuiBox-root.rounded {
 	border: 1px solid #cecece;
 	border-radius: 5px;
@@ -150,7 +146,7 @@ td {
 	min-width: 0 !important;
 }
 
-.page_header {
+.group_header, .page_header, .section_header {
 	display: flex;
 	margin: 0 0 10px 0;
 
@@ -160,13 +156,34 @@ td {
 		flex-grow: 1;
 	}
 
+	button {
+		position: relative;
+	}
+}
+
+.group_header {
+
 	.title {
-		font-size: 2rem;
-		font-weight: 400;
+		font-size: 1.75rem;
 	}
 
 	button {
-		position: relative;
+		top: -10px;
+
+		.MuiSvgIcon-root {
+			font-size: 1.5rem;
+		}
+	}
+}
+
+.page_header {
+
+	.title {
+		font-size: 2rem;
+		font-weight: 600;
+	}
+
+	button {
 		top: -15px;
 
 		.MuiSvgIcon-root {
@@ -180,14 +197,6 @@ td {
 }
 
 .section_header {
-	display: flex;
-	margin-bottom: 10px;
-
-	.MuiTypography-root {
-		flex-basis: 0;
-		flex-shrink: 1;
-		flex-grow: 1;
-	}
 
 	.title {
 		font-size: 1.75rem;
@@ -199,15 +208,11 @@ td {
 		font-weight: 600;
 	}
 
-	.actions {
+	button {
+		top: -10px;
 
-		button {
-			position: relative;
-			top: -10px;
-
-			.MuiSvgIcon-root {
-				font-size: 1.5rem;
-			}
+		.MuiSvgIcon-root {
+			font-size: 1.5rem;
 		}
 	}
 }

@@ -39,6 +39,7 @@ import HRT from './pages/HRT';
 import ManualAdHoc from './pages/ManualAdHoc';
 import Pending from './pages/Pending';
 import Pharmacy from './pages/Pharmacy';
+import Reminders from './pages/Reminders';
 import Search from './pages/Search';
 import Stats from './pages/Stats';
 import Templates from './pages/Templates';
@@ -124,32 +125,8 @@ export default function Site(props) {
 				/>
 				<div id="content">
 					<Switch>
-						<Route path="/agents">
+						<Route exact path="/agents">
 							<Agents user={user} />
-						</Route>
-						<Route path="/manualad">
-							<ManualAdHoc user={user} />
-						</Route>
-						<Route path="/stats">
-							<Stats user={user} />
-						</Route>
-						<Route path="/hrt">
-							<HRT user={user} />
-						</Route>
-						<Route path="/templates">
-							<Templates user={user} />
-						</Route>
-						<Route path="/pharmacy">
-							<Pharmacy user={user} />
-						</Route>
-						<Route path="/pending">
-							<Pending user={user} />
-						</Route>
-						<Route path="/unclaimed">
-							<Unclaimed user={user} />
-						</Route>
-						<Route path="/search">
-							<Search user={user} />
 						</Route>
 						<Route
 							path="/customer/:phoneNumber/:customerId"
@@ -164,6 +141,33 @@ export default function Site(props) {
 								/>
 							)}
 						/>
+						<Route exact path="/hrt">
+							<HRT user={user} />
+						</Route>
+						<Route exact path="/manualad">
+							<ManualAdHoc user={user} />
+						</Route>
+						<Route exact path="/pending">
+							<Pending user={user} />
+						</Route>
+						<Route exact path="/pharmacy">
+							<Pharmacy user={user} />
+						</Route>
+						<Route exact path="/reminders">
+							<Reminders user={user} />
+						</Route>
+						<Route exact path="/search">
+							<Search user={user} />
+						</Route>
+						<Route exact path="/stats">
+							<Stats user={user} />
+						</Route>
+						<Route exact path="/templates">
+							<Templates user={user} />
+						</Route>
+						<Route exact path="/unclaimed">
+							<Unclaimed user={user} />
+						</Route>
 						<Route
 							path="/view/:phoneNumber/:customerId"
 							component={({match: {params:{phoneNumber, customerId}}}) => (
@@ -177,7 +181,7 @@ export default function Site(props) {
 								/>
 							)}
 						/>
-						<Route path="/">
+						<Route exact path="/">
 							<VersionHistory />
 						</Route>
 					</Switch>

@@ -44,7 +44,6 @@ import Events from 'shared/generic/events';
 import {
 	clone,
 	datetime,
-	empty,
 	nicePhone
 } from 'shared/generic/tools';
 

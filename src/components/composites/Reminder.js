@@ -1,11 +1,11 @@
 /**
- * Resolve
+ * Reminder
  *
  * Handles resolve dialog
  *
  * @author Chris Nasr <bast@maleexcel.com>
  * @copyright MaleExcelMedical
- * @created 2020-06-23
+ * @created 2021-03-24
  */
 
 // NPM modules
@@ -19,56 +19,36 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
 
-// Shared communications modules
-import Rest from 'shared/communication/rest';
+// Date modules
+import reminders from 'data/reminders';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
+import { date, nicePhone } from 'shared/generic/tools';
 
-// Resolve
-export default function Resolve(props) {
+// Reminder
+export default function Reminder(props) {
 
 	// Refs
+	let dateRef = useRef();
 	let noteRef = useRef();
 
 	// Submite notes / resolve conversation
 	function submit() {
 
-		// Check for notes
-		let content = noteRef.current.value;
-
-		// If we got text
-		if(content.trim() !== '') {
-
-			// Send the message to the server
-			Rest.create('monolith', 'customer/note', {
-				action: 'CSR Note - ' + props.title + ' Resolved',
-				content: content,
-				customerId: props.customerId
-			}).done(res => {
-
-				// If there's an error
-				if(res.error && !res._handled) {
-					Events.trigger('error', JSON.stringify(res.error));
-				}
-
-				// If there's a warning
-				if(res.warning) {
-					Events.trigger('warning', JSON.stringify(res.warning));
-				}
-
-				// If we're ok
-				if(res.data) {
-					props.onSubmit();
-				}
-			});
-		}
-
-		// Else, let the parent handle removing the claim
-		else {
-			props.onSubmit();
-		}
+		// Send the message to the server
+		reminders.add({
+			date: dateRef.current.value,
+			crm_type: 'knk',
+			crm_id: props.customerId,
+			note: noteRef.current.value.trim()
+		}).then(res => {
+			props.onClose();
+		}, error => {
+			Events.trigger('error', JSON.stringify(error));
+		});
 	}
 
 	return (
@@ -78,25 +58,34 @@ export default function Resolve(props) {
 			open={true}
 			onClose={props.onClose}
 			PaperProps={{
-				className: "resolve"
+				className: "reminder"
 			}}
 		>
-			<DialogTitle id="confirmation-dialog-title">Resolve {props.title}</DialogTitle>
+			<DialogTitle id="confirmation-dialog-title">Reminder {props.title}</DialogTitle>
 			<DialogContent dividers>
-				<TextField
+				<Typography type="p">
+					Add a reminder for {props.name} {nicePhone(props.number)}<br /><br />
+				</Typography>
+				<p><TextField
+					defaultValue={date(new Date())}
+					inputRef={dateRef}
+					type="date"
+					variant="outlined"
+				/></p>
+				<p><TextField
 					label="Add Note"
 					multiline
 					inputRef={noteRef}
 					rows="4"
 					variant="outlined"
-				/>
+				/></p>
 			</DialogContent>
 			<DialogActions>
 				<Button variant="contained" color="secondary" onClick={props.onClose}>
 					Cancel
 				</Button>
 				<Button variant="contained" color="primary" onClick={submit}>
-					Resolve
+					Add Reminder
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -104,14 +93,9 @@ export default function Resolve(props) {
 }
 
 // Valid props
-Resolve.propTypes = {
+Reminder.propTypes = {
 	customerId: PropTypes.string.isRequired,
-	onClose: PropTypes.func.isRequired,
-	onSubmit: PropTypes.func.isRequired,
-	title: PropTypes.string,
-}
-
-// Default props
-Resolve.defaultProps = {
-	title: 'Claim',
+	name: PropTypes.string.isRequired,
+	number: PropTypes.string.isRequired,
+	onClose: PropTypes.func.isRequired
 }

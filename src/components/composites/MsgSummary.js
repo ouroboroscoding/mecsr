@@ -110,15 +110,15 @@ export default function MsgSummary(props) {
 				<Grid item xs={6} sm={2}>
 					<p><strong>Actions:</strong></p>
 					{props.onHide &&
-						<p><Button variant="contained" color="primary" size="large" onClick={hide}>Hide</Button></p>
+						<Button className="action" variant="contained" color="primary" size="large" onClick={hide}>Hide</Button>
 					}
 					{props.claimedAt ?
-						<p>Claimed by {sClaimedBy}</p>
+						<span>Claimed by {sClaimedBy}</span>
 					:
-						<p><Button variant="contained" color="primary" size="large" onClick={claim}>Claim</Button></p>
+						<Button className="action" variant="contained" color="primary" size="large" onClick={claim}>Claim</Button>
 					}
 					{sClaimedBy !== 'You' &&
-						<p><Button variant="contained" color="primary" size="large" onClick={view}>View</Button></p>
+						<Button className="action" variant="contained" color="primary" size="large" onClick={view}>View</Button>
 					}
 				</Grid>
 				<Grid item xs={6} sm={2}>

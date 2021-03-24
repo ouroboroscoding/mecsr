@@ -442,7 +442,7 @@ function CustomerItem(props) {
 			}
 			{reminder &&
 				<Reminder
-					customerId={props.customerId}
+					customerId={props.customerId.toString()}
 					name={props.customerName}
 					number={props.customerPhone}
 					onClose={e => reminderSet(false)}

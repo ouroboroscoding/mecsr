@@ -87,7 +87,7 @@ export default class Search extends React.Component {
 
 		// Get the claimed add promise
 		claimed.add(number).then(res => {
-			Events.trigger('claimedAdd', number, name, customer_id);
+			Events.trigger('claimedAdd', number, name, customer_id || '0');
 		}, error => {
 			// If we got a duplicate
 			if(error.code === 1101) {

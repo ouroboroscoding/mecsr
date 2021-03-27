@@ -94,42 +94,39 @@ export default function Transfer(props) {
 		}
 
 		// Check for notes
-		let content = noteRef.current.value;
+		let content = noteRef.current.value.trim();
+
+		// If there's no note
+		if(content === '') {
+			Events.trigger('error', 'Must specify a note when transferring');
+			return
+		}
 
 		// Add to the list
 		listRef.current.run();
 
-		// If we got text
-		if(content.trim() !== '') {
+		// Send the message to the server
+		Rest.create('monolith', 'customer/note', {
+			action: 'CSR Note - Transfered',
+			content: content,
+			customerId: props.customerId
+		}).done(res => {
 
-			// Send the message to the server
-			Rest.create('monolith', 'customer/note', {
-				action: 'CSR Note - Transfered',
-				content: content,
-				customerId: props.customerId
-			}).done(res => {
+			// If there's an error
+			if(res.error && !res._handled) {
+				Events.trigger('error', JSON.stringify(res.error));
+			}
 
-				// If there's an error
-				if(res.error && !res._handled) {
-					Events.trigger('error', JSON.stringify(res.error));
-				}
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
 
-				// If there's a warning
-				if(res.warning) {
-					Events.trigger('warning', JSON.stringify(res.warning));
-				}
-
-				// If we're ok
-				if(res.data) {
-					props.onSubmit(agent);
-				}
-			});
-		}
-
-		// Else, let the parent handle removing the claim
-		else {
-			props.onSubmit(parseInt(agent));
-		}
+			// If we're ok
+			if(res.data) {
+				props.onSubmit(agent);
+			}
+		});
 	}
 
 	return (

@@ -18,7 +18,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
-	['1.32.0', 'March 24th, 2021', [
+	['1.32.0', 'March 25th, 2021', [
 		'Added reminders system.'
 	]],
 	['1.31.0', 'March 12th, 2021', [

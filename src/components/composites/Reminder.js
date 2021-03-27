@@ -73,6 +73,7 @@ export default function Reminder(props) {
 					variant="outlined"
 				/></p>
 				<p><TextField
+					defaultValue={(!props.customerId || props.customerId.toString() === '0') ? 'Phone Number: ' + props.number + '\n' : ''}
 					label="Add Note"
 					multiline
 					inputRef={noteRef}

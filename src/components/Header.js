@@ -342,6 +342,12 @@ function CustomerItem(props) {
 									{props.orderId &&
 										<p>Order: {props.orderId}</p>
 									}
+									{props.provider &&
+										<p>Provider: {props.providerName}</p>
+									}
+									{props.transferredBy &&
+										<p>Transferrer: {props.transferredByName}</p>
+									}
 								</span>
 								<span className="customerActions">
 									{props.provider !== null ?
@@ -1692,9 +1698,11 @@ export default class Header extends React.Component {
 						// Add the number and transferred by to the data
 						res.data['customerPhone'] = data.claim.phoneNumber;
 						res.data['transferredBy'] = data.claim.transferredBy;
+						res.data['transferredByName'] = data.claim.transferredByName;
 						res.data['viewed'] = data.claim.viewed;
 						res.data['orderId'] = data.claim.orderId;
 						res.data['provider'] = data.claim.provider;
+						res.data['providerName'] = data.claim.providerName;
 						res.data['continuous'] = data.claim.continuous;
 
 						// Push the transfer to the top

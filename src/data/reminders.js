@@ -27,6 +27,7 @@ Events.add('signedIn', user => {
 });
 Events.add('signedOut', () => {
 	_count = 0;
+	clear();
 	notify();
 });
 
@@ -55,6 +56,22 @@ export function add(data) {
 			}
 		});
 	});
+}
+
+/**
+ * Clear
+ *
+ * Clears the timeout so we don't fetch the data again
+ *
+ * @name clear
+ * @access private
+ * @return void
+ */
+function clear() {
+	if(_timer) {
+		clearTimeout(_timer);
+		_timer = null;
+	}
 }
 
 /**
@@ -91,10 +108,8 @@ function fetchCount() {
 				// Store the data
 				_count = res.data;
 
-				// If we have a timer
-				if(_timer) {
-					clearTimeout(_timer);
-				}
+				// Clear the timeout if we have one
+				clear()
 
 				// Set a new timeout in an hour
 				_timer = setTimeout(fetchCount, 3600000);
@@ -245,7 +260,7 @@ function unsubscribe(callback) {
 }
 
 // Default export
-const locales = {
+const reminders = {
 	add: add,
 	remove: remove,
 	resolve: resolve,
@@ -253,4 +268,4 @@ const locales = {
 	unsubscribe: unsubscribe,
 	update: update
 }
-export default locales;
+export default reminders;

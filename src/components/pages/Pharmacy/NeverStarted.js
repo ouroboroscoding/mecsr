@@ -90,7 +90,7 @@ export default function NeverStarted(props) {
 
 			// If there's an error or a warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
@@ -129,7 +129,7 @@ export default function NeverStarted(props) {
 				} else if(res.error.code === 1804) {
 					Events.trigger('error', 'File contains invalid data, contact WellDyneRX');
 				} else {
-					Events.trigger('error', JSON.stringify(res.error));
+					Events.trigger('error', Rest.errorMessage(res.error));
 				}
 			}
 			if(res.warning) {
@@ -176,7 +176,7 @@ export default function NeverStarted(props) {
 
 			// If there's an error or a warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));

@@ -99,7 +99,7 @@ function fetchCount() {
 
 			// If there's an error
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 
 			// If there's data

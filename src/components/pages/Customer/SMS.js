@@ -194,7 +194,7 @@ export default class SMS extends React.Component {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
@@ -233,7 +233,7 @@ export default class SMS extends React.Component {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
@@ -277,7 +277,7 @@ export default class SMS extends React.Component {
 				if(res.error.code === 1101) {
 					Events.trigger('error', 'A C-ED already exists for this customer.');
 				} else {
-					Events.trigger('error', JSON.stringify(res.error));
+					Events.trigger('error', Rest.errorMessage(res.error));
 				}
 				this.refText.value = '';
 			}
@@ -315,7 +315,7 @@ export default class SMS extends React.Component {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
@@ -353,7 +353,7 @@ export default class SMS extends React.Component {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
@@ -393,7 +393,7 @@ export default class SMS extends React.Component {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
@@ -442,7 +442,7 @@ export default class SMS extends React.Component {
 
 			// If there's an error
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 
 			// If there's a warning
@@ -826,7 +826,7 @@ export default class SMS extends React.Component {
 					Events.trigger('error', 'Twilio rejected the message: ' + res.error.msg);
 				}
 				else {
-					Events.trigger('error', JSON.stringify(res.error));
+					Events.trigger('error', Rest.errorMessage(res.error));
 				}
 			}
 

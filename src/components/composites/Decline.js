@@ -44,7 +44,7 @@ export default function Decline(props) {
 				if(res.error.code === 1103) {
 					Events.trigger('error', 'Failed to update order status in Konnektive, please try again or contact support');
 				} else {
-					Events.trigger('error', JSON.stringify(res.error));
+					Events.trigger('error', Rest.errorMessage(res.error));
 				}
 			}
 			if(res.warning) {

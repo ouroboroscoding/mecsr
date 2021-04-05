@@ -39,7 +39,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import CloseIcon from '@material-ui/icons/Close';
 import CheckIcon from '@material-ui/icons/Check';
 import CommentIcon from '@material-ui/icons/Comment';
-import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
+import EmojiPeopleIcon from '@material-ui/icons/EmojiPeople';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ForumIcon from '@material-ui/icons/Forum';
 import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
@@ -48,7 +48,6 @@ import MenuIcon from '@material-ui/icons/Menu';
 import MergeTypeIcon from '@material-ui/icons/MergeType';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import NewReleasesIcon from '@material-ui/icons/NewReleases';
-import PeopleIcon from '@material-ui/icons/People';
 import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import SearchIcon from '@material-ui/icons/Search';
 import ViewListIcon from '@material-ui/icons/ViewList';
@@ -57,8 +56,9 @@ import ViewListIcon from '@material-ui/icons/ViewList';
 import Account from './composites/Account';
 import CancelContinuous from './composites/CancelContinuous';
 import Decline from './composites/Decline';
-import Provider from './composites/Provider';
-import Reminder from './composites/Reminder';
+import ProviderReturn from './composites/ProviderReturn';
+import ProviderTransfer from './composites/ProviderTransfer';
+import { ReminderDialog } from './composites/Reminder';
 import Resolve from './composites/Resolve';
 import Transfer from './composites/Transfer';
 import { CustomListsDialog } from './composites/CustomLists';
@@ -90,10 +90,12 @@ function CustomerItem(props) {
 	let [decline, declineSet] = useState(false);
 	let [list, listSet] = useState(false);
 	let [more, moreSet] = useState(null);
-	let [provider, providerSet] = useState(false);
+	let [providerReturn, providerReturnSet] = useState(false);
+	let [providerTransfer, providerTransferSet] = useState(false);
 	let [reminder, reminderSet] = useState(false);
 	let [resolve, resolveSet] = useState(false);
 	let [transfer, transferSet] = useState(false);
+	let [transferMore, transferMoreSet] = useState(false);
 
 	// Hooks
 	let history = useHistory();
@@ -132,7 +134,7 @@ function CustomerItem(props) {
 			// Trigger the claimed being removed
 			Events.trigger('claimedRemove', props.customerPhone, props.selected);
 		}, error => {
-			Events.trigger('error', JSON.stringify(error));
+			Events.trigger('error', Rest.errorMessage(error));
 		});
 
 		// If we're swapping
@@ -146,7 +148,7 @@ function CustomerItem(props) {
 				if(error.code === 1101) {
 					Events.trigger('error', 'Customer has already been claimed.');
 				} else {
-					Events.trigger('error', JSON.stringify(error));
+					Events.trigger('error', Rest.errorMessage(error));
 				}
 			});
 		}
@@ -187,7 +189,7 @@ function CustomerItem(props) {
 			// Trigger the claimed being removed
 			Events.trigger('claimedRemove', props.customerPhone, props.selected);
 		}, error => {
-			Events.trigger('error', JSON.stringify(error));
+			Events.trigger('error', Rest.errorMessage(error));
 		});
 
 		// If we're currently selected, change the page
@@ -214,27 +216,35 @@ function CustomerItem(props) {
 	function providerClick(ev) {
 		ev.stopPropagation();
 		ev.preventDefault();
-		providerSet(props.user.id);
+		providerReturnSet(props.user.id);
 	}
 
 	// Transfer to provider
-	function providerTransfer() {
+	function providerReturnSubmit() {
 
 		// Hide the dialog
-		providerSet(false);
+		providerReturnSet(false);
 
 		// Delete the claim
 		claimed.remove(props.customerPhone).then(res => {
 			// Trigger the claimed being removed
 			Events.trigger('claimedRemove', props.customerPhone, props.selected);
 		}, error => {
-			Events.trigger('error', JSON.stringify(error));
+			Events.trigger('error', Rest.errorMessage(error));
 		});
 
 		// If we're currently selected, change the page
 		if(props.selected) {
 			history.push(props.provider !== null ? '/pending' : '/unclaimed');
 		}
+	}
+
+	// Provider Transfer click
+	function providerTransferClick(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
+		providerTransferSet(props.user.id);
+		transferMoreSet(null);
 	}
 
 	// X click
@@ -259,7 +269,7 @@ function CustomerItem(props) {
 
 				// If there's an error or warning
 				if(res.error && !res._handled) {
-					Events.trigger('error', JSON.stringify(res.error));
+					Events.trigger('error', Rest.errorMessage(res.error));
 				}
 				if(res.warning) {
 					Events.trigger('warning', JSON.stringify(res.warning));
@@ -277,7 +287,7 @@ function CustomerItem(props) {
 			// Trigger the claimed being removed
 			Events.trigger('claimedRemove', props.customerPhone, props.selected);
 		}, error => {
-			Events.trigger('error', JSON.stringify(error));
+			Events.trigger('error', Rest.errorMessage(error));
 		});
 	}
 
@@ -293,6 +303,21 @@ function CustomerItem(props) {
 		ev.stopPropagation();
 		ev.preventDefault();
 		transferSet(props.user.id);
+		transferMoreSet(null);
+	}
+
+	// Transfer More icon click
+	function transferMoreClick(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
+		transferMoreSet(ev.currentTarget);
+	}
+
+	// Transfer More menu close
+	function trasnferMoreClose(ev) {
+		ev.stopPropagation();
+		ev.preventDefault();
+		transferMoreSet(null);
 	}
 
 	// Transfer dialog submit
@@ -316,7 +341,7 @@ function CustomerItem(props) {
 			if(error.code === 1104) {
 				Events.trigger('error', 'Claim no longer exists, can not transfer.');
 			} else {
-				Events.trigger('error', JSON.stringify(error));
+				Events.trigger('error', Rest.errorMessage(error));
 			}
 		});
 	}
@@ -351,52 +376,88 @@ function CustomerItem(props) {
 								</span>
 								<span className="customerActions">
 									{props.provider !== null ?
-										<span className="tooltip">
-											{props.continuous ?
-												<Tooltip title="Cancel Recurring">
-													<IconButton className="close" onClick={cancelClick}>
-														<CancelIcon />
+										<React.Fragment>
+											<span className="tooltip">
+												{props.continuous ?
+													<Tooltip title="Cancel Recurring">
+														<IconButton className="close" onClick={cancelClick}>
+															<CancelIcon />
+														</IconButton>
+													</Tooltip>
+												:
+													<Tooltip title="Decline Order">
+														<IconButton className="close" onClick={declineClick}>
+															<CancelIcon />
+														</IconButton>
+													</Tooltip>
+												}
+											</span>
+											<span className="tooltip">
+												<Tooltip title="Transfer">
+													<IconButton className="transfer" onClick={transferClick}>
+														<MergeTypeIcon />
 													</IconButton>
 												</Tooltip>
-											:
-												<Tooltip title="Decline Order">
-													<IconButton className="close" onClick={declineClick}>
-														<CancelIcon />
+											</span>
+											<span className="tooltip">
+												<Tooltip title="Send to Provider">
+													<IconButton className="provider" onClick={providerClick}>
+														<LocalHospitalIcon />
 													</IconButton>
 												</Tooltip>
-											}
-										</span>
+											</span>
+										</React.Fragment>
 									:
-										<span className="tooltip">
-											<Tooltip title="Remove Claim">
-												<IconButton className="close" onClick={remove}>
-													<CloseIcon />
-												</IconButton>
-											</Tooltip>
-										</span>
-									}
-									<span className="tooltip">
-										<Tooltip title="Transfer">
-											<IconButton className="transfer" onClick={transferClick}>
-												<MergeTypeIcon />
-											</IconButton>
-										</Tooltip>
-									</span>
-									<span className="tooltip">
-										{props.provider !== null ?
-											<Tooltip title="Send to Provider">
-												<IconButton className="provider" onClick={providerClick}>
-													<LocalHospitalIcon />
-												</IconButton>
-											</Tooltip>
-										:
+										<React.Fragment>
+											<span className="tooltip">
+												<Tooltip title="Remove Claim">
+													<IconButton className="close" onClick={remove}>
+														<CloseIcon />
+													</IconButton>
+												</Tooltip>
+											</span>
+											{props.providerTransfer ?
+												<span className="tooltip">
+													<Tooltip title="Transfer">
+														<IconButton onClick={transferMoreClick}>
+															<MergeTypeIcon />
+														</IconButton>
+													</Tooltip>
+													<Menu
+														anchorEl={transferMore}
+														open={Boolean(transferMore)}
+														onClose={trasnferMoreClose}
+													>
+														<MenuItem onClick={transferClick}>
+															<ListItemIcon>
+																<EmojiPeopleIcon />
+															</ListItemIcon>
+															<ListItemText primary="Transfer to Agent" />
+														</MenuItem>
+														<MenuItem onClick={providerTransferClick}>
+															<ListItemIcon>
+																<LocalHospitalIcon />
+															</ListItemIcon>
+															<ListItemText primary="Transfer to Provider" />
+														</MenuItem>
+													</Menu>
+												</span>
+											:
+												<span className="tooltip">
+													<Tooltip title="Transfer">
+														<IconButton className="transfer" onClick={transferClick}>
+															<MergeTypeIcon />
+														</IconButton>
+													</Tooltip>
+												</span>
+											}
 											<Tooltip title="Resolve">
 												<IconButton className="resolve" onClick={resolveClick}>
 													<CheckIcon />
 												</IconButton>
 											</Tooltip>
-										}
-									</span>
+										</React.Fragment>
+									}
 									<span className="tooltip">
 										<Tooltip title="More">
 											<IconButton onClick={moreClick}>
@@ -447,7 +508,7 @@ function CustomerItem(props) {
 				/>
 			}
 			{reminder &&
-				<Reminder
+				<ReminderDialog
 					customerId={props.customerId.toString()}
 					name={props.customerName}
 					number={props.customerPhone}
@@ -461,10 +522,17 @@ function CustomerItem(props) {
 					onSubmit={remove}
 				/>
 			}
-			{provider &&
-				<Provider
-					onClose={e => providerSet(false)}
-					onTransfer={providerTransfer}
+			{providerReturn &&
+				<ProviderReturn
+					onClose={e => providerReturnSet(false)}
+					onTransfer={providerReturnSubmit}
+					{...props}
+				/>
+			}
+			{providerTransfer &&
+				<ProviderTransfer
+					onClose={e => providerTransferSet(false)}
+					onTransfer={providerReturnSubmit}
 					{...props}
 				/>
 			}
@@ -530,7 +598,7 @@ function ViewItem(props) {
 				Events.trigger('error', 'Customer has already been claimed.');
 				Events.trigger('viewedDuplicate', props.phone, error.msg);
 			} else {
-				Events.trigger('error', JSON.stringify(error));
+				Events.trigger('error', Rest.errorMessage(error));
 			}
 		});
 	}
@@ -608,7 +676,7 @@ function ViewItem(props) {
 			if(error.code === 1104) {
 				Events.trigger('error', 'Claim no longer exists, can not transfer.');
 			} else {
-				Events.trigger('error', JSON.stringify(error));
+				Events.trigger('error', Rest.errorMessage(error));
 			}
 		});
 	}
@@ -705,7 +773,7 @@ function ViewItem(props) {
 				/>
 			}
 			{reminder &&
-				<Reminder
+				<ReminderDialog
 					customerId={props.id.toString()}
 					name={props.name}
 					number={props.phone}
@@ -735,6 +803,7 @@ export default class Header extends React.Component {
 			overwrite: props.user ? Utils.hasRight(props.user, 'csr_overwrite', 'create') : false,
 			path: window.location.pathname,
 			pending: 0,
+			providerTransfer: props.user ? Utils.hasRight(props.user, 'csr_claims_provider', 'create') : false,
 			reminders: 0,
 			unclaimed: 0,
 			user: props.user || false,
@@ -895,7 +964,7 @@ export default class Header extends React.Component {
 			this.setState(oState);
 
 		}, error => {
-			Events.trigger('error', JSON.stringify(error));
+			Events.trigger('error', Rest.errorMessage(error));
 		});
 	}
 
@@ -1009,7 +1078,7 @@ export default class Header extends React.Component {
 				}).done(res => {
 					// If there's an error or warning
 					if(res.error && !res._handled) {
-						Events.trigger('error', JSON.stringify(res.error));
+						Events.trigger('error', Rest.errorMessage(res.error));
 					}
 					if(res.warning) {
 						Events.trigger('warning', JSON.stringify(res.warning));
@@ -1045,7 +1114,7 @@ export default class Header extends React.Component {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
@@ -1105,28 +1174,6 @@ export default class Header extends React.Component {
 		let drawer = (
 			<React.Fragment>
 				<List className="pages">
-					{Utils.hasRight(this.state.user, 'manual_adhoc', 'read') &&
-						<React.Fragment>
-							<Link to="/manualad" onClick={this.menuClick}>
-								<ListItem button selected={this.state.path === "/manualad"}>
-									<ListItemIcon><DeveloperModeIcon /></ListItemIcon>
-									<ListItemText primary="Manual AdHoc" />
-								</ListItem>
-							</Link>
-							<Divider />
-						</React.Fragment>
-					}
-					{Utils.hasRight(this.state.user, 'csr_agents', 'read') &&
-						<React.Fragment>
-							<Link to="/agents" onClick={this.menuClick}>
-								<ListItem button selected={this.state.path === "/agents"}>
-									<ListItemIcon><PeopleIcon /></ListItemIcon>
-									<ListItemText primary="Agents" />
-								</ListItem>
-							</Link>
-							<Divider />
-						</React.Fragment>
-					}
 					{Utils.hasRight(this.state.user, 'csr_stats', 'read') &&
 						<React.Fragment>
 							<Link to="/stats" onClick={this.menuClick}>
@@ -1218,6 +1265,7 @@ export default class Header extends React.Component {
 											key={i}
 											newMsgs={o.customerPhone in this.state.newMsgs}
 											onClick={this.menuItem}
+											providerTransfer={this.state.providerTransfer}
 											selected={this.state.path === Utils.customerPath(o.customerPhone, o.customerId)}
 											user={this.state.user}
 											{...o}
@@ -1325,8 +1373,9 @@ export default class Header extends React.Component {
 
 		// Hide any modals and set the user
 		this.setState({
-			"overwrite": Utils.hasRight(user, 'csr_overwrite', 'create'),
-			"user": user
+			overwrite: Utils.hasRight(user, 'csr_overwrite', 'create'),
+			providerTransfer: Utils.hasRight(user, 'csr_claims_provider', 'create'),
+			user: user
 		}, () => {
 
 			// Track user websocket messages
@@ -1351,12 +1400,10 @@ export default class Header extends React.Component {
 		// Call the signout
 		Rest.create('csr', 'signout', {}).done(res => {
 
-			// If there's an error
+			// If there's an error or warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
-
-			// If there's a warning
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
 			}
@@ -1381,9 +1428,10 @@ export default class Header extends React.Component {
 
 		// Hide and modals and set the user to false
 		this.setState({
-			"claimed": [],
-			"overwrite": false,
-			"user": false
+			claimed: [],
+			overwrite: false,
+			providerTransfer: false,
+			user: false
 		});
 
 		// Stop checking for new messages and unclaimed counts
@@ -1410,7 +1458,7 @@ export default class Header extends React.Component {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
@@ -1427,7 +1475,7 @@ export default class Header extends React.Component {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
@@ -1494,7 +1542,7 @@ export default class Header extends React.Component {
 
 					// If there's an error or warning
 					if(res.error && !res._handled) {
-						Events.trigger('error', JSON.stringify(res.error));
+						Events.trigger('error', Rest.errorMessage(res.error));
 					}
 					if(res.warning) {
 						Events.trigger('warning', JSON.stringify(res.warning));
@@ -1623,8 +1671,6 @@ export default class Header extends React.Component {
 	// WebSocket message
 	wsMessage(data) {
 
-		console.log('ws:', data);
-
 		// Move forward based on the type
 		switch(data.type) {
 
@@ -1674,7 +1720,7 @@ export default class Header extends React.Component {
 
 					// If there's an error or warning
 					if(res.error && !res._handled) {
-						Events.trigger('error', JSON.stringify(res.error));
+						Events.trigger('error', Rest.errorMessage(res.error));
 					}
 					if(res.warning) {
 						Events.trigger('warning', JSON.stringify(res.warning));
@@ -1749,8 +1795,6 @@ export default class Header extends React.Component {
 			// If a claim had it's number swapped
 			case 'claim_swapped': {
 
-				console.log(data);
-
 				// Look for the claim
 				let iIndex = afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
 
@@ -1777,8 +1821,6 @@ export default class Header extends React.Component {
 
 							// Set the new path
 							oState.path = Utils.customerPath(data.newNumber, lPath[2])
-
-							console.log(oState.path);
 
 							// Change the page we're on
 							this.props.history.replace(oState.path);

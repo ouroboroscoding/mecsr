@@ -84,7 +84,7 @@ export default function LabResultAdd(props) {
 					Events.trigger('error', 'Please fix invalid fields');
 					console.error(res.error.msg);
 				} else {
-					Events.trigger('error', JSON.stringify(res.error));
+					Events.trigger('error', Rest.errorMessage(res.error));
 				}
 			}
 			if(res.warning) {

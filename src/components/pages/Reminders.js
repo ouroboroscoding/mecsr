@@ -89,7 +89,7 @@ function Reminder(props) {
 			if(error.code === 1101) {
 				Events.trigger('error', 'Customer has already been claimed.');
 			} else {
-				Events.trigger('error', JSON.stringify(error));
+				Events.trigger('error', Rest.errorMessage(error));
 			}
 		});
 	}
@@ -294,7 +294,7 @@ export default function Reminders(props) {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
@@ -316,7 +316,7 @@ export default function Reminders(props) {
 		reminders.remove(data._id).then(res => {
 			resultRemove(data);
 		}, error => {
-			Events.trigger('error', JSON.stringify(error));
+			Events.trigger('error', Rest.errorMessage(error));
 		});
 	}
 
@@ -327,7 +327,7 @@ export default function Reminders(props) {
 		reminders.resolve(data._id).then(res => {
 			resultRemove(data);
 		}, error => {
-			Events.trigger('error', JSON.stringify(error));
+			Events.trigger('error', Rest.errorMessage(error));
 		});
 	}
 

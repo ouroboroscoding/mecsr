@@ -83,7 +83,7 @@ function DoseSpot(props) {
 				}, 200);
 
 			}, error => {
-				Events.trigger('error', JSON.stringify(error));
+				Events.trigger('error', Rest.errorMessage(error));
 			});
 		}
 	}

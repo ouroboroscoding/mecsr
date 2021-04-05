@@ -95,7 +95,7 @@ export default class Unclaimed extends React.Component {
 				Events.trigger('error', 'Customer has already been claimed. Refreshing unclaimed.');
 				Events.trigger('Unclaimed');
 			} else {
-				Events.trigger('error', JSON.stringify(error));
+				Events.trigger('error', Rest.errorMessage(error));
 			}
 		});
 	}
@@ -109,7 +109,7 @@ export default class Unclaimed extends React.Component {
 
 			// If there's an error
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 
 			// If there's a warning
@@ -151,7 +151,7 @@ export default class Unclaimed extends React.Component {
 
 			// If there's an error
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 
 			// If there's a warning

@@ -78,7 +78,7 @@ function Patient(props) {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
@@ -96,8 +96,6 @@ function Patient(props) {
 		// Get the dropped reason
 		let iReason = refReason.current.value;
 
-		console.log('reason:', iReason);
-
 		// Send the request to the server
 		Rest.update('monolith', 'customer/hrt', {
 			customerId: props.customerId.toString(),
@@ -108,7 +106,7 @@ function Patient(props) {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
@@ -142,7 +140,7 @@ function Patient(props) {
 				if(res.error.code === 1104) {
 					patientSet({});
 				} else {
-					Events.trigger('error', JSON.stringify(res.error));
+					Events.trigger('error', Rest.errorMessage(res.error));
 				}
 			}
 			if(res.warning) {

@@ -27,7 +27,7 @@ Events.add('signedIn', user => {
 
 		// If there's an error or warning
 		if(res.error && !res._handled) {
-			Events.trigger('error', JSON.stringify(res.error));
+			Events.trigger('error', Rest.errorMessage(res.error));
 		}
 		if(res.warning) {
 			Events.trigger('warning', JSON.stringify(res.warning));
@@ -80,7 +80,7 @@ export function createItem(list, item, success) {
 			if(res.error.code === 1101) {
 				Events.trigger('error', 'This conversation is already part of the given list');
 			} else {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 		}
 		if(res.warning) {
@@ -131,7 +131,7 @@ export function createList(title, success=null) {
 
 		// If there's an error or warning
 		if(res.error && !res._handled) {
-			Events.trigger('error', JSON.stringify(res.error));
+			Events.trigger('error', Rest.errorMessage(res.error));
 		}
 		if(res.warning) {
 			Events.trigger('warning', JSON.stringify(res.warning));
@@ -181,7 +181,7 @@ export function deleteItem(list, _id) {
 
 		// If there's an error or warning
 		if(res.error && !res._handled) {
-			Events.trigger('error', JSON.stringify(res.error));
+			Events.trigger('error', Rest.errorMessage(res.error));
 		}
 		if(res.warning) {
 			Events.trigger('warning', JSON.stringify(res.warning));
@@ -232,7 +232,7 @@ export function deleteList(_id) {
 
 		// If there's an error or warning
 		if(res.error && !res._handled) {
-			Events.trigger('error', JSON.stringify(res.error));
+			Events.trigger('error', Rest.errorMessage(res.error));
 		}
 		if(res.warning) {
 			Events.trigger('warning', JSON.stringify(res.warning));

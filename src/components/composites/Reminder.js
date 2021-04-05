@@ -24,30 +24,97 @@ import Typography from '@material-ui/core/Typography';
 // Date modules
 import reminders from 'data/reminders';
 
+// Shared communications modules
+import Rest from 'shared/communication/rest';
+
 // Shared generic modules
 import Events from 'shared/generic/events';
 import { date, nicePhone } from 'shared/generic/tools';
 
-// Reminder
-export default function Reminder(props) {
+/**
+ * Reminders Form
+ *
+ * Displays a form for creating a new reminder
+ *
+ * @name ReminderForm
+ * @access public
+ * @extends React.Component
+ */
+export class ReminderForm extends React.Component {
+
+	constructor(props) {
+
+		// Call the parent constructor
+		super(props);
+
+		// Initial state
+		this.state = {};
+
+		// Refs
+		this.dateRef = React.createRef();
+		this.noteRef = React.createRef();
+	}
+
+	render() {
+		return (
+			<React.Fragment>
+				<p><TextField
+					defaultValue={date(new Date())}
+					inputRef={this.dateRef}
+					type="date"
+					variant="outlined"
+				/></p>
+				<p><TextField
+					defaultValue={(!this.props.customerId || this.props.customerId.toString() === '0') ? 'Phone Number: ' + this.props.customerPhone + '\n' : ''}
+					label="Add Note"
+					multiline
+					inputRef={this.noteRef}
+					rows="4"
+					variant="outlined"
+				/></p>
+			</React.Fragment>
+		);
+	}
+
+	run() {
+		return new Promise((resolve, reject) => {
+
+			// Send the message to the server
+			reminders.add({
+				date: this.dateRef.current.value,
+				crm_type: 'knk',
+				crm_id: this.props.customerId,
+				note: this.noteRef.current.value.trim()
+			}).then(res => {
+				resolve(res);
+			}, error => {
+				reject(error);
+			});
+		});
+	}
+}
+
+/**
+ * Reminder Dialog
+ *
+ * Shows a dialog to add a new reminder with a given customer ID
+ *
+ * @name ReminderDialog
+ * @access public
+ * @param Object props Attributes sent to the component
+ * @return React.Component
+ */
+export function ReminderDialog(props) {
 
 	// Refs
-	let dateRef = useRef();
-	let noteRef = useRef();
+	let formRef = useRef();
 
 	// Submite notes / resolve conversation
 	function submit() {
-
-		// Send the message to the server
-		reminders.add({
-			date: dateRef.current.value,
-			crm_type: 'knk',
-			crm_id: props.customerId,
-			note: noteRef.current.value.trim()
-		}).then(res => {
+		formRef.current.run().then(res => {
 			props.onClose();
 		}, error => {
-			Events.trigger('error', JSON.stringify(error));
+			Events.trigger('error', Rest.errorMessage(error));
 		});
 	}
 
@@ -61,25 +128,15 @@ export default function Reminder(props) {
 				className: "reminder"
 			}}
 		>
-			<DialogTitle id="confirmation-dialog-title">Reminder {props.title}</DialogTitle>
+			<DialogTitle>Reminder {props.title}</DialogTitle>
 			<DialogContent dividers>
 				<Typography type="p">
-					Add a reminder for {props.name} {nicePhone(props.number)}<br /><br />
+					Add a reminder for {this.props.customerName} {nicePhone(this.props.customerPhone)}<br /><br />
 				</Typography>
-				<p><TextField
-					defaultValue={date(new Date())}
-					inputRef={dateRef}
-					type="date"
-					variant="outlined"
-				/></p>
-				<p><TextField
-					defaultValue={(!props.customerId || props.customerId.toString() === '0') ? 'Phone Number: ' + props.number + '\n' : ''}
-					label="Add Note"
-					multiline
-					inputRef={noteRef}
-					rows="4"
-					variant="outlined"
-				/></p>
+				<ReminderForm
+					ref={formRef}
+					{...props}
+				/>
 			</DialogContent>
 			<DialogActions>
 				<Button variant="contained" color="secondary" onClick={props.onClose}>
@@ -94,9 +151,9 @@ export default function Reminder(props) {
 }
 
 // Valid props
-Reminder.propTypes = {
+ReminderDialog.propTypes = {
 	customerId: PropTypes.string.isRequired,
-	name: PropTypes.string.isRequired,
-	number: PropTypes.string.isRequired,
+	customerName: PropTypes.string.isRequired,
+	customerPhone: PropTypes.string.isRequired,
 	onClose: PropTypes.func.isRequired
 }

@@ -16,12 +16,6 @@ import { SnackbarProvider } from 'notistack';
 // Shared data modules
 import DoseSpot from 'shared/data/dosespot';
 
-// Shared communication modules
-import Rest from 'shared/communication/rest';
-
-// Shared generic modules
-import Events from 'shared/generic/events';
-
 // Shared hooks
 import { useEvent } from 'shared/hooks/event';
 import { useResize } from 'shared/hooks/resize';
@@ -33,7 +27,6 @@ import Header from './Header';
 import Signin from './Signin';
 
 // Page component modules
-import Agents from './pages/Agents';
 import Customer from './pages/Customer';
 import HRT from './pages/HRT';
 import ManualAdHoc from './pages/ManualAdHoc';
@@ -46,47 +39,22 @@ import Templates from './pages/Templates';
 import Unclaimed from './pages/Unclaimed';
 import VersionHistory from './pages/VersionHistory';
 
-// Local modules
-import { LoaderHide, LoaderShow } from './Loader';
+// Rest
+import 'rest_init';
 
 // SASS CSS
 import 'sass/site.scss';
 
-// Init the rest services
-Rest.init(process.env.REACT_APP_MEMS_DOMAIN, process.env.REACT_APP_WS_DOMAIN, xhr => {
-
-	// If we got a 401, let everyone know we signed out
-	if(xhr.status === 401) {
-		Events.trigger('error', 'You have been signed out!');
-		Events.trigger('signedOut');
-	} else {
-		Events.trigger('error',
-			'Unable to connect to ' + process.env.REACT_APP_MEMS_DOMAIN +
-			': ' + xhr.statusText +
-			' (' + xhr.status + ')');
-	}
-}, (method, url, data, opts) => {
-	LoaderShow();
-}, (method, url, data, opts) => {
-	LoaderHide();
-});
-
-// If we have a session, fetch the user
-if(Rest.session()) {
-	Rest.read('csr', 'session', {}).done(res => {
-		Rest.read('monolith', 'user', {}).done(res => {
-			Events.trigger('signedIn', res.data);
-		});
-	});
-}
-
-// Make Events available from console
-window.Events = Events;
-
-// Hide the loader
-LoaderHide();
-
-// Site
+/**
+ * Site
+ *
+ * The primary component for the entire application
+ *
+ * @name Site
+ * @access public
+ * @param Object props Attributes sent to the component
+ * @return React.Component
+ */
 export default function Site(props) {
 
 	// State
@@ -125,9 +93,6 @@ export default function Site(props) {
 				/>
 				<div id="content">
 					<Switch>
-						<Route exact path="/agents">
-							<Agents user={user} />
-						</Route>
 						<Route
 							path="/customer/:phoneNumber/:customerId"
 							component={({match: {params:{phoneNumber, customerId}}}) => (

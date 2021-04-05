@@ -87,7 +87,7 @@ export default function Outbound(props) {
 				} else if(res.error.code === 1101) {
 					Events.trigger('error', 'The trigger associated with this Outbound Failed Claim already has an AdHoc, a second can not be made until the first is processed.');
 				} else {
-					Events.trigger('error', JSON.stringify(res.error));
+					Events.trigger('error', Rest.errorMessage(res.error));
 				}
 			}
 			if(res.warning) {
@@ -137,7 +137,7 @@ export default function Outbound(props) {
 
 			// If there's an error or a warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
@@ -183,7 +183,7 @@ export default function Outbound(props) {
 
 			// If there's an error or a warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));

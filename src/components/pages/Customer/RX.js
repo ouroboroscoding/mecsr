@@ -28,6 +28,9 @@ import EditIcon from '@material-ui/icons/Edit';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 
+// Shared communication modules
+import Rest from 'shared/communication/rest';
+
 // Shared data modules
 import DoseSpotData from 'shared/data/dosespot';
 
@@ -83,7 +86,7 @@ function DoseSpot(props) {
 				}, 200);
 
 			}, error => {
-				Events.trigger('error', JSON.stringify(error));
+				Events.trigger('error', Rest.errorMessage(error));
 			});
 		}
 	}

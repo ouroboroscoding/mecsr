@@ -335,7 +335,7 @@ CustomLists.propTypes = {
 /**
  * Custom Lists Form
  *
- * Displays a form for added a conversation to a list
+ * Displays a form for adding a conversation to a list
  *
  * @name CustomListsForm
  * @access public

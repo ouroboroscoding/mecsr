@@ -62,7 +62,7 @@ export default function Transfer(props) {
 
 			// If there's an error
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 
 			// If there's a warning
@@ -98,7 +98,7 @@ export default function Transfer(props) {
 
 		// If there's no note
 		if(content === '') {
-			Events.trigger('error', 'Must specify a note when transferring');
+			Events.trigger('error', 'Must write a note when transferring');
 			return
 		}
 
@@ -114,7 +114,7 @@ export default function Transfer(props) {
 
 			// If there's an error
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 
 			// If there's a warning

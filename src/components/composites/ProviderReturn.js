@@ -1,7 +1,8 @@
 /**
- * Provider
+ * Provider Return
  *
- * Handles provider dialog (resolve for orders)
+ * Handles provider dialog for returning claims to providers whether a specific
+ * one is assigned or not
  *
  * @author Chris Nasr <bast@maleexcel.com>
  * @copyright MaleExcelMedical
@@ -25,8 +26,17 @@ import Rest from 'shared/communication/rest';
 // Shared generic modules
 import Events from 'shared/generic/events';
 
-// Provider
-export default function Provider(props) {
+/**
+ * Provider Return
+ *
+ * Displays a dialog to put a note
+ *
+ * @name ProviderReturn
+ * @access public
+ * @param Object props Attributes sent to the component
+ * @return React.Component
+ */
+export default function ProviderReturn(props) {
 
 	// Refs
 	let noteRef = useRef();
@@ -44,7 +54,7 @@ export default function Provider(props) {
 		}
 
 		// Send the message to the server
-		Rest.update('monolith', 'customer/transfer', {
+		Rest.update('monolith', 'customer/provider/return', {
 			phoneNumber: props.customerPhone,
 			customerId: props.customerId,
 			orderId: props.orderId,
@@ -54,7 +64,7 @@ export default function Provider(props) {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', JSON.stringify(res.error));
+				Events.trigger('error', Rest.errorMessage(res.error));
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));

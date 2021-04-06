@@ -65,7 +65,7 @@ export class ReminderForm extends React.Component {
 					variant="outlined"
 				/></p>
 				<p><TextField
-					defaultValue={(!this.props.customerId || this.props.customerId.toString() === '0') ? 'Phone Number: ' + this.props.customerPhone + '\n' : ''}
+					defaultValue={(!this.props.customerId || this.props.customerId.toString() === '0') ? 'Phone Number: ' + this.props.number + '\n' : ''}
 					label="Add Note"
 					multiline
 					inputRef={this.noteRef}
@@ -131,7 +131,7 @@ export function ReminderDialog(props) {
 			<DialogTitle>Reminder {props.title}</DialogTitle>
 			<DialogContent dividers>
 				<Typography type="p">
-					Add a reminder for {this.props.customerName} {nicePhone(this.props.customerPhone)}<br /><br />
+					Add a reminder for {props.name} {nicePhone(props.number)}<br /><br />
 				</Typography>
 				<ReminderForm
 					ref={formRef}

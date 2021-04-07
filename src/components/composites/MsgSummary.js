@@ -19,6 +19,7 @@ import Paper from '@material-ui/core/Paper';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
+import { datetime } from 'shared/generic/tools';
 
 // Local modules
 import Utils from 'utils';
@@ -79,7 +80,7 @@ function Message(props) {
 				{msg.direction === 'Outgoing' &&
 					<span className="name">{msg.from} at </span>
 				}
-				<span className="date">{msg.date}</span>
+				<span className="date">{datetime(msg.date)}</span>
 			</div>
 		</div>
 	);

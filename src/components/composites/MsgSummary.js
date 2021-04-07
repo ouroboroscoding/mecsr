@@ -80,7 +80,7 @@ function Message(props) {
 				{msg.direction === 'Outgoing' &&
 					<span className="name">{msg.from} at </span>
 				}
-				<span className="date">{datetime(msg.date)}</span>
+				<span className="date">{msg.date}</span>
 			</div>
 		</div>
 	);

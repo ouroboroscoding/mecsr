@@ -37,7 +37,7 @@ import Rest from 'shared/communication/rest';
 // Shared generic modules
 import Clipboard from 'shared/generic/clipboard';
 import Events from 'shared/generic/events';
-import { afindi, clone, ucfirst } from 'shared/generic/tools';
+import { afindi, clone, datetime, ucfirst } from 'shared/generic/tools';
 
 // Local modules
 import Utils from 'utils';
@@ -80,7 +80,7 @@ function Message(props) {
 				{props.type === 'Outgoing' &&
 					<span>{props.fromName} at </span>
 				}
-				<span>{props.createdAt}</span>
+				<span>{datetime(props.createdAt)}</span>
 				{(props.type === 'Outgoing' && props.status !== null) &&
 					<React.Fragment>
 						<span> / {props.status}</span>
@@ -853,7 +853,7 @@ export default class SMS extends React.Component {
 					type: 'Outgoing',
 					notes: content,
 					fromName: this.props.user.firstName + ' ' + this.props.user.lastName,
-					createdAt: Utils.datetime(new Date())
+					createdAt: Date.now()/1000
 				});
 
 				// Add the id to those that need statuses

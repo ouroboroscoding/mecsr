@@ -1,6 +1,6 @@
 {
   "name": "MeCSR",
-  "version": "1.33.2",
+  "version": "1.33.3",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.9.8",

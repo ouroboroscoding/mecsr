@@ -18,6 +18,9 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 
+// Shared generic modules
+import { datetime } from 'shared/generic/tools';
+
 // Encounter types
 const _encounter = {
 	A: 'Audio',
@@ -62,7 +65,7 @@ export default function CustomerSummary(props) {
 					<Typography variant="h6">Order</Typography>
 					<p>{props.continuous && 'C-'}{props.type.toUpperCase()} - {props.orderId}</p>
 					<p>{sLabel}</p>
-					<p>{props.createdAt}</p>
+					<p>{datetime(props.createdAt)}</p>
 				</Grid>
 			</Grid>
 		</Paper>

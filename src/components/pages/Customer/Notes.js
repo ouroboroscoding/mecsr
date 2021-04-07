@@ -21,10 +21,7 @@ import Rest from 'shared/communication/rest';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
-import { clone } from 'shared/generic/tools';
-
-// Local modules
-import Utils from 'utils';
+import { clone, datetime } from 'shared/generic/tools';
 
 // Data
 import lLabels from 'definitions/status_labels.json';
@@ -59,7 +56,7 @@ function Note(props) {
 			</div>
 			<div className="footer">
 				<span className="name">{props.data.createdBy} at </span>
-				<span className="date">{props.data.createdAt}</span>
+				<span className="date">{datetime(props.data.createdAt)}</span>
 			</div>
 		</div>
 	);
@@ -305,7 +302,7 @@ export default class Notes extends React.Component {
 					action: 'CSR Note',
 					note: content,
 					createdBy: this.props.user.firstName + ' ' + this.props.user.lastName,
-					createdAt: Utils.datetime(new Date()),
+					createdAt: Date.now()/1000,
 					userRole: 'CSR'
 				});
 

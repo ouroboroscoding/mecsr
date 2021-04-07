@@ -148,8 +148,8 @@ function Calendly(props) {
 				<TableBody>
 					{results.map(o =>
 						<TableRow key={o.id}>
-							<TableCell>{o.start}</TableCell>
-							<TableCell>{o.end}</TableCell>
+							<TableCell>{datetime(o.start, '-')}</TableCell>
+							<TableCell>{datetime(o.end, '-')}</TableCell>
 							<TableCell>{o.prov_name}</TableCell>
 							<TableCell>{o.prov_emailAddress}</TableCell>
 						</TableRow>

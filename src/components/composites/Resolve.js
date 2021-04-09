@@ -10,15 +10,20 @@
 
 // NPM modules
 import PropTypes from 'prop-types';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
 // Material UI
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import TextField from '@material-ui/core/TextField';
+
+// Composite components
+import { ReminderForm } from './Reminder';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -29,17 +34,26 @@ import Events from 'shared/generic/events';
 // Resolve
 export default function Resolve(props) {
 
+	// State
+	let [reminder, reminderSet] = useState(null);
+
 	// Refs
 	let noteRef = useRef();
+	let reminderRef = useRef();
 
 	// Submite notes / resolve conversation
 	function submit() {
 
+		// If we need a reminder, create it
+		if(reminder) {
+			reminderRef.current.run();
+		}
+
 		// Check for notes
-		let content = noteRef.current.value;
+		let content = noteRef.current.value.trim();
 
 		// If we got text
-		if(content.trim() !== '') {
+		if(content !== '') {
 
 			// Send the message to the server
 			Rest.create('monolith', 'customer/note', {
@@ -90,6 +104,20 @@ export default function Resolve(props) {
 					rows="4"
 					variant="outlined"
 				/>
+				<p><FormControlLabel
+					control={<Checkbox
+						color="primary"
+						checked={reminder}
+						onChange={ev => reminderSet(ev.currentTarget.checked)}
+					/>}
+					label={<span>Add Reminder?</span>}
+				/></p>
+				{reminder &&
+					<ReminderForm
+						ref={reminderRef}
+						{...props}
+					/>
+				}
 			</DialogContent>
 			<DialogActions>
 				<Button variant="contained" color="secondary" onClick={props.onClose}>

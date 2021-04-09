@@ -107,6 +107,7 @@ export default function ProviderTransfer(props) {
 		let sNote = noteRef.current.value.trim();
 		if(sNote === '') {
 			Events.trigger('Must write a note when transferring')
+			return;
 		}
 
 		// If we need a reminder, create it
@@ -175,11 +176,9 @@ export default function ProviderTransfer(props) {
 							</Select>
 						</FormControl></p>
 						<p><CustomListsForm
-							customer={props.customerId}
-							name={props.name}
-							number={props.number}
 							optional={true}
 							ref={listRef}
+							{...props}
 						/></p>
 						<p><FormControlLabel
 							control={<Checkbox

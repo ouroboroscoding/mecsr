@@ -13,17 +13,20 @@ import React, { useEffect, useRef, useState } from 'react';
 
 // Material UI
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 
 // Composite components
 import { CustomListsForm } from './CustomLists';
+import { ReminderForm } from './Reminder';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -38,10 +41,12 @@ export default function Transfer(props) {
 	// State
 	let [agents, agentsSet] = useState({});
 	let [agent, agentSet] = useState('');
+	let [reminder, reminderSet] = useState(null);
 
 	// Refs
 	let noteRef = useRef();
 	let listRef = useRef();
+	let reminderRef = useRef();
 
 	// Effects
 	useEffect(() => {
@@ -105,6 +110,11 @@ export default function Transfer(props) {
 		// Add to the list
 		listRef.current.run();
 
+		// If we need a reminder, create it
+		if(reminder) {
+			reminderRef.current.run();
+		}
+
 		// Send the message to the server
 		Rest.create('monolith', 'customer/note', {
 			action: 'CSR Note - Transfered',
@@ -166,12 +176,24 @@ export default function Transfer(props) {
 					</Select>
 				</FormControl></p>
 				<p><CustomListsForm
-					customer={props.customerId}
-					name={props.name}
-					number={props.number}
 					optional={true}
 					ref={listRef}
+					{...props}
 				/></p>
+				<p><FormControlLabel
+					control={<Checkbox
+						color="primary"
+						checked={reminder}
+						onChange={ev => reminderSet(ev.currentTarget.checked)}
+					/>}
+					label={<span>Add Reminder?</span>}
+				/></p>
+				{reminder &&
+					<ReminderForm
+						ref={reminderRef}
+						{...props}
+					/>
+				}
 			</DialogContent>
 			<DialogActions>
 				<Button variant="contained" color="secondary" onClick={props.onClose}>

@@ -39,9 +39,9 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import CloseIcon from '@material-ui/icons/Close';
 import CheckIcon from '@material-ui/icons/Check';
 import CommentIcon from '@material-ui/icons/Comment';
-import EmojiPeopleIcon from '@material-ui/icons/EmojiPeople';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ForumIcon from '@material-ui/icons/Forum';
+import HeadsetMicIcon from '@material-ui/icons/HeadsetMic';
 import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import LocalPharmacyIcon from '@material-ui/icons/LocalPharmacy';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -430,7 +430,7 @@ function CustomerItem(props) {
 													>
 														<MenuItem onClick={transferClick}>
 															<ListItemIcon>
-																<EmojiPeopleIcon />
+																<HeadsetMicIcon />
 															</ListItemIcon>
 															<ListItemText primary="Transfer to Agent" />
 														</MenuItem>
@@ -491,35 +491,29 @@ function CustomerItem(props) {
 			</Link>
 			{transfer !== false &&
 				<Transfer
-					customerId={props.customerId}
 					ignore={transfer}
-					name={props.customerName}
-					number={props.customerPhone}
 					onClose={e => transferSet(false)}
 					onSubmit={transferSubmit}
+					{...props}
 				/>
 			}
 			{list &&
 				<CustomListsDialog
-					customer={props.customerId}
-					name={props.customerName}
-					number={props.customerPhone}
 					onClose={() => listSet(false)}
+					{...props}
 				/>
 			}
 			{reminder &&
 				<ReminderDialog
-					customerId={props.customerId.toString()}
-					name={props.customerName}
-					number={props.customerPhone}
 					onClose={e => reminderSet(false)}
+					{...props}
 				/>
 			}
 			{resolve &&
 				<Resolve
-					customerId={props.customerId}
 					onClose={e => resolveSet(false)}
 					onSubmit={remove}
+					{...props}
 				/>
 			}
 			{providerReturn &&
@@ -538,17 +532,17 @@ function CustomerItem(props) {
 			}
 			{cancel &&
 				<CancelContinuous
-					customerId={props.customerId}
-					orderId={props.orderId}
 					onClose={e => cancelSet(false)}
 					onSubmit={cancelSubmit}
+					{...props}
 				/>
 			}
 			{decline &&
 				<Decline
-					orderId={props.orderId}
 					onClose={e => declineSet(false)}
 					onSubmit={declineSubmit}
+					{...props}
+
 				/>
 			}
 		</React.Fragment>
@@ -589,14 +583,14 @@ function ViewItem(props) {
 		ev.preventDefault();
 
 		// Attempt to claim the conversation
-		claimed.add(props.phone).then(res => {
-			Events.trigger('claimedAdd', props.phone, props.name, props.id);
-			Events.trigger('viewedRemove', props.phone, false);
+		claimed.add(props.customerPhone).then(res => {
+			Events.trigger('claimedAdd', props.customerPhone, props.customerName, props.customerId);
+			Events.trigger('viewedRemove', props.customerPhone, false);
 		}, error => {
 			// If we got a duplicate
 			if(error.code === 1101) {
 				Events.trigger('error', 'Customer has already been claimed.');
-				Events.trigger('viewedDuplicate', props.phone, error.msg);
+				Events.trigger('viewedDuplicate', props.customerPhone, error.msg);
 			} else {
 				Events.trigger('error', Rest.errorMessage(error));
 			}
@@ -606,8 +600,8 @@ function ViewItem(props) {
 	// Click event
 	function click(ev) {
 		props.onClick(
-			Utils.viewedPath(props.phone, props.id),
-			props.phone
+			Utils.viewedPath(props.customerPhone, props.customerId),
+			props.customerPhone
 		)
 	}
 
@@ -640,31 +634,31 @@ function ViewItem(props) {
 		}
 
 		// Trigger the viewed being removed
-		Events.trigger('viewedRemove', props.phone, props.selected);
+		Events.trigger('viewedRemove', props.customerPhone, props.selected);
 	}
 
 	// Transfer click
 	function transferClick(ev) {
 		ev.stopPropagation();
 		ev.preventDefault();
-		transferSet(props.claimed);
+		transferSet(props.claimedUser);
 	}
 
 	// Transfer dialog submit
 	function transferSubmit(agent) {
 
 		// Call the request
-		claimed.transfer(props.phone, agent).then(res => {
+		claimed.transfer(props.customerPhone, agent).then(res => {
 
 			// Remove transfer dialog
 			transferSet(false);
 
 			// Trigger the claimed being removed
-			Events.trigger('viewedRemove', props.phone, false);
+			Events.trigger('viewedRemove', props.customerPhone, false);
 
 			// If we're adding it to ourselves
 			if(agent === props.user.id) {
-				Events.trigger('claimedAdd', props.phone, props.name, props.id);
+				Events.trigger('claimedAdd', props.customerPhone, props.customerName, props.customerId);
 			}
 
 			// Else if it's selected
@@ -684,7 +678,7 @@ function ViewItem(props) {
 	// Render
 	return (
 		<React.Fragment>
-			<Link to={Utils.viewedPath(props.phone, props.id)} onClick={click}>
+			<Link to={Utils.viewedPath(props.customerPhone, props.customerId)} onClick={click}>
 				<ListItem button selected={props.selected}>
 					<ListItemAvatar>
 						{props.newMsgs ?
@@ -693,12 +687,12 @@ function ViewItem(props) {
 						}
 					</ListItemAvatar>
 					<ListItemText
-						primary={props.name}
+						primary={props.customerName}
 						secondary={
 							<React.Fragment>
 								<span>
-									ID: {props.id}<br/>
-									#: {Utils.nicePhone(props.phone)}
+									ID: {props.customerId}<br/>
+									#: {Utils.nicePhone(props.customerPhone)}
 								</span>
 								<span className="customerActions">
 									<span className="tooltip">
@@ -709,14 +703,14 @@ function ViewItem(props) {
 										</Tooltip>
 									</span>
 									<span className="tooltip">
-										{(props.claimed && props.overwrite) &&
+										{(props.claimedUser && props.overwrite) &&
 											<Tooltip title="Transfer">
 												<IconButton className="transfer" onClick={transferClick}>
 													<MergeTypeIcon />
 												</IconButton>
 											</Tooltip>
 										}
-										{!props.claimed &&
+										{!props.claimedUser &&
 											<Tooltip title="Claim">
 												<IconButton className="claim" onClick={claim}>
 													<AddIcon />
@@ -757,27 +751,21 @@ function ViewItem(props) {
 			</Link>
 			{transfer !== false &&
 				<Transfer
-					customerId={props.id}
-					name={props.name}
-					number={props.phone}
 					onClose={e => transferSet(false)}
 					onSubmit={transferSubmit}
+					{...props}
 				/>
 			}
 			{list &&
 				<CustomListsDialog
-					customer={props.id}
-					name={props.name}
-					number={props.phone}
 					onClose={() => listSet(false)}
+					{...props}
 				/>
 			}
 			{reminder &&
 				<ReminderDialog
-					customerId={props.id.toString()}
-					name={props.name}
-					number={props.phone}
 					onClose={e => reminderSet(false)}
+					{...props}
 				/>
 			}
 
@@ -1290,16 +1278,13 @@ export default class Header extends React.Component {
 								<Box className="items">
 									{this.state.viewed.map((o,i) =>
 										<ViewItem
-											claimed={o.claimedUser}
 											key={i}
-											id={o.customerId}
-											name={o.customerName}
 											newMsgs={o.customerPhone in this.state.newMsgs}
 											onClick={this.menuItem}
 											overwrite={this.state.overwrite}
-											phone={o.customerPhone}
 											selected={this.state.path === Utils.viewedPath(o.customerPhone, o.customerId)}
 											user={this.state.user}
+											{...o}
 										/>
 									)}
 								</Box>

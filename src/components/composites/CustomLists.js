@@ -395,9 +395,9 @@ export class CustomListsForm extends React.Component {
 
 	itemCreate(list, callback) {
 		customLists.createItem(list, {
-			customer: this.props.customer,
-			name: this.props.name || '(empty)',
-			number: this.props.number
+			customer: this.props.customerId,
+			name: this.props.customerName || '(empty)',
+			number: this.props.customerPhone
 		}, _id => {
 			if(callback) {
 				callback();
@@ -502,13 +502,11 @@ export function CustomListsDialog(props) {
 			<DialogTitle>Add Conversation to Custom List</DialogTitle>
 			<DialogContent dividers>
 				<Typography type="p">
-					Add {props.name} {Utils.nicePhone(props.number)} to which Custom List<br /><br />
+					Add {props.customerName} {Utils.nicePhone(props.customerPhone)} to which Custom List<br /><br />
 				</Typography>
 				<CustomListsForm
-					customer={props.customer}
-					name={props.name}
-					number={props.number}
 					ref={formRef}
+					{...props}
 				/>
 			</DialogContent>
 			<DialogActions>

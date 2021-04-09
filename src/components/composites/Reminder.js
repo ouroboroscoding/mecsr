@@ -83,7 +83,7 @@ export class ReminderForm extends React.Component {
 			reminders.add({
 				date: this.dateRef.current.value,
 				crm_type: 'knk',
-				crm_id: this.props.customerId,
+				crm_id: this.props.customerId.toString(),
 				note: this.noteRef.current.value.trim()
 			}).then(res => {
 				resolve(res);
@@ -131,7 +131,7 @@ export function ReminderDialog(props) {
 			<DialogTitle>Reminder {props.title}</DialogTitle>
 			<DialogContent dividers>
 				<Typography type="p">
-					Add a reminder for {props.name} {nicePhone(props.number)}<br /><br />
+					Add a reminder for {props.customerName} {nicePhone(props.customerPhone)}<br /><br />
 				</Typography>
 				<ReminderForm
 					ref={formRef}

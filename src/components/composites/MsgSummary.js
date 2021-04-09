@@ -19,7 +19,6 @@ import Paper from '@material-ui/core/Paper';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
-import { datetime } from 'shared/generic/tools';
 
 // Local modules
 import Utils from 'utils';

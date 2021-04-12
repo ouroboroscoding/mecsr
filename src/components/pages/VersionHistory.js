@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.33.5', 'April 12th, 2021', [
+		'Added ability for Agents to change a patient\'s portal login email which (re)sends the verification link.'
+	]],
 	['1.33.0', 'April 5th, 2021', [
 		'Added ability to transfer a customer to a provider even if the provider did not initiate the claim.',
 		'Only providers that are eligble ED providers in the customer\'s shipping state will be available.'

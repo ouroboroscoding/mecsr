@@ -10,7 +10,7 @@
 
 // NPM modules
 import Tree from 'format-oc/Tree'
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // Material UI
 import Box from '@material-ui/core/Box';
@@ -24,6 +24,7 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 
@@ -356,8 +357,12 @@ function Patient(props) {
 
 	// State
 	let [attempts, attemptsSet] = useState([]);
+	let [emailUpdate, emailUpdateSet] = useState(false);
 	let [patient, patientSet] = useState(null);
 	let [patientUpdate, patientUpdateSet] = useState(false);
+
+	// Refs
+	let emailRef = useRef();
 
 	// User effect
 	useEffect(() => {
@@ -374,7 +379,7 @@ function Patient(props) {
 	}, [props.user]);
 
 	// Fetch the failed attempts to setup the account
-	function patientAttempts(key) {
+	function attemptsFetch(key) {
 
 		// Clear the current attempts
 		attemptsSet([]);
@@ -400,7 +405,7 @@ function Patient(props) {
 	}
 
 	// Send the customer the patient portal access setup email
-	function patientCreate() {
+	function create() {
 
 		// Init the data to the request
 		let oData = {
@@ -461,14 +466,14 @@ function Patient(props) {
 
 				// If there are failed attempts
 				if(res.data && res.data.attempts !== null) {
-					patientAttempts(res.data._id);
+					attemptsFetch(res.data._id);
 				}
 			}
 		});
 	}
 
 	// Reset the failed attempts count
-	function patientReset(key) {
+	function reset(key) {
 
 		// Request the attempts
 		Rest.update('patient', 'setup/reset', {
@@ -495,7 +500,8 @@ function Patient(props) {
 		});
 	}
 
-	function patientUpdated(values) {
+	// Called after setup is updated successfully
+	function setupUpdated(values) {
 
 		// Clone the data
 		let oPatient = clone(patient);
@@ -510,6 +516,48 @@ function Patient(props) {
 		patientUpdateSet(false);
 	}
 
+	// Update email address
+	function updateEmail() {
+
+		// Get the email
+		let sEmail = emailRef.current.value.trim();
+
+		// If it's empty
+		if(sEmail === '') {
+			Events.trigger('error', 'Email must have some value');
+			return;
+		}
+
+		// Tell the server
+		Rest.update('patient', 'account/email', {
+			_id: patient._id,
+			email: sEmail,
+			url: 'https://' + process.env.REACT_APP_MEPP_DOMAIN + '/verify#key='
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !res._handled) {
+				if(res.error.code === 1900) {
+					Events.trigger('error', 'E-mail address already in use');
+				} else {
+					Events.trigger('error', Rest.errorMessage(res.error));
+				}
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If there's data, set the state
+			if(res.data) {
+				patientSet(patient => {
+					patient.email = sEmail;
+					return clone(patient);
+				})
+				emailUpdateSet(false);
+			}
+		});
+	}
+
 	// If we're still loading
 	let inner = null
 	if(patient === null) {
@@ -521,7 +569,7 @@ function Patient(props) {
 			<span>
 				Customer has no patient portal access.
 				{(!props.readOnly && Rights.has('patient_account', 'create')) &&
-					<span> <Button color="primary" onClick={patientCreate} variant="contained">Send Setup Email</Button></span>
+					<span> <Button color="primary" onClick={create} variant="contained">Send Setup Email</Button></span>
 				}
 			</span>
 		);
@@ -530,10 +578,17 @@ function Patient(props) {
 			<React.Fragment>
 				{patientUpdate ?
 					<Form
+						beforeSubmit={values => {
+							values.url = 'https://' + process.env.REACT_APP_MEPP_DOMAIN + '/#key=s';
+							return values;
+						}}
 						cancel={() => patientUpdateSet(false)}
+						errors={{
+							1900: "E-mail address already in use"
+						}}
 						noun="setup/update"
 						service="patient"
-						success={patientUpdated}
+						success={setupUpdated}
 						title={false}
 						tree={SetupTree}
 						type="update"
@@ -550,13 +605,37 @@ function Patient(props) {
 							</span>
 							{!patient.activated && patient.attempts > 0 &&
 								<Tooltip title="Reset Attempts">
-									<IconButton onClick={() => patientReset(patient._id)}>
+									<IconButton onClick={() => reset(patient._id)}>
 										<RotateLeftIcon />
 									</IconButton>
 								</Tooltip>
 							}
 						</Grid>
-						<Grid item xs={12} md={6}><strong>Email: </strong><span>{patient.email}</span></Grid>
+						<Grid item xs={12} md={6}>
+							{emailUpdate ?
+								<React.Fragment>
+									<TextField
+										defaultValue={patient.email}
+										inputRef={emailRef}
+										label="E-mail Address"
+										placeholder="E-mail Address"
+										variant="outlined"
+									/>
+									<Button color="primary" onClick={updateEmail} variant="contained">Submit</Button>
+								</React.Fragment>
+							:
+								<React.Fragment>
+									<strong>Email: </strong><span>{patient.email}</span>
+									{patient.activated &&
+										<Tooltip title="Edit e-mail address">
+											<IconButton onClick={() => emailUpdateSet(true)} style={{padding: '0', marginLeft: '10px'}}>
+												<EditIcon />
+											</IconButton>
+										</Tooltip>
+									}
+								</React.Fragment>
+							}
+						</Grid>
 						{!patient.activated &&
 							<React.Fragment>
 								<Grid item xs={12} md={6}><strong>Last Name: </strong><span>{patient.lname}</span></Grid>
@@ -569,7 +648,7 @@ function Patient(props) {
 								<Grid item xs={12}>
 									<strong style={{verticalAlign: 'middle'}}>Failed Attempts: </strong>
 									<Tooltip title="Refresh Attempts List">
-										<IconButton className="nopadding" onClick={() => patientAttempts(patient._id)}>
+										<IconButton className="nopadding" onClick={() => attempts(patient._id)}>
 											<RefreshIcon />
 										</IconButton>
 									</Tooltip>

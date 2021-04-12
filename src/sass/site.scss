@@ -142,6 +142,18 @@ td {
 	}
 }
 
+.MuiIconButton-root.noPadding {
+	padding: 0;
+}
+
+.MuiIconButton.leftMargin {
+	margin-left: 10px;
+}
+
+.MuiIconButton.rightMargin {
+	margin-right: 10px;
+}
+
 .MuiTab-root {
 	min-width: 0 !important;
 }

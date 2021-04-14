@@ -244,6 +244,7 @@ function EVerify(props) {
 
 			// If we got ok, fetch latest data
 			if(res.data) {
+				results(false);
 				fetch();
 			}
 		});

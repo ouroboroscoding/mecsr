@@ -226,6 +226,32 @@ function EVerify(props) {
 		});
 	}
 
+	// Resubmit identity check to everify
+	function reSubmit() {
+
+		// Clear current results so it's obvious we are re-fetching
+		resultsSet(null);
+
+		// Tell the server to update everify
+		Rest.update('monolith', 'customer/everify', {
+			customerId: props.customerId.toString()
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !res._handled) {
+				Events.trigger('error', Rest.errorMessage(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+
+			// If we got ok, fetch latest data
+			if(res.data) {
+				fetch();
+			}
+		});
+	}
+
 	// Show SSN then hide it again in 5 seconds
 	function ssnShow() {
 		ssnSet(true);
@@ -335,6 +361,9 @@ function EVerify(props) {
 		<Box className="everify">
 			<Box className="section_header">
 				<Typography className="title">E-Verification</Typography>
+				{Rights.has('everify', 'update') &&
+					<Button color="primary" onClick={reSubmit} variant="contained">Re-Check Identity</Button>
+				}
 			</Box>
 			<Paper className="padded">
 				{inner}

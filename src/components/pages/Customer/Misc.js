@@ -229,6 +229,9 @@ function EVerify(props) {
 	// Resubmit identity check to everify
 	function reSubmit() {
 
+		// Clear current results so it's obvious we are re-fetching
+		results(false);
+
 		// Tell the server to update everify
 		Rest.update('monolith', 'customer/everify', {
 			customerId: props.customerId.toString()
@@ -244,7 +247,6 @@ function EVerify(props) {
 
 			// If we got ok, fetch latest data
 			if(res.data) {
-				results(false);
 				fetch();
 			}
 		});

@@ -281,7 +281,7 @@ function EVerify(props) {
 						<Typography><strong>Last Check</strong></Typography>
 					</Grid>
 					<Grid item sm={12} md={5} lg={5}>
-						<Typography>{datetime(results.lastIdentiFloAt)}</Typography>
+						<Typography>{results.lastIdentiFloAt ? datetime(results.lastIdentiFloAt) : ''}</Typography>
 					</Grid>
 					<Grid item sm={12} md={5} lg={6}>&nbsp;</Grid>
 					<Grid item sm={12} md={2} lg={1}>

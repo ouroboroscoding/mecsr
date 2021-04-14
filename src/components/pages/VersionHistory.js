@@ -18,6 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const VERSION = [
+	['1.33.6', 'April 14th, 2021', [
+		'Added ability to re-check identity in E-Verification section for those with permission to do so.'
+	]],
 	['1.33.5', 'April 12th, 2021', [
 		'Added ability for Agents to change a patient\'s portal login email which (re)sends the verification link.'
 	]],

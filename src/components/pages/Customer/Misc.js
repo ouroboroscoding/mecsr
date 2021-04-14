@@ -230,7 +230,7 @@ function EVerify(props) {
 	function reSubmit() {
 
 		// Clear current results so it's obvious we are re-fetching
-		resultsSet(false);
+		resultsSet(null);
 
 		// Tell the server to update everify
 		Rest.update('monolith', 'customer/everify', {

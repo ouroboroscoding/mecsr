@@ -30,16 +30,14 @@ import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 
 // Shared communication modules
 import Rest from 'shared/communication/rest';
+import Rights from 'shared/communication/rights';
 
 // Shared data modules
 import DoseSpotData from 'shared/data/dosespot';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
-import { afindi } from 'shared/generic/tools';
-
-// Local modules
-import Utils from 'utils';
+import { afindi, date, datetime, nicePhone } from 'shared/generic/tools';
 
 /**
  * Dose Spot
@@ -128,7 +126,7 @@ function DoseSpot(props) {
 						}
 					</Grid>
 					<Grid item xs={12} md={6}>
-						<Typography>{Utils.nicePhone(props.details.PrimaryPhone)}</Typography>
+						<Typography>{nicePhone(props.details.PrimaryPhone)}</Typography>
 						<Typography>{props.details.Email}</Typography>
 						<Typography>{props.details.DateOfBirth.substring(0, 10)}</Typography>
 					</Grid>
@@ -162,7 +160,7 @@ function DoseSpot(props) {
 									<Grid item xs={12} md={4}><strong>Pharmacy: </strong><span>{o.PharmacyName}</span></Grid>
 									<Grid item xs={12} md={4}><strong>Prescriber: </strong><span>{o.PrescriberName}</span></Grid>
 									<Grid item xs={12} md={4}><strong>Product: </strong><span>{o.DisplayName} ({o.Quantity})</span></Grid>
-									<Grid item xs={12} md={o.EffectiveDate ? 4 : 8}><strong>Written: </strong><span>{o.WrittenDate.substring(0, 10)}</span></Grid>
+									<Grid item xs={12} md={o.EffectiveDate ? 4 : 8}><strong>Written: </strong><span>{datetime(o.WrittenDate)}</span></Grid>
 									{o.EffectiveDate &&
 										<Grid item xs={12} md={4}><strong>Effective: </strong><span>{o.EffectiveDate.substring(0, 10)}</span></Grid>
 									}
@@ -291,7 +289,7 @@ function PharmacyFill(props) {
 						<Grid container spacing={2}>
 							<Grid item xs={12} md={4}><strong>KNK Order: </strong><span>{o.crm_order}</span></Grid>
 							<Grid item xs={12} md={4}><strong>Agent: </strong><span>{o.user_name}</span></Grid>
-							<Grid item xs={12} md={4}><strong>Created: </strong><span>{Utils.date(o._created, '-')}</span></Grid>
+							<Grid item xs={12} md={4}><strong>Created: </strong><span>{date(o._created, '-')}</span></Grid>
 						</Grid>
 					</Paper>
 				)}
@@ -327,9 +325,9 @@ function PharmacyFill(props) {
 							<Grid item xs={12} md={4}><strong>Type: </strong><span>{o.list}</span></Grid>
 							<Grid item xs={12} md={4}><strong>Reason: </strong><span>{o.reason}</span></Grid>
 							<Grid item xs={12} md={4}><strong>Fail Count: </strong><span>{o.fail_count}</span></Grid>
-							<Grid item xs={12} md={4}><strong>{o._created === o._updated ? 'Failed' : 'First Failure'}: </strong><span>{Utils.date(o._created, '-')}</span></Grid>
+							<Grid item xs={12} md={4}><strong>{o._created === o._updated ? 'Failed' : 'First Failure'}: </strong><span>{date(o._created, '-')}</span></Grid>
 							{o._created !== o._updated &&
-								<Grid item xs={12} md={4}><strong>Most Recent: </strong><span>{Utils.date(o._updated, '-')}</span></Grid>
+								<Grid item xs={12} md={4}><strong>Most Recent: </strong><span>{date(o._updated, '-')}</span></Grid>
 							}
 						</Grid>
 					</Paper>
@@ -372,30 +370,30 @@ function Trigger(props) {
 		// If it was somehow shipped anyway
 		if(props.shipped) {
 			dates = [
-				<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{Utils.date(props.triggered, '-')}</span></Grid>,
+				<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{date(props.triggered, '-')}</span></Grid>,
 				<Grid item xs={12} md={4}><strong>Cancelled: </strong><span>{props.cancelled.split(' ')[0]}</span></Grid>,
 				<Grid item xs={12} md={4}><strong>Shipped: </strong><span>{props.shipped.split(' ')[0]}</span></Grid>
 			];
 		} else {
 			dates = [
-				<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{Utils.date(props.triggered, '-')}</span></Grid>,
+				<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{date(props.triggered, '-')}</span></Grid>,
 				<Grid item xs={12} md={8}><strong>Cancelled: </strong><span>{props.cancelled.split(' ')[0]}</span></Grid>
 			];
 		}
 	} else if(props.shipped) {
 		dates = [
-			<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{Utils.date(props.triggered, '-')}</span></Grid>,
+			<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{date(props.triggered, '-')}</span></Grid>,
 			<Grid item xs={12} md={4}><strong>Opened: </strong><span>{props.opened ? props.opened.split(' ')[0] : ''}</span></Grid>,
 			<Grid item xs={12} md={4}><strong>Shipped: </strong><span>{props.shipped.split(' ')[0]}</span></Grid>
 		]
 	} else if(props.opened) {
 		dates = [
-			<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{Utils.date(props.triggered, '-')}</span></Grid>,
+			<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{date(props.triggered, '-')}</span></Grid>,
 			<Grid item xs={12} md={4}><strong>Opened: </strong><span>{props.opened.split(' ')[0]}</span></Grid>,
 			<Grid item xs={12} md={4}><strong>Opened Stage: </strong><span>{props.opened_state}</span></Grid>
 		]
 	} else {
-		dates = <Grid item xs={12} md={12}><strong>Triggered: </strong><span>{Utils.date(props.triggered, '-')}</span></Grid>
+		dates = <Grid item xs={12} md={12}><strong>Triggered: </strong><span>{date(props.triggered, '-')}</span></Grid>
 	}
 
 	return (
@@ -482,7 +480,7 @@ export default function RX(props) {
 		<Box>
 			{props.pharmacyFill &&
 				<PharmacyFill
-					create={Utils.hasRight(props.user, 'pharmacy_fill', 'create')}
+					create={Rights.has('pharmacy_fill', 'create')}
 					errors={props.pharmacyFill['errors']}
 					fills={props.pharmacyFill['fills']}
 					onPharmacyFill={props.onPharmacyFill}
@@ -492,14 +490,14 @@ export default function RX(props) {
 			}
 			{props.triggers && props.triggers.length > 0 &&
 				<Triggers
-					onAdhocAdd={Utils.hasRight(props.user, 'welldyne_adhoc', 'create') ? props.onAdhocAdd : false}
+					onAdhocAdd={Rights.has('welldyne_adhoc', 'create') ? props.onAdhocAdd : false}
 					triggers={props.triggers}
 				/>
 			}
 			{props.patientId !== null &&
 				<DoseSpot
 					dsClinicianId={props.user.dsClinicianId}
-					create={Utils.hasRight(props.user, 'prescriptions', 'create')}
+					create={Rights.has('prescriptions', 'create')}
 					details={props.details}
 					onDsCreate={props.onDsCreate}
 					onDsUpdate={props.onDsUpdate}

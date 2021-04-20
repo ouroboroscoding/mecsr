@@ -42,7 +42,8 @@ const HrtTree = new Tree({
 	customerId: {__type__: "string", __react__: {title: 'Customer ID'}},
 	phoneNumber: {__type__: "string", __react__: {title: 'Phone Number'}},
 	firstName: {__type__: "string", __react__: {title: 'First'}},
-	lastName: {__type__: "string", __react__: {title: 'Last'}}
+	lastName: {__type__: "string", __react__: {title: 'Last'}},
+	shipState: {__type__: "string", __react__:{title: 'State'}}
 });
 
 /**

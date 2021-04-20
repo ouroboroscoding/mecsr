@@ -218,14 +218,15 @@ export default class SMS extends React.Component {
 		});
 	}
 
-	calendlyTemplateStart(customerId, name, email) {
+	calendlyTemplateStart(customerId, name, email, mips) {
 
 		// Set the initial state
 		this.setState({calendly: {
 			customerId: customerId,
 			name: name,
 			email: email,
-			events: false
+			events: false,
+			mips: mips
 		}});
 
 		// Get the list of Calendly events
@@ -242,11 +243,16 @@ export default class SMS extends React.Component {
 			// If we were successful
 			if(res.data) {
 
-				// Clone the current calendly state
+				// Clone the current calendly state and init the list
 				let oCalendly = clone(this.state.calendly);
+				oCalendly.events = [];
 
-				// Add the list of events
-				oCalendly.events = res.data;
+				// Go through each event
+				for(let o of res.data) {
+					if(mips[o.type]) {
+						oCalendly.events.push(o);
+					}
+				}
 
 				// Update the state
 				this.setState({calendly: oCalendly});
@@ -939,12 +945,30 @@ export default class SMS extends React.Component {
 						Events.trigger('error', 'Can not use template without KNK data');
 						return;
 					}
+					if(!this.props.mips) {
+						Events.trigger('error', 'Can not use template with no MIP data');
+						return;
+					}
+
+					// Go through all the mips
+					let oMIPs = {ed: false, hrt: false}
+					for(let o of this.props.mips) {
+						if(o.completed) {
+							if(['MIP-A1', 'MIP-A2'].indexOf(o.form) > -1) {
+								oMIPs['ed'] = true;
+							}
+							if(['MIP-H1', 'MIP-H2'].indexOf(o.form) > -1) {
+								oMIPs['hrt'] = true;
+							}
+						}
+					}
 
 					// Start the process
 					this.calendlyTemplateStart(
 						this.props.customer.customerId,
 						this.props.customer.shipping.firstName + ' ' + this.props.customer.shipping.lastName,
-						this.props.customer.email
+						this.props.customer.email,
+						oMIPs
 					);
 					break;
 

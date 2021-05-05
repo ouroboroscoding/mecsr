@@ -19,8 +19,8 @@ import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 
 // Local components
-import Calls from './Logs_Calls';
-import Emails from './Logs_Emails';
+import Calls from './Calls';
+import Emails from './Emails';
 
 /**
  * Logs

@@ -15,6 +15,7 @@ import { SnackbarProvider } from 'notistack';
 
 // Shared data modules
 import DoseSpot from 'shared/data/dosespot';
+import Tickets from 'shared/data/tickets';
 
 // Shared hooks
 import { useEvent } from 'shared/hooks/event';
@@ -44,6 +45,9 @@ import 'rest_init';
 
 // SASS CSS
 import 'sass/site.scss';
+
+// Init tickets module
+Tickets.init();
 
 /**
  * Site

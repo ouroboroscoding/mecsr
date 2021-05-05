@@ -27,11 +27,11 @@ import AddCircleIcon from '@material-ui/icons/AddCircle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 
-// Composite components
-import Resolve from 'components/composites/Resolve';
+// Dialog components
+import Claim from 'components/dialogs/Claim';
+import Resolve from 'components/dialogs/Resolve';
 
 // Data modules
-import claimed from 'data/claimed';
 import reminders from 'data/reminders';
 
 // Format Components
@@ -70,29 +70,9 @@ const ReminderTree = new Tree(clone(ReminderDef));
 function Reminder(props) {
 
 	// State
+	let [claim, claimSet] = useState(false);
 	let [edit, editSet] = useState(false);
 	let [resolve, resolveSet] = useState(false);
-
-	// Claim the customer associated with the reminder
-	function claim() {
-
-		// Get the claimed add promise
-		claimed.add(props.data.claimed.customerPhone).then(res => {
-			Events.trigger(
-				'claimedAdd',
-				props.data.claimed.customerPhone,
-				props.data.claimed.customerName,
-				props.data.claimed.customerId
-			);
-		}, error => {
-			// If we got a duplicate
-			if(error.code === 1101) {
-				Events.trigger('error', 'Customer has already been claimed.');
-			} else {
-				Events.trigger('error', Rest.errorMessage(error));
-			}
-		});
-	}
 
 	// Catch a click on the resolve button
 	function resolveClick() {
@@ -196,6 +176,15 @@ function Reminder(props) {
 					</Grid>
 				}
 			</Grid>
+			{claim &&
+				<Claim
+					customerId={props.customerId.toString()}
+					customerName={props.customerName}
+					customerPhone={props.customerPhone}
+					defaultType="followup"
+					onClose={() => claimSet(false)}
+				/>
+			}
 			{resolve &&
 				<Resolve
 					customerId={props.data.claimed.customerId}

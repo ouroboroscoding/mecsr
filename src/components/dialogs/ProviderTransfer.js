@@ -27,8 +27,8 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 
 // Composite components
-import { CustomListsForm } from './CustomLists';
-import { ReminderForm } from './Reminder';
+import { CustomListsForm } from 'components/composites/CustomLists';
+import { ReminderForm } from 'components/composites/Reminder';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';

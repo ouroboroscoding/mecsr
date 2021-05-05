@@ -19,6 +19,9 @@ import TextField from '@material-ui/core/TextField';
 // Shared communications modules
 import Rest from 'shared/communication/rest';
 
+// Shared data modules
+import Tickets from 'shared/data/tickets';
+
 // Shared generic modules
 import Events from 'shared/generic/events';
 import { clone, datetime } from 'shared/generic/tools';
@@ -287,6 +290,9 @@ export default class Notes extends React.Component {
 
 			// If we're ok
 			if(res.data) {
+
+				// Add the Note to the current ticket
+				Tickets.item('note', res.data);
 
 				// Clear the note content
 				this.text.value = '';

@@ -314,7 +314,7 @@ function PharmacyFill(props) {
 	let errors = null;
 	if(props.errors.length > 0) {
 		errors = (
-			<React.Fragment>
+			<React.Fragment key="errors">
 				<Box className="section_header">
 					<Typography className="title">Pharmacy Fill Errors</Typography>
 				</Box>
@@ -369,29 +369,29 @@ function Trigger(props) {
 
 		// If it was somehow shipped anyway
 		if(props.shipped) {
-			dates = [
-				<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{date(props.triggered, '-')}</span></Grid>,
-				<Grid item xs={12} md={4}><strong>Cancelled: </strong><span>{props.cancelled.split(' ')[0]}</span></Grid>,
+			dates = <React.Fragment>
+				<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{date(props.triggered, '-')}</span></Grid>
+				<Grid item xs={12} md={4}><strong>Cancelled: </strong><span>{props.cancelled.split(' ')[0]}</span></Grid>
 				<Grid item xs={12} md={4}><strong>Shipped: </strong><span>{props.shipped.split(' ')[0]}</span></Grid>
-			];
+			</React.Fragment>;
 		} else {
-			dates = [
-				<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{date(props.triggered, '-')}</span></Grid>,
+			dates = <React.Fragment>
+				<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{date(props.triggered, '-')}</span></Grid>
 				<Grid item xs={12} md={8}><strong>Cancelled: </strong><span>{props.cancelled.split(' ')[0]}</span></Grid>
-			];
+			</React.Fragment>;
 		}
 	} else if(props.shipped) {
-		dates = [
-			<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{date(props.triggered, '-')}</span></Grid>,
-			<Grid item xs={12} md={4}><strong>Opened: </strong><span>{props.opened ? props.opened.split(' ')[0] : ''}</span></Grid>,
+		dates = <React.Fragment>
+			<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{date(props.triggered, '-')}</span></Grid>
+			<Grid item xs={12} md={4}><strong>Opened: </strong><span>{props.opened ? props.opened.split(' ')[0] : ''}</span></Grid>
 			<Grid item xs={12} md={4}><strong>Shipped: </strong><span>{props.shipped.split(' ')[0]}</span></Grid>
-		]
+		</React.Fragment>
 	} else if(props.opened) {
-		dates = [
-			<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{date(props.triggered, '-')}</span></Grid>,
-			<Grid item xs={12} md={4}><strong>Opened: </strong><span>{props.opened.split(' ')[0]}</span></Grid>,
+		dates = <React.Fragment>
+			<Grid item xs={12} md={4}><strong>Triggered: </strong><span>{date(props.triggered, '-')}</span></Grid>
+			<Grid item xs={12} md={4}><strong>Opened: </strong><span>{props.opened.split(' ')[0]}</span></Grid>
 			<Grid item xs={12} md={4}><strong>Opened Stage: </strong><span>{props.opened_state}</span></Grid>
-		]
+		</React.Fragment>
 	} else {
 		dates = <Grid item xs={12} md={12}><strong>Triggered: </strong><span>{date(props.triggered, '-')}</span></Grid>
 	}

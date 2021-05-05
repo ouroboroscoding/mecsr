@@ -9,60 +9,34 @@
  */
 
 // NPM modules
-import React from 'react';
+import React, { useState } from 'react';
 
-// Shared generic modules
-import Events from  'shared/generic/events';
+// Shared hooks
+import { useEvent } from 'shared/hooks/event';
 
-// Local variables
-let _count = 1;
+/**
+ * Loader
+ *
+ * Handles showing the ajax loader image
+ *
+ * @name Loader
+ * @access public
+ * @param Object props Attributes sent to the component
+ * @return React.Component
+ */
+export default function Loader(props) {
 
-// Loader component
-export default class Loader extends React.Component {
+	// State
+	let [count, countSet] = useState(1);
 
-	constructor(props) {
-		super(props);
-		this.state = {
-			visible: _count !== 0
-		}
-		this.event = this.event.bind(this);
-	}
+	// Hooks
+	useEvent('LoaderShow', () => {
+		countSet(i => i+1);
+	});
+	useEvent('LoaderHide', () => {
+		countSet(i => i-1);
+	});
 
-	componentDidMount() {
-		Events.add('Loader', this.event);
-	}
-
-	componentWillUnmount() {
-		Events.remove('Loader', this.event);
-	}
-
-	event(show) {
-		this.setState({visible: show});
-	}
-
-	render() {
-		return <img src="/images/ajax.gif" alt="ajax" style={{display: this.state.visible ? 'inline' : 'none'}} />
-	}
-}
-
-export function LoaderHide() {
-
-	// Decrement the count
-	_count--;
-
-	// If this is the last one
-	if(_count === 0) {
-		Events.trigger('Loader', false);
-	}
-}
-
-export function LoaderShow() {
-
-	// Increment the count
-	_count++;
-
-	// If this is the first one
-	if(_count === 1) {
-		Events.trigger('Loader', true);
-	}
+	// Render
+	return <img src="/images/ajax.gif" alt="ajax" style={{display: count > 0 ? 'inline' : 'none'}} />
 }

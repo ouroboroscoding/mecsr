@@ -23,7 +23,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import TextField from '@material-ui/core/TextField';
 
 // Composite components
-import { ReminderForm } from './Reminder';
+import { ReminderForm } from 'components/composites/Reminder';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -31,7 +31,16 @@ import Rest from 'shared/communication/rest';
 // Shared generic modules
 import Events from 'shared/generic/events';
 
-// Resolve
+/**
+ * Resolve
+ *
+ * Handles dialog for resolving a claim/ticket
+ *
+ * @name Resolve
+ * @access public
+ * @param Object props Attributes sent to the component
+ * @return React.Component
+ */
 export default function Resolve(props) {
 
 	// State

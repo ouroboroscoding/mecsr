@@ -4,6 +4,9 @@
 /* variables */
 $menu-width: 250px;
 
+/* shared */
+@import '../shared/sass/flex';
+
 /* components */
 @import 'footer';
 @import 'format';
@@ -12,9 +15,13 @@ $menu-width: 250px;
 /* composites */
 @import 'composites/cancelContinuous';
 @import 'composites/custom_lists';
-@import 'composites/decline';
-@import 'composites/dialogs';
+@import 'composites/message';
 @import 'composites/msg_summary';
+
+/* dialogs */
+@import 'dialogs/claim';
+@import 'dialogs/decline';
+@import 'dialogs/all';
 
 /* pages */
 @import 'pages/agents';
@@ -82,15 +89,15 @@ td {
 	}
 }
 
-#manual_adhoc {
-	padding: 10px;
-}
-
 /* classes */
 .page {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+}
+
+div.field {
+	margin-bottom: 10px;
 }
 
 .MuiFormControl-root.dialog {
@@ -226,30 +233,5 @@ td {
 		.MuiSvgIcon-root {
 			font-size: 1.5rem;
 		}
-	}
-}
-
-.flexColumns {
-	display: flex;
-	flex-direction: row;
-}
-
-.flexRows {
-	display: flex;
-	flex-direction: column;
-}
-
-.flexColumns, .flexRows {
-
-	.grow {
-		flex-basis: 0;
-		flex-grow: 1;
-		flex-shrink: 1;
-	}
-
-	.static {
-		flex-basis: auto;
-		flex-grow: 0;
-		flex-shrink: 0;
 	}
 }

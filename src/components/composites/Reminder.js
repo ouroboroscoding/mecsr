@@ -65,7 +65,7 @@ export class ReminderForm extends React.Component {
 					variant="outlined"
 				/></p>
 				<p><TextField
-					defaultValue={(!this.props.customerId || this.props.customerId.toString() === '0') ? 'Phone Number: ' + this.props.number + '\n' : ''}
+					defaultValue={(!this.props.customerId || this.props.customerId.toString() === '0') ? 'Phone Number: ' + this.props.customerPhone + '\n' : ''}
 					label="Add Note"
 					multiline
 					inputRef={this.noteRef}

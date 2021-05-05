@@ -9,62 +9,43 @@
  */
 
 // NPM modules
-import React, { useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 // Material UI
-import Avatar from '@material-ui/core/Avatar';
 import Box from '@material-ui/core/Box';
 import Drawer from '@material-ui/core/Drawer';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
 import AddAlertIcon from '@material-ui/icons/AddAlert';
-import AddIcon from '@material-ui/icons/Add';
 import AllInboxIcon from '@material-ui/icons/AllInbox';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 import AssessmentIcon from '@material-ui/icons/Assessment';
-import CancelIcon from '@material-ui/icons/Cancel';
-import CloseIcon from '@material-ui/icons/Close';
-import CheckIcon from '@material-ui/icons/Check';
 import CommentIcon from '@material-ui/icons/Comment';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import ForumIcon from '@material-ui/icons/Forum';
-import HeadsetMicIcon from '@material-ui/icons/HeadsetMic';
-import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import LocalPharmacyIcon from '@material-ui/icons/LocalPharmacy';
 import MenuIcon from '@material-ui/icons/Menu';
-import MergeTypeIcon from '@material-ui/icons/MergeType';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-import NewReleasesIcon from '@material-ui/icons/NewReleases';
 import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import SearchIcon from '@material-ui/icons/Search';
-import ViewListIcon from '@material-ui/icons/ViewList';
 
-// Composite components
-import Account from './composites/Account';
-import CancelContinuous from './composites/CancelContinuous';
-import Decline from './composites/Decline';
-import ProviderReturn from './composites/ProviderReturn';
-import ProviderTransfer from './composites/ProviderTransfer';
-import { ReminderDialog } from './composites/Reminder';
-import Resolve from './composites/Resolve';
-import Transfer from './composites/Transfer';
-import { CustomListsDialog } from './composites/CustomLists';
+// Dialogs components
+import Account from 'components/dialogs/Account';
 
-// Composite components
-import Loader from './Loader';
+// Site components
+import Loader from 'components/Loader';
+
+// Header components
+import Customer from './Customer'
+import View from './View'
 
 // Data modules
 import claimed from 'data/claimed';
@@ -74,6 +55,9 @@ import reminders from 'data/reminders';
 import Rest from 'shared/communication/rest';
 import TwoWay from 'shared/communication/twoway';
 
+// Shared data modules
+import Tickets from 'shared/data/tickets';
+
 // Shared generic modules
 import Events from 'shared/generic/events';
 import PageVisibility from 'shared/generic/pageVisibility';
@@ -81,697 +65,6 @@ import { afindi, clone, empty, safeLocalStorageJSON } from 'shared/generic/tools
 
 // Local modules
 import Utils from 'utils';
-
-// Customer Item component
-function CustomerItem(props) {
-
-	// State
-	let [cancel, cancelSet] = useState(false);
-	let [decline, declineSet] = useState(false);
-	let [list, listSet] = useState(false);
-	let [more, moreSet] = useState(null);
-	let [providerReturn, providerReturnSet] = useState(false);
-	let [providerTransfer, providerTransferSet] = useState(false);
-	let [reminder, reminderSet] = useState(false);
-	let [resolve, resolveSet] = useState(false);
-	let [transfer, transferSet] = useState(false);
-	let [transferMore, transferMoreSet] = useState(false);
-
-	// Hooks
-	let history = useHistory();
-
-	// Add the claimed customer to a list
-	function addToList(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		listSet(true);
-		moreSet(null);
-	}
-
-	// Add the claimed customer to a reminder
-	function addToReminders(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		reminderSet(true);
-		moreSet(null);
-	}
-
-	// Cancel click
-	function cancelClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		cancelSet(true);
-	}
-
-	// Cancel submit
-	function cancelSubmit(swap) {
-
-		// Hide the dialog
-		declineSet(false);
-
-		// Delete the claim
-		claimed.remove(props.customerPhone).then(res => {
-			// Trigger the claimed being removed
-			Events.trigger('claimedRemove', props.customerPhone, props.selected);
-		}, error => {
-			Events.trigger('error', Rest.errorMessage(error));
-		});
-
-		// If we're swapping
-		if(swap) {
-
-			// Get the claimed add promise
-			claimed.add(props.customerPhone).then(res => {
-				Events.trigger('claimedAdd', props.customerPhone, props.customerName, props.customerId);
-			}, error => {
-				// If we got a duplicate
-				if(error.code === 1101) {
-					Events.trigger('error', 'Customer has already been claimed.');
-				} else {
-					Events.trigger('error', Rest.errorMessage(error));
-				}
-			});
-		}
-
-		// Else, switch page
-		else {
-
-			// If we're currently selected, change the page
-			if(props.selected) {
-				history.push(props.provider !== null ? '/pending' : '/unclaimed');
-			}
-		}
-	}
-
-	// Click event
-	function click(ev) {
-		props.onClick(
-			Utils.customerPath(props.customerPhone, props.customerId),
-			props.customerPhone
-		)
-	}
-
-	// Decline click
-	function declineClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		declineSet(true);
-	}
-
-	// Decline submit
-	function declineSubmit() {
-
-		// Hide the dialog
-		declineSet(false);
-
-		// Delete the claim
-		claimed.remove(props.customerPhone).then(res => {
-			// Trigger the claimed being removed
-			Events.trigger('claimedRemove', props.customerPhone, props.selected);
-		}, error => {
-			Events.trigger('error', Rest.errorMessage(error));
-		});
-
-		// If we're currently selected, change the page
-		if(props.selected) {
-			history.push(props.provider !== null ? '/pending' : '/unclaimed');
-		}
-	}
-
-	// More icon click
-	function moreClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		moreSet(ev.currentTarget);
-	}
-
-	// More menu close
-	function moreClose(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		moreSet(null);
-	}
-
-	// Provider click
-	function providerClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		providerReturnSet(props.user.id);
-	}
-
-	// Transfer to provider
-	function providerReturnSubmit() {
-
-		// Hide the dialog
-		providerReturnSet(false);
-
-		// Delete the claim
-		claimed.remove(props.customerPhone).then(res => {
-			// Trigger the claimed being removed
-			Events.trigger('claimedRemove', props.customerPhone, props.selected);
-		}, error => {
-			Events.trigger('error', Rest.errorMessage(error));
-		});
-
-		// If we're currently selected, change the page
-		if(props.selected) {
-			history.push(props.provider !== null ? '/pending' : '/unclaimed');
-		}
-	}
-
-	// Provider Transfer click
-	function providerTransferClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		providerTransferSet(props.user.id);
-		transferMoreSet(null);
-	}
-
-	// X click
-	function remove(ev) {
-
-		// Stop all propogation of the event
-		if(ev) {
-			ev.stopPropagation();
-			ev.preventDefault();
-		}
-
-		// If we resolved
-		if(resolve) {
-
-			// Hide the dialog
-			resolveSet(false);
-
-			// Mark the conversation as hidden on the server side
-			Rest.update('monolith', 'customer/hide', {
-				customerPhone: props.customerPhone
-			}).done(res => {
-
-				// If there's an error or warning
-				if(res.error && !res._handled) {
-					Events.trigger('error', Rest.errorMessage(res.error));
-				}
-				if(res.warning) {
-					Events.trigger('warning', JSON.stringify(res.warning));
-				}
-			});
-		}
-
-		// If we're currently selected, change the page
-		if(props.selected) {
-			history.push(props.provider !== null ? '/pending' : '/unclaimed');
-		}
-
-		// Send the request to the server
-		claimed.remove(props.customerPhone).then(() => {
-			// Trigger the claimed being removed
-			Events.trigger('claimedRemove', props.customerPhone, props.selected);
-		}, error => {
-			Events.trigger('error', Rest.errorMessage(error));
-		});
-	}
-
-	// Resolve click
-	function resolveClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		resolveSet(true);
-	}
-
-	// Transfer click
-	function transferClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		transferSet(props.user.id);
-		transferMoreSet(null);
-	}
-
-	// Transfer More icon click
-	function transferMoreClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		transferMoreSet(ev.currentTarget);
-	}
-
-	// Transfer More menu close
-	function trasnferMoreClose(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		transferMoreSet(null);
-	}
-
-	// Transfer dialog submit
-	function transferSubmit(agent) {
-
-		// Call the request
-		claimed.transfer(props.customerPhone, agent).then(res => {
-
-			// Remove transfer dialog
-			transferSet(false);
-
-			// If we're currently selected, change the page
-			if(props.selected) {
-				history.push(props.provider !== null ? '/pending' : '/unclaimed');
-			}
-
-			// Trigger the claimed being removed
-			Events.trigger('claimedRemove', props.customerPhone, props.selected);
-
-		}, error => {
-			if(error.code === 1104) {
-				Events.trigger('error', 'Claim no longer exists, can not transfer.');
-			} else {
-				Events.trigger('error', Rest.errorMessage(error));
-			}
-		});
-	}
-
-	// Render
-	return (
-		<React.Fragment>
-			<Link to={Utils.customerPath(props.customerPhone, props.customerId)} onClick={click}>
-				<ListItem button selected={props.selected} className={!props.viewed ? 'transferred' : ''}>
-					<ListItemAvatar>
-						{props.newMsgs ?
-							<Avatar style={{backgroundColor: 'red'}}><NewReleasesIcon /></Avatar> :
-							<Avatar><ForumIcon /></Avatar>
-						}
-					</ListItemAvatar>
-					<ListItemText
-						primary={props.customerName}
-						secondary={
-							<React.Fragment>
-								<span className="customerDetails">
-									<p>#: {Utils.nicePhone(props.customerPhone)}</p>
-									<p>ID: {props.customerId}</p>
-									{props.orderId &&
-										<p>Order: {props.orderId}</p>
-									}
-									{props.provider &&
-										<p>Provider: {props.providerName}</p>
-									}
-									{props.transferredBy &&
-										<p>Transferrer: {props.transferredByName}</p>
-									}
-								</span>
-								<span className="customerActions">
-									{props.provider !== null ?
-										<React.Fragment>
-											<span className="tooltip">
-												{props.continuous ?
-													<Tooltip title="Cancel Recurring">
-														<IconButton className="close" onClick={cancelClick}>
-															<CancelIcon />
-														</IconButton>
-													</Tooltip>
-												:
-													<Tooltip title="Decline Order">
-														<IconButton className="close" onClick={declineClick}>
-															<CancelIcon />
-														</IconButton>
-													</Tooltip>
-												}
-											</span>
-											<span className="tooltip">
-												<Tooltip title="Transfer">
-													<IconButton className="transfer" onClick={transferClick}>
-														<MergeTypeIcon />
-													</IconButton>
-												</Tooltip>
-											</span>
-											<span className="tooltip">
-												<Tooltip title="Send to Provider">
-													<IconButton className="provider" onClick={providerClick}>
-														<LocalHospitalIcon />
-													</IconButton>
-												</Tooltip>
-											</span>
-										</React.Fragment>
-									:
-										<React.Fragment>
-											<span className="tooltip">
-												<Tooltip title="Remove Claim">
-													<IconButton className="close" onClick={remove}>
-														<CloseIcon />
-													</IconButton>
-												</Tooltip>
-											</span>
-											{props.providerTransfer ?
-												<span className="tooltip">
-													<Tooltip title="Transfer">
-														<IconButton onClick={transferMoreClick}>
-															<MergeTypeIcon />
-														</IconButton>
-													</Tooltip>
-													<Menu
-														anchorEl={transferMore}
-														open={Boolean(transferMore)}
-														onClose={trasnferMoreClose}
-													>
-														<MenuItem onClick={transferClick}>
-															<ListItemIcon>
-																<HeadsetMicIcon />
-															</ListItemIcon>
-															<ListItemText primary="Transfer to Agent" />
-														</MenuItem>
-														<MenuItem onClick={providerTransferClick}>
-															<ListItemIcon>
-																<LocalHospitalIcon />
-															</ListItemIcon>
-															<ListItemText primary="Transfer to Provider" />
-														</MenuItem>
-													</Menu>
-												</span>
-											:
-												<span className="tooltip">
-													<Tooltip title="Transfer">
-														<IconButton className="transfer" onClick={transferClick}>
-															<MergeTypeIcon />
-														</IconButton>
-													</Tooltip>
-												</span>
-											}
-											<Tooltip title="Resolve">
-												<IconButton className="resolve" onClick={resolveClick}>
-													<CheckIcon />
-												</IconButton>
-											</Tooltip>
-										</React.Fragment>
-									}
-									<span className="tooltip">
-										<Tooltip title="More">
-											<IconButton onClick={moreClick}>
-												<MoreVertIcon />
-											</IconButton>
-										</Tooltip>
-										<Menu
-											anchorEl={more}
-											open={Boolean(more)}
-											onClose={moreClose}
-										>
-											<MenuItem onClick={addToList}>
-												<ListItemIcon>
-													<ViewListIcon />
-												</ListItemIcon>
-												<ListItemText primary="Add to List" />
-											</MenuItem>
-											<MenuItem onClick={addToReminders}>
-												<ListItemIcon>
-													<AddAlertIcon />
-												</ListItemIcon>
-												<ListItemText primary="Add to Reminders" />
-											</MenuItem>
-										</Menu>
-									</span>
-								</span>
-							</React.Fragment>
-						}
-					/>
-				</ListItem>
-			</Link>
-			{transfer !== false &&
-				<Transfer
-					ignore={transfer}
-					onClose={e => transferSet(false)}
-					onSubmit={transferSubmit}
-					{...props}
-				/>
-			}
-			{list &&
-				<CustomListsDialog
-					onClose={() => listSet(false)}
-					{...props}
-				/>
-			}
-			{reminder &&
-				<ReminderDialog
-					onClose={e => reminderSet(false)}
-					{...props}
-				/>
-			}
-			{resolve &&
-				<Resolve
-					onClose={e => resolveSet(false)}
-					onSubmit={remove}
-					{...props}
-				/>
-			}
-			{providerReturn &&
-				<ProviderReturn
-					onClose={e => providerReturnSet(false)}
-					onTransfer={providerReturnSubmit}
-					{...props}
-				/>
-			}
-			{providerTransfer &&
-				<ProviderTransfer
-					onClose={e => providerTransferSet(false)}
-					onTransfer={providerReturnSubmit}
-					{...props}
-				/>
-			}
-			{cancel &&
-				<CancelContinuous
-					onClose={e => cancelSet(false)}
-					onSubmit={cancelSubmit}
-					{...props}
-				/>
-			}
-			{decline &&
-				<Decline
-					onClose={e => declineSet(false)}
-					onSubmit={declineSubmit}
-					{...props}
-
-				/>
-			}
-		</React.Fragment>
-	);
-}
-
-// View Item component
-function ViewItem(props) {
-
-	// State
-	let [list, listSet] = useState(false);
-	let [more, moreSet] = useState(null);
-	let [reminder, reminderSet] = useState(false);
-	let [transfer, transferSet] = useState(false);
-
-	// Hooks
-	let history = useHistory();
-
-	// Add the claimed customer to a list
-	function addToList(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		listSet(true);
-		moreSet(null);
-	}
-
-	// Add the claimed customer to a reminder
-	function addToReminders(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		reminderSet(true);
-		moreSet(null);
-	}
-
-	// Claim
-	function claim(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-
-		// Attempt to claim the conversation
-		claimed.add(props.customerPhone).then(res => {
-			Events.trigger('claimedAdd', props.customerPhone, props.customerName, props.customerId);
-			Events.trigger('viewedRemove', props.customerPhone, false);
-		}, error => {
-			// If we got a duplicate
-			if(error.code === 1101) {
-				Events.trigger('error', 'Customer has already been claimed.');
-				Events.trigger('viewedDuplicate', props.customerPhone, error.msg);
-			} else {
-				Events.trigger('error', Rest.errorMessage(error));
-			}
-		});
-	}
-
-	// Click event
-	function click(ev) {
-		props.onClick(
-			Utils.viewedPath(props.customerPhone, props.customerId),
-			props.customerPhone
-		)
-	}
-
-	// More icon click
-	function moreClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		moreSet(ev.currentTarget);
-	}
-
-	// More menu close
-	function moreClose(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		moreSet(null);
-	}
-
-	// X click
-	function remove(ev) {
-
-		// Stop all propogation of the event
-		if(ev) {
-			ev.stopPropagation();
-			ev.preventDefault();
-		}
-
-		// If we're currently selected, change the page
-		if(props.selected) {
-			history.push('/unclaimed');
-		}
-
-		// Trigger the viewed being removed
-		Events.trigger('viewedRemove', props.customerPhone, props.selected);
-	}
-
-	// Transfer click
-	function transferClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		transferSet(props.claimedUser);
-	}
-
-	// Transfer dialog submit
-	function transferSubmit(agent) {
-
-		// Call the request
-		claimed.transfer(props.customerPhone, agent).then(res => {
-
-			// Remove transfer dialog
-			transferSet(false);
-
-			// Trigger the claimed being removed
-			Events.trigger('viewedRemove', props.customerPhone, false);
-
-			// If we're adding it to ourselves
-			if(agent === props.user.id) {
-				Events.trigger('claimedAdd', props.customerPhone, props.customerName, props.customerId);
-			}
-
-			// Else if it's selected
-			else if(props.selected) {
-				history.push(props.provider !== null ? '/pending' : '/unclaimed');
-			}
-
-		}, error => {
-			if(error.code === 1104) {
-				Events.trigger('error', 'Claim no longer exists, can not transfer.');
-			} else {
-				Events.trigger('error', Rest.errorMessage(error));
-			}
-		});
-	}
-
-	// Render
-	return (
-		<React.Fragment>
-			<Link to={Utils.viewedPath(props.customerPhone, props.customerId)} onClick={click}>
-				<ListItem button selected={props.selected}>
-					<ListItemAvatar>
-						{props.newMsgs ?
-							<Avatar style={{backgroundColor: 'red'}}><NewReleasesIcon /></Avatar> :
-							<Avatar><ForumIcon /></Avatar>
-						}
-					</ListItemAvatar>
-					<ListItemText
-						primary={props.customerName}
-						secondary={
-							<React.Fragment>
-								<span>
-									ID: {props.customerId}<br/>
-									#: {Utils.nicePhone(props.customerPhone)}
-								</span>
-								<span className="customerActions">
-									<span className="tooltip">
-										<Tooltip title="Remove">
-											<IconButton className="close" onClick={remove}>
-												<CloseIcon />
-											</IconButton>
-										</Tooltip>
-									</span>
-									<span className="tooltip">
-										{(props.claimedUser && props.overwrite) &&
-											<Tooltip title="Transfer">
-												<IconButton className="transfer" onClick={transferClick}>
-													<MergeTypeIcon />
-												</IconButton>
-											</Tooltip>
-										}
-										{!props.claimedUser &&
-											<Tooltip title="Claim">
-												<IconButton className="claim" onClick={claim}>
-													<AddIcon />
-												</IconButton>
-											</Tooltip>
-										}
-									</span>
-									<span className="tooltip">
-										<Tooltip title="More">
-											<IconButton onClick={moreClick}>
-												<MoreVertIcon />
-											</IconButton>
-										</Tooltip>
-										<Menu
-											anchorEl={more}
-											open={Boolean(more)}
-											onClose={moreClose}
-										>
-											<MenuItem onClick={addToList}>
-												<ListItemIcon>
-													<ViewListIcon />
-												</ListItemIcon>
-												<ListItemText primary="Add to List" />
-											</MenuItem>
-											<MenuItem onClick={addToReminders}>
-												<ListItemIcon>
-													<AddAlertIcon />
-												</ListItemIcon>
-												<ListItemText primary="Add to Reminders" />
-											</MenuItem>
-										</Menu>
-									</span>
-								</span>
-							</React.Fragment>
-						}
-					/>
-				</ListItem>
-			</Link>
-			{transfer !== false &&
-				<Transfer
-					onClose={e => transferSet(false)}
-					onSubmit={transferSubmit}
-					{...props}
-				/>
-			}
-			{list &&
-				<CustomListsDialog
-					onClose={() => listSet(false)}
-					{...props}
-				/>
-			}
-			{reminder &&
-				<ReminderDialog
-					onClose={e => reminderSet(false)}
-					{...props}
-				/>
-			}
-
-		</React.Fragment>
-	);
-}
 
 // Header component
 export default class Header extends React.Component {
@@ -880,20 +173,21 @@ export default class Header extends React.Component {
 		this.setState({"account": !this.state.account});
 	}
 
-	claimedAdd(number, name, customer_id, order_id=null, continuous=null, provider=null) {
+	claimedAdd(ticket, number, name, customer_id, order_id=null, continuous=null, provider=null) {
 
 		// Clone the claimed state
 		let lClaimed = clone(this.state.claimed);
 
 		// Add the record to the end
 		lClaimed.push({
+			ticket: ticket,
 			customerId: customer_id,
 			customerName: name,
 			customerPhone: number,
 			orderId: order_id,
 			continuous: continuous,
 			provider: provider,
-			viewed: true
+			viewed: 1
 		});
 
 		// Generate the path
@@ -939,12 +233,20 @@ export default class Header extends React.Component {
 			let lPath = Utils.parsePath(this.state.path);
 			if(lPath[0] === 'customer') {
 
+				// Look for the index of the claim
+				let i = afindi(data, 'customerPhone', lPath[1]);
+
 				// If we can't find the customer we're on
-				if(afindi(data, 'customerPhone', lPath[1]) === -1) {
+				if(i === -1) {
 
 					// Switch to view
 					Events.trigger('viewedAdd', lPath[1], lPath[2]);
 					Events.trigger('error', 'This customer is not claimed, switching to view only.');
+				}
+
+				// Else, set the ticket
+				else {
+					Tickets.current(data[i].ticket);
 				}
 			}
 
@@ -1094,6 +396,11 @@ export default class Header extends React.Component {
 			this.state.claimed.map(o => o.customerPhone),
 			this.state.viewed.map(o => o.customerPhone)
 		);
+
+		// If there's none
+		if(lNumbers.length === 0) {
+			return;
+		}
 
 		// Send the removal to the server
 		Rest.read('monolith', 'msgs/claimed/new', {
@@ -1249,7 +556,7 @@ export default class Header extends React.Component {
 							{this.state.claimed_open &&
 								<Box className="items">
 									{this.state.claimed.map((o,i) =>
-										<CustomerItem
+										<Customer
 											key={i}
 											newMsgs={o.customerPhone in this.state.newMsgs}
 											onClick={this.menuItem}
@@ -1277,7 +584,7 @@ export default class Header extends React.Component {
 							{this.state.viewed_open &&
 								<Box className="items">
 									{this.state.viewed.map((o,i) =>
-										<ViewItem
+										<View
 											key={i}
 											newMsgs={o.customerPhone in this.state.newMsgs}
 											onClick={this.menuItem}
@@ -1727,6 +1034,7 @@ export default class Header extends React.Component {
 						}
 
 						// Add the number and transferred by to the data
+						res.data['ticket'] = data.claim.ticket;
 						res.data['customerPhone'] = data.claim.phoneNumber;
 						res.data['transferredBy'] = data.claim.transferredBy;
 						res.data['transferredByName'] = data.claim.transferredByName;

@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
 
 // Material UI
+import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import Dialog from '@material-ui/core/Dialog';
@@ -33,6 +34,9 @@ import { ReminderForm } from 'components/composites/Reminder';
 // Shared communications modules
 import Rest from 'shared/communication/rest';
 
+// Shared data modules
+import Tickets from 'shared/data/tickets';
+
 // Shared generic modules
 import Events from 'shared/generic/events';
 import { omap } from 'shared/generic/tools';
@@ -51,13 +55,13 @@ import { omap } from 'shared/generic/tools';
 export default function ProviderTransfer(props) {
 
 	// State
+	let [note, noteSet] = useState('');
+	let [provider, providerSet] = useState('');
 	let [providers, providersSet] = useState(null);
 	let [reminder, reminderSet] = useState(null);
 
 	// Refs
 	let listRef = useRef();
-	let noteRef = useRef();
-	let providerRef = useRef();
 	let reminderRef = useRef();
 
 	// Load effect
@@ -97,19 +101,6 @@ export default function ProviderTransfer(props) {
 	// Make the transfer
 	function submit() {
 
-		// Make sure we have a provider
-		if(providerRef.current.value === '') {
-			Events.trigger('error', 'Please select a provider to transfer to');
-			return;
-		}
-
-		// Make sure we have a note
-		let sNote = noteRef.current.value.trim();
-		if(sNote === '') {
-			Events.trigger('Must write a note when transferring')
-			return;
-		}
-
 		// If we need a reminder, create it
 		if(reminder) {
 			reminderRef.current.run();
@@ -117,9 +108,9 @@ export default function ProviderTransfer(props) {
 
 		// Send the transfer request to the server
 		Rest.update('monolith', 'customer/provider/transfer', {
-			note: sNote,
+			note: note,
 			phoneNumber: props.customerPhone,
-			user_id: providerRef.current.value
+			user_id: provider
 		}).done(res => {
 
 			// If there's an error or warning
@@ -132,7 +123,19 @@ export default function ProviderTransfer(props) {
 
 			// If we got data
 			if(res.data) {
-				props.onTransfer(providerRef.current.value);
+
+				// If there's a ticket
+				if(props.ticket) {
+
+					// Add the note
+					Tickets.item('note', res.data, props.ticket);
+
+					// Add the action
+					Tickets.action('Transferred', 'Provider Required', props.ticket);
+				}
+
+				// Notify the parent
+				props.onSubmit(provider);
 			}
 		});
 	}
@@ -152,42 +155,54 @@ export default function ProviderTransfer(props) {
 			{providers ?
 				<React.Fragment>
 					<DialogContent dividers>
-						<p><TextField
-							label="Add Note"
-							multiline
-							inputRef={noteRef}
-							rows="4"
-							variant="outlined"
-						/></p>
-						<p><FormControl variant="outlined">
-							<InputLabel htmlFor="provider-transfer">Transfer To</InputLabel>
-							<Select
-								inputProps={{
-									id: 'provider-transfer',
-									ref: providerRef
-								}}
-								label="Transfer To"
-								native
-							>
-								<option aria-label="None" value="" />
-								{omap(providers, (o,k) =>
-									<option key={k} value={k}>{o.firstName + ' ' + o.lastName}</option>
-								)}
-							</Select>
-						</FormControl></p>
-						<p><CustomListsForm
-							optional={true}
-							ref={listRef}
-							{...props}
-						/></p>
-						<p><FormControlLabel
-							control={<Checkbox
-								color="primary"
-								checked={reminder}
-								onChange={ev => reminderSet(ev.currentTarget.checked)}
-							/>}
-							label={<span>Add Reminder?</span>}
-						/></p>
+						<Box className="field">
+							<TextField
+								label="Add Note"
+								multiline
+								onChange={ev => noteSet(ev.currentTarget.value)}
+								rows="4"
+								value={note}
+								variant="outlined"
+							/>
+						</Box>
+						<Box className="field">
+							<FormControl variant="outlined">
+								<InputLabel htmlFor="provider-transfer">Transfer To</InputLabel>
+								<Select
+									inputProps={{
+										id: 'provider-transfer'
+									}}
+									label="Transfer To"
+									native
+									onChange={ev => providerSet(ev.target.value)}
+									value={provider}
+								>
+									<option aria-label="None" value="" />
+									{omap(providers, (o,k) =>
+										<option key={k} value={k}>{o.firstName + ' ' + o.lastName}</option>
+									)}
+								</Select>
+							</FormControl>
+						</Box>
+						<br />
+						<Typography><strong>Optional</strong></Typography>
+						<Box className="field">
+							<CustomListsForm
+								optional={true}
+								ref={listRef}
+								{...props}
+							/>
+						</Box>
+						<Box className="field">
+							<FormControlLabel
+								control={<Checkbox
+									color="primary"
+									checked={reminder}
+									onChange={ev => reminderSet(ev.currentTarget.checked)}
+								/>}
+								label={<span>Add Reminder?</span>}
+							/>
+						</Box>
 						{reminder &&
 							<ReminderForm
 								ref={reminderRef}
@@ -199,9 +214,11 @@ export default function ProviderTransfer(props) {
 						<Button variant="contained" color="secondary" onClick={props.onClose}>
 							Cancel
 						</Button>
-						<Button variant="contained" color="primary" onClick={submit}>
-							Transfer to Provider
-						</Button>
+						{(note.trim() !== '' && provider !== '') &&
+							<Button variant="contained" color="primary" onClick={submit}>
+								Transfer to Provider
+							</Button>
+						}
 					</DialogActions>
 				</React.Fragment>
 			:
@@ -218,7 +235,7 @@ ProviderTransfer.propTypes = {
 	customerName: PropTypes.string.isRequired,
 	customerPhone: PropTypes.string.isRequired,
 	onClose: PropTypes.func.isRequired,
-	onTransfer: PropTypes.func.isRequired,
+	onSubmit: PropTypes.func.isRequired,
 	type: PropTypes.oneOf(['ed', 'hrt'])
 }
 

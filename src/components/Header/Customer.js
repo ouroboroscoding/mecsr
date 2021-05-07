@@ -49,17 +49,8 @@ import Transfer from 'components/dialogs/Transfer';
 import { ReminderDialog } from 'components/composites/Reminder';
 import { CustomListsDialog } from 'components/composites/CustomLists';
 
-// Data modules
-import Claimed from 'data/claimed';
-
-// Shared communications modules
-import Rest from 'shared/communication/rest';
-
 // Shared data modules
 import Tickets from 'shared/data/tickets';
-
-// Shared generic modules
-import Events from 'shared/generic/events';
 
 // Local modules
 import Utils from 'utils';
@@ -78,7 +69,6 @@ export default function Customer(props) {
 
 	// State
 	let [dialog, dialogSet] = useState(false);
-	let [list, listSet] = useState(false);
 	let [more, moreSet] = useState(null);
 	let [transferMore, transferMoreSet] = useState(null);
 

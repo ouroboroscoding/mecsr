@@ -10,52 +10,129 @@
 
 // NPM modules
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useState } from 'react';
 
 // Material UI
+import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
+
+// Data modules
+import Claimed from 'data/claimed';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
 
+// Shared components
+import RadioButtons from 'shared/components/RadioButtons';
+
+// Shared data modules
+import Tickets from 'shared/data/tickets';
+
 // Shared generic modules
 import Events from 'shared/generic/events';
 
-// Decline
+/**
+ * Decline
+ *
+ * Handles a dialog for declining a QA order
+ *
+ * @name Decline
+ * @access public
+ * @param Object props Attributes sent to the component
+ * @return React.Component
+ */
 export default function Decline(props) {
 
-	// Submite notes / resolve conversation
-	function submit(reason) {
+	// Constants
+	const ORDER_DECLINED = Tickets.subtype_id('QA Order Declined');
 
-		// Decline the order
-		Rest.update('monolith', 'order/decline', {
-			orderId: props.orderId,
-			reason: reason
-		}).done(res => {
+	// State
+	let [reason, reasonSet] = useState('');
 
-			// If there's an error or warning
-			if(res.error && !res._handled) {
-				if(res.error.code === 1103) {
-					Events.trigger('error', 'Failed to update order status in Konnektive, please try again or contact support');
-				} else {
-					Events.trigger('error', Rest.errorMessage(res.error));
+	// Submit notes / resolve conversation
+	function submitDecline() {
+
+		// If the reason isn't Ran CC Successfully
+		if(reason !== 'Ran CC Successfully') {
+
+			// Decline the order
+			Rest.update('monolith', 'order/decline', {
+				orderId: props.orderId,
+				reason: reason
+			}).done(res => {
+
+				// If there's an error or warning
+				if(res.error && !res._handled) {
+					if(res.error.code === 1103) {
+						Events.trigger('error', 'Failed to update order status in Konnektive, please try again or contact support');
+					} else {
+						Events.trigger('error', Rest.errorMessage(res.error));
+					}
 				}
-			}
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
+				if(res.warning) {
+					Events.trigger('warning', JSON.stringify(res.warning));
+				}
 
-			// If there's data
-			if(res.data) {
-				props.onSubmit();
-			}
-		});
+				// If there's data
+				if(res.data) {
+
+					// Add the note to the ticket
+					if(props.ticket) {
+						Tickets.item('note', res.data, props.ticket);
+					}
+
+					// Start the resolution
+					submitResolution()
+				}
+			});
+		} else {
+
+			// Start the resolution
+			submitResolution();
+		}
+	}
+
+	// Called to submit the resolution, close the ticket, and remove the claim
+	function submitResolution() {
+
+		// If there's no ticket (eventually we can remove this)
+		if(!props.ticket) {
+
+			// Remove the claim
+			Claimed.remove(props.customerPhone).then(() => {
+				Events.trigger('claimedRemove', props.customerPhone);
+			}, error => {
+				Events.trigger('error', Rest.errorMessage(error));
+			});
+
+			// Notify the parent
+			props.onSubmit();
+			return;
+		}
+
+		// Resolve the ticket
+		Tickets.resolve(ORDER_DECLINED, props.ticket).then(data => {
+
+			// Delete the claim
+			Claimed.remove(props.customerPhone).then(res => {
+				Events.trigger('claimedRemove', props.customerPhone);
+			}, error => {
+				Events.trigger('error', Rest.errorMessage(error));
+			});
+
+			// Notify the parent
+			props.onSubmit();
+
+		}, error => {
+			Events.trigger('error', Rest.errorMessage(error));
+		})
 	}
 
 	return (
@@ -72,28 +149,33 @@ export default function Decline(props) {
 			<DialogTitle id="confirmation-dialog-title">QA Order Decline</DialogTitle>
 			<DialogContent dividers>
 				<Typography>Choose the reason for the decline:</Typography>
-				<Grid container spacing={2}>
-					<Grid item xs={12} md={6} xl={3}>
-						<Button color="primary" onClick={props.onSubmit} variant="contained">Ran CC Successfully</Button>
-					</Grid>
-					<Grid item xs={12} md={6} xl={3}>
-						<Button color="primary" onClick={e => submit('Duplicate Order')} variant="contained">Duplicate Order*</Button>
-					</Grid>
-					<Grid item xs={12} md={6} xl={3}>
-						<Button color="primary" onClick={e => submit('Current Customer')} variant="contained">Customer Request*</Button>
-					</Grid>
-					<Grid item xs={12} md={6} xl={3}>
-						<Button color="primary" onClick={e => submit('Contact Attempt')} variant="contained">Contact Attempt*</Button>
-					</Grid>
-					<Grid item xs={12}>
-						<Typography>* Will cancel QA order in Konnektive</Typography>
-					</Grid>
-				</Grid>
+				<Box className="field">
+					<RadioButtons
+						buttonProps={{style: {width: '100%'}}}
+						gridContainerProps={{spacing: 2}}
+						gridItemProps={{xs: 12, md: 6, xl: 3}}
+						onChange={value => reasonSet(value, 10)}
+						options={[
+							{value: 'Ran CC Successfully'},
+							{value: 'Duplicate Order*'},
+							{value: 'Customer Request*'},
+							{value: 'Contact Attempt*'}
+						]}
+						value={reason}
+						variant="grid"
+					/>
+				</Box>
+				<Typography>* Will cancel QA order in Konnektive</Typography>
 			</DialogContent>
 			<DialogActions>
 				<Button variant="contained" color="secondary" onClick={props.onClose}>
 					Cancel
 				</Button>
+				{reason !== '' &&
+					<Button variant="contained" color="primary" onClick={submitDecline}>
+						Decline
+					</Button>
+				}
 			</DialogActions>
 		</Dialog>
 	);

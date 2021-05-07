@@ -68,13 +68,13 @@ export default function Transfer(props) {
 	let [agents, agentsSet] = useState([]);
 	let [agentsAll, agentsAllSet] = useState([]);
 	let [agent, agentSet] = useState('');
+	let [note, noteSet] = useState('');
 	let [reminder, reminderSet] = useState(null);
 	let [type, typeSet] = useState(TRANSFER);
 	let [subtype, subtypeSet] = useState('');
-	let [subtypes, subtypesSet] = useState('');
+	let [subtypes, subtypesSet] = useState([]);
 
 	// Refs
-	let noteRef = useRef();
 	let listRef = useRef();
 	let reminderRef = useRef();
 
@@ -193,15 +193,6 @@ export default function Transfer(props) {
 			return;
 		}
 
-		// Check for notes
-		let content = noteRef.current.value.trim();
-
-		// If there's no note
-		if(content === '') {
-			Events.trigger('error', 'Must write a note when transferring');
-			return
-		}
-
 		// Add to the list
 		listRef.current.run();
 
@@ -213,7 +204,7 @@ export default function Transfer(props) {
 		// Send the message to the server
 		Rest.create('monolith', 'customer/note', {
 			action: 'CSR Note - Transfered',
-			content: content,
+			content: note,
 			customerId: props.customerId
 		}).done(res => {
 
@@ -257,7 +248,7 @@ export default function Transfer(props) {
 			}
 
 			// Trigger the claimed being removed
-			Events.trigger('claimedRemove', props.customerPhone, props.selected);
+			Events.trigger('claimedRemove', props.customerPhone);
 
 			// Call the parent
 			props.onSubmit();
@@ -309,8 +300,9 @@ export default function Transfer(props) {
 					<TextField
 						label="Add Note"
 						multiline
-						inputRef={noteRef}
+						onChange={ev => noteSet(ev.currentTarget.value)}
 						rows="4"
+						value={note}
 						variant="outlined"
 					/>
 				</Box>
@@ -363,9 +355,11 @@ export default function Transfer(props) {
 				<Button variant="contained" color="secondary" onClick={props.onClose}>
 					Cancel
 				</Button>
-				<Button variant="contained" color="primary" onClick={submitNote}>
-					Transfer
-				</Button>
+				{(agent !== '' && note.trim() !== '') &&
+					<Button variant="contained" color="primary" onClick={submitNote}>
+						Transfer
+					</Button>
+				}
 			</DialogActions>
 		</Dialog>
 	);

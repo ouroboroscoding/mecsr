@@ -82,7 +82,6 @@ export default class Header extends React.Component {
 			menu: false,
 			newMsgs: safeLocalStorageJSON('newMsgs', {}),
 			overwrite: props.user ? Utils.hasRight(props.user, 'csr_overwrite', 'create') : false,
-			path: window.location.pathname,
 			pending: 0,
 			providerTransfer: props.user ? Utils.hasRight(props.user, 'csr_claims_provider', 'create') : false,
 			reminders: 0,
@@ -135,7 +134,7 @@ export default class Header extends React.Component {
 		reminders.subscribe(this.reminderCount);
 
 		// Check for a direct view
-		let lPath = Utils.parsePath(this.state.path);
+		let lPath = Utils.parsePath(this.props.history.location.pathname);
 		if(lPath[0] === 'view' && !this.state.viewed.length) {
 			this.viewedAdd(lPath[1], '');
 		}
@@ -194,10 +193,7 @@ export default class Header extends React.Component {
 		let sPath = Utils.customerPath(number, customer_id);
 
 		// Create the new state
-		let oState = {
-			claimed: lClaimed,
-			path: sPath
-		}
+		let oState = {claimed: lClaimed}
 
 		// Does the new claim exist in the viewed?
 		let iIndex = afindi(this.state.viewed, 'customerPhone', number);
@@ -230,7 +226,7 @@ export default class Header extends React.Component {
 			let oState = {claimed: data};
 
 			// If we're on a customer
-			let lPath = Utils.parsePath(this.state.path);
+			let lPath = Utils.parsePath(this.props.history.location.pathname);
 			if(lPath[0] === 'customer') {
 
 				// Look for the index of the claim
@@ -258,7 +254,7 @@ export default class Header extends React.Component {
 		});
 	}
 
-	claimedRemove(number, switch_path) {
+	claimedRemove(number) {
 
 		// Find the index of the remove customer
 		let iClaimed = afindi(this.state.claimed, 'customerPhone', number);
@@ -277,13 +273,6 @@ export default class Header extends React.Component {
 
 			// Create new instance of state
 			let oState = {claimed: lClaimed}
-
-			// If the path has switch
-			if(switch_path) {
-				oState.path = oClaim.provider !== null ?
-					'/pending' :
-					'/unclaimed';
-			}
 
 			// If it's in the new messages
 			if(number in this.state.newMsgs) {
@@ -319,9 +308,7 @@ export default class Header extends React.Component {
 	menuItem(pathname, number) {
 
 		// New state
-		let state = {
-			path: pathname
-		};
+		let state = {};
 
 		// If we're in mobile, hide the menu
 		if(this.props.mobile) {
@@ -357,7 +344,7 @@ export default class Header extends React.Component {
 				let lClaimed = clone(this.state.claimed);
 
 				// Set the viewed flag
-				lClaimed[iIndex].viewed = true;
+				lClaimed[iIndex].viewed = 1;
 
 				// Update the state
 				state.claimed = lClaimed;
@@ -431,7 +418,7 @@ export default class Header extends React.Component {
 					for(let sNumber in res.data) {
 
 						// If we're on the customer's page
-						if(this.state.path.indexOf('/'+sNumber+'/') > -1) {
+						if(this.props.history.location.pathname.indexOf('/'+sNumber+'/') > -1) {
 							Events.trigger('newMessage');
 						}
 
@@ -472,7 +459,7 @@ export default class Header extends React.Component {
 					{Utils.hasRight(this.state.user, 'csr_stats', 'read') &&
 						<React.Fragment>
 							<Link to="/stats" onClick={this.menuClick}>
-								<ListItem button selected={this.state.path === "/stats"}>
+								<ListItem button selected={this.props.history.location.pathname === "/stats"}>
 									<ListItemIcon><AssessmentIcon /></ListItemIcon>
 									<ListItemText primary="Stats" />
 								</ListItem>
@@ -483,7 +470,7 @@ export default class Header extends React.Component {
 					{Utils.hasRight(this.state.user, 'csr_templates', 'read') &&
 						<React.Fragment>
 							<Link to="/templates" onClick={this.menuClick}>
-								<ListItem button selected={this.state.path === "/templates"}>
+								<ListItem button selected={this.props.history.location.pathname === "/templates"}>
 									<ListItemIcon><CommentIcon /></ListItemIcon>
 									<ListItemText primary="Templates" />
 								</ListItem>
@@ -496,7 +483,7 @@ export default class Header extends React.Component {
 						Utils.hasRight(this.state.user, 'welldyne_outbound', 'read')) &&
 						<React.Fragment>
 							<Link to="/pharmacy" onClick={this.menuClick}>
-								<ListItem button selected={this.state.path === "/pharmacy"}>
+								<ListItem button selected={this.props.history.location.pathname === "/pharmacy"}>
 									<ListItemIcon><LocalPharmacyIcon /></ListItemIcon>
 									<ListItemText primary="Pharmacy" />
 								</ListItem>
@@ -505,14 +492,14 @@ export default class Header extends React.Component {
 						</React.Fragment>
 					}
 					<Link to="/reminders" onClick={this.menuClick}>
-						<ListItem button selected={this.state.path === "/reminders"}>
+						<ListItem button selected={this.props.history.location.pathname === "/reminders"}>
 							<ListItemIcon><AddAlertIcon /></ListItemIcon>
 							<ListItemText primary={'Reminders (' + this.state.reminders + ')'} />
 						</ListItem>
 					</Link>
 					<Divider />
 					<Link to="/hrt" onClick={this.menuClick}>
-						<ListItem button selected={this.state.path === "/hrt"}>
+						<ListItem button selected={this.props.history.location.pathname === "/hrt"}>
 							<ListItemIcon><AssessmentIcon /></ListItemIcon>
 							<ListItemText primary="HRT Patients" />
 						</ListItem>
@@ -520,7 +507,7 @@ export default class Header extends React.Component {
 					<Divider />
 					<React.Fragment>
 						<Link to="/pending" onClick={this.menuClick}>
-							<ListItem button selected={this.state.path === "/pending"}>
+							<ListItem button selected={this.props.history.location.pathname === "/pending"}>
 								<ListItemIcon><AllInboxIcon /></ListItemIcon>
 								<ListItemText primary={'Pending Orders (' + this.state.pending + ')'} />
 							</ListItem>
@@ -528,14 +515,14 @@ export default class Header extends React.Component {
 						<Divider />
 					</React.Fragment>
 					<Link to="/unclaimed" onClick={this.menuClick}>
-						<ListItem button selected={this.state.path === "/unclaimed"}>
+						<ListItem button selected={this.props.history.location.pathname === "/unclaimed"}>
 							<ListItemIcon><AllInboxIcon /></ListItemIcon>
 							<ListItemText primary={'Incoming SMS (' + this.state.unclaimed + ')'} />
 						</ListItem>
 					</Link>
 					<Divider />
 					<Link to="/search" onClick={this.menuClick}>
-						<ListItem button selected={this.state.path === "/search"}>
+						<ListItem button selected={this.props.history.location.pathname === "/search"}>
 							<ListItemIcon><SearchIcon /></ListItemIcon>
 							<ListItemText primary="Search" />
 						</ListItem>
@@ -561,7 +548,7 @@ export default class Header extends React.Component {
 											newMsgs={o.customerPhone in this.state.newMsgs}
 											onClick={this.menuItem}
 											providerTransfer={this.state.providerTransfer}
-											selected={this.state.path === Utils.customerPath(o.customerPhone, o.customerId)}
+											selected={this.props.history.location.pathname === Utils.customerPath(o.customerPhone, o.customerId)}
 											user={this.state.user}
 											{...o}
 										/>
@@ -589,7 +576,7 @@ export default class Header extends React.Component {
 											newMsgs={o.customerPhone in this.state.newMsgs}
 											onClick={this.menuItem}
 											overwrite={this.state.overwrite}
-											selected={this.state.path === Utils.viewedPath(o.customerPhone, o.customerId)}
+											selected={this.props.history.location.pathname === Utils.viewedPath(o.customerPhone, o.customerId)}
 											user={this.state.user}
 											{...o}
 										/>
@@ -796,11 +783,6 @@ export default class Header extends React.Component {
 			// Generate the path
 			let sPath = Utils.customerPath(number, this.state.claimed[iClaimed].customerId);
 
-			// Set the new state
-			this.setState({
-				path: sPath
-			});
-
 			// Push the history
 			this.props.history.push(sPath);
 		}
@@ -816,9 +798,6 @@ export default class Header extends React.Component {
 
 				// Generate the path
 				let sPath = Utils.viewedPath(number, this.state.viewed[iViewed].customerId);
-
-				// Set the new state
-				this.setState({path: sPath});
 
 				// Push the history
 				this.props.history.push(sPath);
@@ -867,10 +846,7 @@ export default class Header extends React.Component {
 						let sPath = Utils.viewedPath(number, res.data.customerId);
 
 						// Set the new state
-						this.setState({
-							viewed: lView,
-							path: sPath
-						});
+						this.setState({viewed: lView});
 
 						// Push the history
 						this.props.history.push(sPath);
@@ -901,7 +877,7 @@ export default class Header extends React.Component {
 	}
 
 	// A viewed conversation was removed
-	viewedRemove(number, switch_path) {
+	viewedRemove(number) {
 
 		// Find the index of the remove viewed
 		let iIndex = afindi(this.state.viewed, 'customerPhone', number);
@@ -917,9 +893,6 @@ export default class Header extends React.Component {
 
 			// Set the new state
 			let oState = {viewed: lView}
-			if(switch_path) {
-				oState.path = '/unclaimed';
-			}
 			this.setState(oState);
 		}
 	}
@@ -987,7 +960,7 @@ export default class Header extends React.Component {
 					});
 
 					// If we're on a customer
-					let lPath = Utils.parsePath(this.state.path);
+					let lPath = Utils.parsePath(this.props.history.location.pathname);
 					if(lPath[0] === 'customer') {
 
 						// If it's the one removed
@@ -1106,17 +1079,16 @@ export default class Header extends React.Component {
 					}
 
 					// If we're on a customer
-					let lPath = Utils.parsePath(this.state.path);
+					let lPath = Utils.parsePath(this.props.history.location.pathname);
 					if(lPath[0] === 'customer') {
 
 						// If it's the one swapped
 						if(lPath[1] === data.phoneNumber) {
 
-							// Set the new path
-							oState.path = Utils.customerPath(data.newNumber, lPath[2])
-
 							// Change the page we're on
-							this.props.history.replace(oState.path);
+							this.props.history.replace(
+								Utils.customerPath(data.newNumber, lPath[2])
+							);
 						}
 					}
 

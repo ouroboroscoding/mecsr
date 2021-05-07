@@ -28,7 +28,6 @@ import Typography from '@material-ui/core/Typography';
 // Material UI Icons
 import AddAlertIcon from '@material-ui/icons/AddAlert';
 import CancelIcon from '@material-ui/icons/Cancel';
-import CloseIcon from '@material-ui/icons/Close';
 import CheckIcon from '@material-ui/icons/Check';
 import ForumIcon from '@material-ui/icons/Forum';
 import HeadsetMicIcon from '@material-ui/icons/HeadsetMic';
@@ -78,82 +77,13 @@ import Utils from 'utils';
 export default function Customer(props) {
 
 	// State
-	let [cancel, cancelSet] = useState(false);
-	let [decline, declineSet] = useState(false);
+	let [dialog, dialogSet] = useState(false);
 	let [list, listSet] = useState(false);
 	let [more, moreSet] = useState(null);
-	let [providerReturn, providerReturnSet] = useState(false);
-	let [providerTransfer, providerTransferSet] = useState(false);
-	let [reminder, reminderSet] = useState(false);
-	let [resolve, resolveSet] = useState(false);
-	let [transfer, transferSet] = useState(false);
 	let [transferMore, transferMoreSet] = useState(null);
 
 	// Hooks
 	let history = useHistory();
-
-	// Add the claimed customer to a list
-	function addToList(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		listSet(true);
-		moreSet(null);
-	}
-
-	// Add the claimed customer to a reminder
-	function addToReminders(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		reminderSet(true);
-		moreSet(null);
-	}
-
-	// Cancel click
-	function cancelClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		cancelSet(true);
-	}
-
-	// Cancel submit
-	function cancelSubmit(swap) {
-
-		// Hide the dialog
-		declineSet(false);
-
-		// Delete the claim
-		Claimed.remove(props.customerPhone).then(res => {
-			// Trigger the claimed being removed
-			Events.trigger('claimedRemove', props.customerPhone, props.selected);
-		}, error => {
-			Events.trigger('error', Rest.errorMessage(error));
-		});
-
-		// If we're swapping
-		if(swap) {
-
-			// Get the claimed add promise
-			Claimed.add(props.customerPhone).then(res => {
-				Events.trigger('claimedAdd', props.ticket, props.customerPhone, props.customerName, props.customerId);
-			}, error => {
-				// If we got a duplicate
-				if(error.code === 1101) {
-					Events.trigger('error', 'Customer has already been claimed.');
-				} else {
-					Events.trigger('error', Rest.errorMessage(error));
-				}
-			});
-		}
-
-		// Else, switch page
-		else {
-
-			// If we're currently selected, change the page
-			if(props.selected) {
-				history.push(props.provider !== null ? '/pending' : '/unclaimed');
-			}
-		}
-	}
 
 	// Click event
 	function click(ev) {
@@ -168,31 +98,37 @@ export default function Customer(props) {
 		);
 	}
 
-	// Decline click
-	function declineClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		declineSet(true);
-	}
+	// Called to close a dialog
+	function dialogClose(ev) {
 
-	// Decline submit
-	function declineSubmit() {
+		// Cancel any events if there is one
+		if(ev) {
+			ev.stopPropagation();
+			ev.preventDefault();
+		}
 
 		// Hide the dialog
-		declineSet(false);
-
-		// Delete the claim
-		Claimed.remove(props.customerPhone).then(res => {
-			// Trigger the claimed being removed
-			Events.trigger('claimedRemove', props.customerPhone, props.selected);
-		}, error => {
-			Events.trigger('error', Rest.errorMessage(error));
-		});
+		dialogSet(false);
 
 		// If we're currently selected, change the page
 		if(props.selected) {
-			history.push(props.provider !== null ? '/pending' : '/unclaimed');
+			history.push('/');
 		}
+	}
+
+	// Called to open a dialog
+	function dialogOpen(ev, which) {
+
+		// Cancel the events
+		ev.stopPropagation();
+		ev.preventDefault();
+
+		// Set the dialog to open
+		dialogSet(which);
+
+		// If any sub-menus are open, close them
+		if(more) moreSet(null);
+		if(transferMore) transferMoreSet(null);
 	}
 
 	// More icon click
@@ -209,100 +145,6 @@ export default function Customer(props) {
 		moreSet(null);
 	}
 
-	// Provider click
-	function providerClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		providerReturnSet(props.user.id);
-	}
-
-	// Transfer to provider
-	function providerReturnSubmit() {
-
-		// Hide the dialog
-		providerReturnSet(false);
-
-		// Delete the claim
-		Claimed.remove(props.customerPhone).then(res => {
-			// Trigger the claimed being removed
-			Events.trigger('claimedRemove', props.customerPhone, props.selected);
-		}, error => {
-			Events.trigger('error', Rest.errorMessage(error));
-		});
-
-		// If we're currently selected, change the page
-		if(props.selected) {
-			history.push(props.provider !== null ? '/pending' : '/unclaimed');
-		}
-	}
-
-	// Provider Transfer click
-	function providerTransferClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		providerTransferSet(props.user.id);
-		transferMoreSet(null);
-	}
-
-	// X click
-	function remove(ev) {
-
-		// Stop all propogation of the event
-		if(ev) {
-			ev.stopPropagation();
-			ev.preventDefault();
-		}
-
-		// If we resolved
-		if(resolve) {
-
-			// Hide the dialog
-			resolveSet(false);
-
-			// Mark the conversation as hidden on the server side
-			Rest.update('monolith', 'customer/hide', {
-				customerPhone: props.customerPhone
-			}).done(res => {
-
-				// If there's an error or warning
-				if(res.error && !res._handled) {
-					Events.trigger('error', Rest.errorMessage(res.error));
-				}
-				if(res.warning) {
-					Events.trigger('warning', JSON.stringify(res.warning));
-				}
-			});
-		}
-
-		// If we're currently selected, change the page
-		if(props.selected) {
-			history.push(props.provider !== null ? '/pending' : '/unclaimed');
-		}
-
-		// Send the request to the server
-		Claimed.remove(props.customerPhone).then(() => {
-			// Trigger the claimed being removed
-			Events.trigger('claimedRemove', props.customerPhone, props.selected);
-		}, error => {
-			Events.trigger('error', Rest.errorMessage(error));
-		});
-	}
-
-	// Resolve click
-	function resolveClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		resolveSet(true);
-	}
-
-	// Transfer click
-	function transferClick(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
-		transferSet(props.user.id);
-		transferMoreSet(null);
-	}
-
 	// Transfer More icon click
 	function transferMoreClick(ev) {
 		ev.stopPropagation();
@@ -315,18 +157,6 @@ export default function Customer(props) {
 		ev.stopPropagation();
 		ev.preventDefault();
 		transferMoreSet(null);
-	}
-
-	// Transfer dialog submit
-	function transferSubmit() {
-
-		// Remove transfer dialog
-		transferSet(false);
-
-		// If we're currently selected, change the page
-		if(props.selected) {
-			history.push(props.provider !== null ? '/pending' : '/unclaimed');
-		}
 	}
 
 	// Render
@@ -364,13 +194,13 @@ export default function Customer(props) {
 											<span className="tooltip">
 												{props.continuous ?
 													<Tooltip title="Cancel Recurring">
-														<IconButton className="close" onClick={cancelClick}>
+														<IconButton className="close" onClick={ev => dialogOpen(ev, 'cancel')}>
 															<CancelIcon />
 														</IconButton>
 													</Tooltip>
 												:
 													<Tooltip title="Decline Order">
-														<IconButton className="close" onClick={declineClick}>
+														<IconButton className="close" onClick={ev => dialogOpen(ev, 'decline')}>
 															<CancelIcon />
 														</IconButton>
 													</Tooltip>
@@ -378,14 +208,14 @@ export default function Customer(props) {
 											</span>
 											<span className="tooltip">
 												<Tooltip title="Transfer">
-													<IconButton className="transfer" onClick={transferClick}>
+													<IconButton className="transfer" onClick={ev => dialogOpen(ev, 'transfer')}>
 														<MergeTypeIcon />
 													</IconButton>
 												</Tooltip>
 											</span>
 											<span className="tooltip">
 												<Tooltip title="Send to Provider">
-													<IconButton className="provider" onClick={providerClick}>
+													<IconButton className="provider" onClick={ev => dialogOpen(ev, 'provider')}>
 														<LocalHospitalIcon />
 													</IconButton>
 												</Tooltip>
@@ -405,13 +235,13 @@ export default function Customer(props) {
 														open={Boolean(transferMore)}
 														onClose={transferMoreClose}
 													>
-														<MenuItem onClick={transferClick}>
+														<MenuItem onClick={ev => dialogOpen(ev, 'transfer')}>
 															<ListItemIcon>
 																<HeadsetMicIcon />
 															</ListItemIcon>
 															<ListItemText primary="Transfer to Agent" />
 														</MenuItem>
-														<MenuItem onClick={providerTransferClick}>
+														<MenuItem onClick={ev => dialogOpen(ev, 'providerTransfer')}>
 															<ListItemIcon>
 																<LocalHospitalIcon />
 															</ListItemIcon>
@@ -422,17 +252,19 @@ export default function Customer(props) {
 											:
 												<span className="tooltip">
 													<Tooltip title="Transfer">
-														<IconButton className="transfer" onClick={transferClick}>
+														<IconButton className="transfer" onClick={ev => dialogOpen(ev, 'transfer')}>
 															<MergeTypeIcon />
 														</IconButton>
 													</Tooltip>
 												</span>
 											}
-											<Tooltip title="Resolve">
-												<IconButton className="resolve" onClick={resolveClick}>
-													<CheckIcon />
-												</IconButton>
-											</Tooltip>
+											<span className="tooltip">
+												<Tooltip title="Resolve">
+													<IconButton className="resolve" onClick={ev => dialogOpen(ev, 'resolve')}>
+														<CheckIcon />
+													</IconButton>
+												</Tooltip>
+											</span>
 										</React.Fragment>
 									}
 									<span className="tooltip">
@@ -446,13 +278,13 @@ export default function Customer(props) {
 											open={Boolean(more)}
 											onClose={moreClose}
 										>
-											<MenuItem onClick={addToList}>
+											<MenuItem onClick={ev => dialogOpen(ev, 'list')}>
 												<ListItemIcon>
 													<ViewListIcon />
 												</ListItemIcon>
 												<ListItemText primary="Add to List" />
 											</MenuItem>
-											<MenuItem onClick={addToReminders}>
+											<MenuItem onClick={ev => dialogOpen(ev, 'reminder')}>
 												<ListItemIcon>
 													<AddAlertIcon />
 												</ListItemIcon>
@@ -466,58 +298,58 @@ export default function Customer(props) {
 					/>
 				</ListItem>
 			</Link>
-			{transfer !== false &&
+			{dialog === 'transfer' &&
 				<Transfer
-					ignore={transfer}
-					onClose={e => transferSet(false)}
-					onSubmit={transferSubmit}
+					ignore={props.user.id}
+					onClose={e => dialogSet(false)}
+					onSubmit={dialogClose}
 					{...props}
 				/>
 			}
-			{list &&
+			{dialog === 'list' &&
 				<CustomListsDialog
-					onClose={() => listSet(false)}
+					onClose={() => dialogSet(false)}
 					{...props}
 				/>
 			}
-			{reminder &&
+			{dialog === 'reminder' &&
 				<ReminderDialog
-					onClose={e => reminderSet(false)}
+					onClose={e => dialogSet(false)}
 					{...props}
 				/>
 			}
-			{resolve &&
+			{dialog === 'resolve' &&
 				<Resolve
-					onClose={e => resolveSet(false)}
-					onSubmit={remove}
+					onClose={e => dialogSet(false)}
+					onSubmit={dialogClose}
 					{...props}
 				/>
 			}
-			{providerReturn &&
+			{dialog === 'providerReturn' &&
 				<ProviderReturn
-					onClose={e => providerReturnSet(false)}
-					onTransfer={providerReturnSubmit}
+					onClose={e => dialogSet(false)}
+					onSubmit={dialogClose}
 					{...props}
 				/>
 			}
-			{providerTransfer &&
+			{dialog === 'providerTransfer' &&
 				<ProviderTransfer
-					onClose={e => providerTransferSet(false)}
-					onTransfer={providerReturnSubmit}
+					onClose={e => dialogSet(false)}
+					onSubmit={dialogClose}
 					{...props}
 				/>
 			}
-			{cancel &&
+			{dialog === 'cancel' &&
 				<CancelContinuous
-					onClose={e => cancelSet(false)}
-					onSubmit={cancelSubmit}
+					onClose={e => dialogSet(false)}
+					onSubmit={dialogClose}
 					{...props}
 				/>
 			}
-			{decline &&
+			{dialog === 'decline' &&
 				<Decline
-					onClose={e => declineSet(false)}
-					onSubmit={declineSubmit}
+					onClose={e => dialogSet(false)}
+					onSubmit={dialogClose}
 					{...props}
 				/>
 			}

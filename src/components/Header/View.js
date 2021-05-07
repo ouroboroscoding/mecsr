@@ -139,7 +139,7 @@ export default function View(props) {
 
 		// If we're currently selected, change the page
 		if(props.selected) {
-			history.push('/unclaimed');
+			history.push('/');
 		}
 
 		// Trigger the viewed being removed
@@ -167,7 +167,7 @@ export default function View(props) {
 
 			// If it's selected
 			if(props.selected) {
-				history.push(props.provider !== null ? '/pending' : '/unclaimed');
+				history.push('/');
 			}
 
 		}, error => {

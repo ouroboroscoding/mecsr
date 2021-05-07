@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
 import React, { useRef, useState } from 'react';
 
 // Material UI
+import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import Dialog from '@material-ui/core/Dialog';
@@ -21,15 +22,26 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
 
 // Composite components
 import { ReminderForm } from 'components/composites/Reminder';
 
+// Data modules
+import Claimed from 'data/claimed';
+
 // Shared communications modules
 import Rest from 'shared/communication/rest';
 
+// Shared components
+import RadioButtons from 'shared/components/RadioButtons';
+
+// Shared data modules
+import Tickets from 'shared/data/tickets';
+
 // Shared generic modules
 import Events from 'shared/generic/events';
+import { omap } from 'shared/generic/tools';
 
 /**
  * Resolve
@@ -43,11 +55,15 @@ import Events from 'shared/generic/events';
  */
 export default function Resolve(props) {
 
+	// Constants
+	const TYPES = omap(Tickets.subtype_ids('Resolved'), (name,id) => {return {value: id, text: name}});
+
 	// State
+	let [note, noteSet] = useState('');
 	let [reminder, reminderSet] = useState(null);
+	let [type, typeSet] = useState('');
 
 	// Refs
-	let noteRef = useRef();
 	let reminderRef = useRef();
 
 	// Submite notes / resolve conversation
@@ -58,46 +74,91 @@ export default function Resolve(props) {
 			reminderRef.current.run();
 		}
 
-		// Check for notes
-		let content = noteRef.current.value.trim();
+		// Send the message to the server
+		Rest.create('monolith', 'customer/note', {
+			action: 'CSR Note - ' + props.title + ' Resolved',
+			content: note,
+			customerId: props.customerId
+		}).done(res => {
 
-		// If we got text
-		if(content !== '') {
+			// If there's an error
+			if(res.error && !res._handled) {
+				Events.trigger('error', Rest.errorMessage(res.error));
+			}
 
-			// Send the message to the server
-			Rest.create('monolith', 'customer/note', {
-				action: 'CSR Note - ' + props.title + ' Resolved',
-				content: content,
-				customerId: props.customerId
-			}).done(res => {
+			// If there's a warning
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
 
-				// If there's an error
-				if(res.error && !res._handled) {
-					Events.trigger('error', Rest.errorMessage(res.error));
+			// If we're ok
+			if(res.data) {
+
+				// Add it to the ticket
+				if(props.ticket) {
+					Tickets.item('note', res.data, props.ticket);
 				}
 
-				// If there's a warning
-				if(res.warning) {
-					Events.trigger('warning', JSON.stringify(res.warning));
-				}
+				// Start the resolving
+				submitResolution();
+			}
+		});
+	}
 
-				// If we're ok
-				if(res.data) {
-					props.onSubmit();
-				}
+	// Called to submit the resolution, close the ticket, and remove the claim
+	function submitResolution() {
+
+		// Mark the conversation as hidden on the server side
+		Rest.update('monolith', 'customer/hide', {
+			customerPhone: props.customerPhone
+		}).done(res => {
+
+			// If there's an error or warning
+			if(res.error && !res._handled) {
+				Events.trigger('error', Rest.errorMessage(res.error));
+			}
+			if(res.warning) {
+				Events.trigger('warning', JSON.stringify(res.warning));
+			}
+		});
+
+		// If there's no ticket (eventually we can remove this)
+		if(!props.ticket) {
+
+			// Remove the claim
+			Claimed.remove(props.customerPhone).then(() => {
+				Events.trigger('claimedRemove', props.customerPhone);
+			}, error => {
+				Events.trigger('error', Rest.errorMessage(error));
 			});
+
+			// Notify the parent
+			props.onSubmit();
+			return;
 		}
 
-		// Else, let the parent handle removing the claim
-		else {
+		// Close the ticket
+		Tickets.resolve(parseInt(type, 10)).then(data => {
+
+			// Remove the claim
+			Claimed.remove(props.customerPhone).then(() => {
+				Events.trigger('claimedRemove', props.customerPhone);
+			}, error => {
+				Events.trigger('error', Rest.errorMessage(error));
+			});
+
+			// Notify the parent
 			props.onSubmit();
-		}
+
+		}, error => {
+			Events.trigger('error', Rest.errorMessage(error));
+		});
 	}
 
 	return (
 		<Dialog
 			fullWidth={true}
-			maxWidth="sm"
+			maxWidth="md"
 			open={true}
 			onClose={props.onClose}
 			PaperProps={{
@@ -106,21 +167,38 @@ export default function Resolve(props) {
 		>
 			<DialogTitle id="confirmation-dialog-title">Resolve {props.title}</DialogTitle>
 			<DialogContent dividers>
-				<TextField
-					label="Add Note"
-					multiline
-					inputRef={noteRef}
-					rows="4"
-					variant="outlined"
-				/>
-				<p><FormControlLabel
-					control={<Checkbox
-						color="primary"
-						checked={reminder}
-						onChange={ev => reminderSet(ev.currentTarget.checked)}
-					/>}
-					label={<span>Add Reminder?</span>}
-				/></p>
+				<Box className="field">
+					<RadioButtons
+						buttonProps={{style: {width: '100%'}}}
+						gridContainerProps={{spacing: 2}}
+						gridItemProps={{xs: 4}}
+						onChange={value => typeSet(value, 10)}
+						options={TYPES}
+						value={type}
+						variant="grid"
+					/>
+				</Box>
+				<Box className="field">
+					<TextField
+						label="Add Note"
+						multiline
+						onChange={ev => noteSet(ev.currentTarget.value)}
+						rows="4"
+						value={note}
+						variant="outlined"
+					/>
+				</Box>
+				<Typography><strong>Optional</strong></Typography>
+				<Box className="field">
+					<FormControlLabel
+						control={<Checkbox
+							color="primary"
+							checked={reminder}
+							onChange={ev => reminderSet(ev.currentTarget.checked)}
+						/>}
+						label={<span>Add Reminder?</span>}
+					/>
+				</Box>
 				{reminder &&
 					<ReminderForm
 						ref={reminderRef}
@@ -132,9 +210,11 @@ export default function Resolve(props) {
 				<Button variant="contained" color="secondary" onClick={props.onClose}>
 					Cancel
 				</Button>
-				<Button variant="contained" color="primary" onClick={submit}>
-					Resolve
-				</Button>
+				{(type !== '' && note.trim() !== '') &&
+					<Button variant="contained" color="primary" onClick={submit}>
+						Resolve
+					</Button>
+				}
 			</DialogActions>
 		</Dialog>
 	);

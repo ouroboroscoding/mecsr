@@ -179,7 +179,7 @@ export default function Customer(props) {
 									}
 								</span>
 								<span className="customerActions">
-									{props.provider !== null ?
+									{props.orderId !== null ?
 										<React.Fragment>
 											<span className="tooltip">
 												{props.continuous ?
@@ -205,7 +205,7 @@ export default function Customer(props) {
 											</span>
 											<span className="tooltip">
 												<Tooltip title="Send to Provider">
-													<IconButton className="provider" onClick={ev => dialogOpen(ev, 'provider')}>
+													<IconButton className="provider" onClick={ev => dialogOpen(ev, 'providerReturn')}>
 														<LocalHospitalIcon />
 													</IconButton>
 												</Tooltip>

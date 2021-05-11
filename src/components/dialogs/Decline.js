@@ -146,12 +146,12 @@ export default function Decline(props) {
 		>
 			<DialogTitle id="confirmation-dialog-title">QA Order Decline</DialogTitle>
 			<DialogContent dividers>
-				<Typography>Choose the reason for the decline:</Typography>
 				<Box className="field">
 					<RadioButtons
 						buttonProps={{style: {width: '100%'}}}
 						gridContainerProps={{spacing: 2}}
 						gridItemProps={{xs: 12, md: 6, xl: 3}}
+						label="Reason for decline"
 						onChange={value => reasonSet(value, 10)}
 						options={[
 							{value: 'Ran CC Successfully'},

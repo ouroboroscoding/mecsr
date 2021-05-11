@@ -103,7 +103,7 @@ export default function ProviderReturn(props) {
 		}
 
 		// Close the ticket
-		Tickets.resolve(ISSUE_RESOLVED).then(data => {
+		Tickets.resolve(ISSUE_RESOLVED, props.ticket).then(data => {
 
 			// Remove the claim
 			Claimed.remove(props.customerPhone).then(() => {
@@ -130,7 +130,7 @@ export default function ProviderReturn(props) {
 				className: "resolve"
 			}}
 		>
-			<DialogTitle id="confirmation-dialog-title">Send to Provider</DialogTitle>
+			<DialogTitle id="confirmation-dialog-title">Return to Provider</DialogTitle>
 			<DialogContent dividers>
 				<TextField
 					label="Add Note"

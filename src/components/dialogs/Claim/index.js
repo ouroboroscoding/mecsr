@@ -194,12 +194,13 @@ export default function Claim(props) {
 			Content = (
 				<React.Fragment>
 					<Box className="flexStatic">
-						<Typography>Before claiming this customer you must generate a new Support Ticket. Please select the type of Ticket to create and any applicable interactions.</Typography>
+						<Typography>Before claiming this customer you must generate a new Support Ticket.</Typography>
 						<br />
 						<RadioButtons
 							buttonProps={{style: {width: '100%'}}}
 							gridContainerProps={{spacing: 2}}
 							gridItemProps={{xs: 4}}
+							label="Claim Type"
 							onChange={value => typeSet(value)}
 							options={[
 								{value: 'SMS / Voicemail', text: 'SMS / Voicemail'},

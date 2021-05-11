@@ -274,28 +274,33 @@ export default function Transfer(props) {
 		>
 			<DialogTitle id="confirmation-dialog-title">Transfer / Escalate</DialogTitle>
 			<DialogContent dividers>
-				<RadioButtons
-					buttonProps={{style: {width: '100%'}}}
-					gridContainerProps={{spacing: 2}}
-					gridItemProps={{xs: 6}}
-					onChange={value => typeSet(value)}
-					options={[
-						{value: TRANSFER, text: 'Transfer'},
-						{value: ESCALATE, text: 'Escalate'}
-					]}
-					value={type}
-					variant="grid"
-				/>
-				<RadioButtons
-					buttonProps={{style: {width: '100%'}}}
-					gridContainerProps={{spacing: 2}}
-					gridItemProps={{xs: Math.floor(12 / subtypes.length)}}
-					onChange={value => subtypeSet(value, 10)}
-					options={subtypes}
-					value={subtype}
-					variant="grid"
-				/>
-				<br />
+				<Box className="field">
+					<RadioButtons
+						buttonProps={{style: {width: '100%'}}}
+						gridContainerProps={{spacing: 2}}
+						gridItemProps={{xs: 6}}
+						label="Type"
+						onChange={value => typeSet(value)}
+						options={[
+							{value: TRANSFER, text: 'Transfer'},
+							{value: ESCALATE, text: 'Escalate'}
+						]}
+						value={type}
+						variant="grid"
+					/>
+				</Box>
+				<Box className="field">
+					<RadioButtons
+						buttonProps={{style: {width: '100%'}}}
+						gridContainerProps={{spacing: 2}}
+						gridItemProps={{xs: Math.floor(12 / subtypes.length)}}
+						label="Sub-Type"
+						onChange={value => subtypeSet(value)}
+						options={subtypes}
+						value={subtype}
+						variant="grid"
+					/>
+				</Box>
 				<Box className="field">
 					<TextField
 						label="Add Note"

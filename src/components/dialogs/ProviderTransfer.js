@@ -31,6 +31,9 @@ import Typography from '@material-ui/core/Typography';
 import { CustomListsForm } from 'components/composites/CustomLists';
 import { ReminderForm } from 'components/composites/Reminder';
 
+// Data modules
+import Claimed from 'data/claimed';
+
 // Shared communications modules
 import Rest from 'shared/communication/rest';
 
@@ -134,8 +137,15 @@ export default function ProviderTransfer(props) {
 					Tickets.action('Transferred', 'Provider Required', props.ticket);
 				}
 
+				// Remove the claim
+				Claimed.remove(props.customerPhone).then(() => {
+					Events.trigger('claimedRemove', props.customerPhone);
+				}, error => {
+					Events.trigger('error', Rest.errorMessage(error));
+				});
+
 				// Notify the parent
-				props.onSubmit(provider);
+				props.onSubmit();
 			}
 		});
 	}

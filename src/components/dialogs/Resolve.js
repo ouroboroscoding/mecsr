@@ -172,6 +172,7 @@ export default function Resolve(props) {
 						buttonProps={{style: {width: '100%'}}}
 						gridContainerProps={{spacing: 2}}
 						gridItemProps={{xs: 4}}
+						label="Resolution"
 						onChange={value => typeSet(value, 10)}
 						options={TYPES}
 						value={type}

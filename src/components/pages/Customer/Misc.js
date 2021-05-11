@@ -144,6 +144,7 @@ function Calendly(props) {
 						<TableCell>Ends at</TableCell>
 						<TableCell>Provider Name</TableCell>
 						<TableCell>Provider E-mail</TableCell>
+						<TableCell>Location</TableCell>
 					</TableRow>
 				</TableHead>
 				<TableBody>
@@ -153,6 +154,7 @@ function Calendly(props) {
 							<TableCell>{datetime(o.end, '-')}</TableCell>
 							<TableCell>{o.prov_name}</TableCell>
 							<TableCell>{o.prov_emailAddress}</TableCell>
+							<TableCell>{o.location}</TableCell>
 						</TableRow>
 					)}
 				</TableBody>

@@ -126,16 +126,6 @@ export default function Claim(props) {
 	// Make the ticket
 	function submitTicket() {
 
-		// If the type is sms or ongoing it's initated by the customer
-		let sInitiator = '';
-		if(['SMS / Voicemail', 'Call'].includes(type)) {
-			sInitiator = 'customer';
-		} else if(type === 'Follow Up') {
-			sInitiator = 'agent';
-		} else {
-			throw new Error('invalid type in Claim component');
-		}
-
 		// If the type is sms, add the items
 		let lItems = null;
 		if(type === 'SMS / Voicemail') {
@@ -152,17 +142,15 @@ export default function Claim(props) {
 			for(let id of items) {
 				lItems.push({
 					type: 'sms',
-					identifier: id.toString()
+					identifier: id
 				});
 			}
 		}
 
 		// Create the ticket
 		Tickets.create(
-			sInitiator,				// Type of initiator
 			props.customerPhone,	// Customer phone number
 			props.customerId,		// Customer ID
-			'Claimed',				// Action type
 			type,					// Action sub-type
 			lItems					// Items, if any
 		).then(data => {
@@ -251,7 +239,7 @@ export default function Claim(props) {
 				<Button variant="contained" color="secondary" onClick={props.onClose}>
 					Cancel
 				</Button>
-				{(['Call', 'Follow Up'].includes(type) || ('SMS / Voicemail' === type && items.length > 0)) &&
+				{(mode === 'ticket_new' && (['Call', 'Follow Up'].includes(type) || ('SMS / Voicemail' === type && items.length > 0))) &&
 					<Button variant="contained" color="primary" onClick={submitTicket}>
 						Claim
 					</Button>

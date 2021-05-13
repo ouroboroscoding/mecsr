@@ -44,9 +44,6 @@ import Events from 'shared/generic/events';
  */
 export default function ProviderReturn(props) {
 
-	// Constants
-	const ISSUE_RESOLVED = Tickets.subtype_id('Issue Resolved');
-
 	// State
 	let [note, noteSet] = useState('');
 
@@ -103,7 +100,7 @@ export default function ProviderReturn(props) {
 		}
 
 		// Close the ticket
-		Tickets.resolve(ISSUE_RESOLVED, props.ticket).then(data => {
+		Tickets.resolve('Issue Resolved', props.ticket).then(data => {
 
 			// Remove the claim
 			Claimed.remove(props.customerPhone).then(() => {

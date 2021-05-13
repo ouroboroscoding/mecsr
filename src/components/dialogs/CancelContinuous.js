@@ -48,9 +48,6 @@ import Events from 'shared/generic/events';
  */
 export default function CancelContinuous(props) {
 
-	// Constants
-	const CANCEL_CONTINUOUS = Tickets.subtype_id('Recurring Purchase Canceled');
-
 	// State
 	let [reason, reasonSet] = useState('');
 
@@ -125,7 +122,7 @@ export default function CancelContinuous(props) {
 		}
 
 		// Resolve the ticket
-		Tickets.resolve(CANCEL_CONTINUOUS, props.ticket).then(data => {
+		Tickets.resolve('Recurring Purchase Canceled', props.ticket).then(data => {
 
 			// Delete the claim
 			Claimed.remove(props.customerPhone).then(res => {

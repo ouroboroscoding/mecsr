@@ -60,19 +60,26 @@ import { afindi, clone, omap } from 'shared/generic/tools';
 export default function Transfer(props) {
 
 	// Constants
-	let ESCALATE = Tickets.type_id('Escalated').toString();
-	let TRANSFER = Tickets.type_id('Transferred').toString();
-	let REQUESTED_AGENT = Tickets.subtype_id('Requested Specific Agent').toString();
+	let REQUESTED_AGENT = Tickets.actionTypeID('Requested Specific Agent/PA').toString();
+	let TYPES = {
+		'Transferred': [
+			{value: Tickets.actionTypeID('PA Required').toString(), text: 'PA Required'},
+			{value: Tickets.actionTypeID('Requested Specific Agent/PA').toString(), text: 'Requested Specific Agent/PA'}
+		],
+		'Escalated': omap(
+			Tickets.actionTypeIDs('Escalated'),
+			(name,id) => { return {value: id.toString(), text: name}}
+		)
+	}
 
 	// State
+	let [action, actionSet] = useState('Transferred');
+	let [agent, agentSet] = useState('');
 	let [agents, agentsSet] = useState([]);
 	let [agentsAll, agentsAllSet] = useState([]);
-	let [agent, agentSet] = useState('');
 	let [note, noteSet] = useState('');
 	let [reminder, reminderSet] = useState(null);
-	let [type, typeSet] = useState(TRANSFER);
-	let [subtype, subtypeSet] = useState('');
-	let [subtypes, subtypesSet] = useState([]);
+	let [type, typeSet] = useState('');
 
 	// Refs
 	let listRef = useRef();
@@ -86,25 +93,16 @@ export default function Transfer(props) {
 
 	// Type effect
 	useEffect(() => {
-		// Get and set new subtypes
-		let oSubTypes = Tickets.subtype_ids(parseInt(type, 10));
-		let lSubTypes = omap(oSubTypes, (name,id) => { return {value: id.toString(), text: name}});
-		subtypesSet(lSubTypes);
-
-		// Reset current subtype
-		subtypeSet(lSubTypes[0].value.toString());
+		// Reset current type
+		typeSet(TYPES[action][0].value.toString());
 	// eslint-disable-next-line
-	}, [type]);
+	}, [action]);
 
 	// Agents effect
 	useEffect(() => {
 		agentsFilter();
 	// eslint-disable-next-line
-	}, [agentsAll, type, subtype]);
-
-	function agentChange(event) {
-		agentSet(event.currentTarget.value);
-	}
+	}, [agentsAll, action, type]);
 
 	// Fetch agents we can transfer to
 	function agentsFetch() {
@@ -139,17 +137,17 @@ export default function Transfer(props) {
 		});
 	}
 
-	// Filter the list of agents based on the type/subtype requested
+	// Filter the list of agents based on the action/type requested
 	function agentsFilter() {
 
 		// Init the new list of agents
 		let lAgents = [];
 
-		// If the type is transfer
-		if(type === TRANSFER) {
+		// If the action is transfer
+		if(action === 'Transferred') {
 
 			// If we want all agents
-			if(subtype === REQUESTED_AGENT) {
+			if(type === REQUESTED_AGENT) {
 				agentsSet(clone(agentsAll));
 				return;
 			}
@@ -172,12 +170,17 @@ export default function Transfer(props) {
 			// Go through all agents
 			for(let o of agentsAll) {
 
-				// Regargless of subtype, we only want agents that can be
+				// Regargless of type, we only want agents that can be
 				//	escalated
 				if(o.escalate) {
 					lAgents.push(o);
 				}
 			}
+		}
+
+		// If the current agent is not in the new list, clear the field
+		if(afindi(lAgents, 'memo_id', parseInt(agent, 10)) === -1) {
+			agentSet('');
 		}
 
 		// Set the new agents
@@ -236,15 +239,11 @@ export default function Transfer(props) {
 	function submitTransfer() {
 
 		// Call the request
-		Claimed.transfer(props.customerPhone, agent).then(res => {
+		Claimed.transfer(props.customerPhone, parseInt(agent, 10)).then(res => {
 
 			// Add it to the ticket if we have one
 			if(props.ticket) {
-				Tickets.action(
-					parseInt(type, 10),
-					parseInt(subtype, 10),
-					props.ticket
-				);
+				Tickets.action(action, parseInt(type, 10), props.ticket);
 			}
 
 			// Trigger the claimed being removed
@@ -280,12 +279,12 @@ export default function Transfer(props) {
 						gridContainerProps={{spacing: 2}}
 						gridItemProps={{xs: 6}}
 						label="Type"
-						onChange={value => typeSet(value)}
+						onChange={value => actionSet(value)}
 						options={[
-							{value: TRANSFER, text: 'Transfer'},
-							{value: ESCALATE, text: 'Escalate'}
+							{value: 'Transferred', text: 'Transfer'},
+							{value: 'Escalated', text: 'Escalate'}
 						]}
-						value={type}
+						value={action}
 						variant="grid"
 					/>
 				</Box>
@@ -293,11 +292,11 @@ export default function Transfer(props) {
 					<RadioButtons
 						buttonProps={{style: {width: '100%'}}}
 						gridContainerProps={{spacing: 2}}
-						gridItemProps={{xs: Math.floor(12 / subtypes.length)}}
+						gridItemProps={{xs: Math.floor(12 / TYPES[action].length)}}
 						label="Sub-Type"
-						onChange={value => subtypeSet(value)}
-						options={subtypes}
-						value={subtype}
+						onChange={value => typeSet(value)}
+						options={TYPES[action]}
+						value={type}
 						variant="grid"
 					/>
 				</Box>
@@ -320,7 +319,7 @@ export default function Transfer(props) {
 							}}
 							label="Transfer To"
 							native
-							onChange={agentChange}
+							onChange={ev => agentSet(ev.target.value)}
 							value={agent}
 						>
 							<option aria-label="None" value="" />

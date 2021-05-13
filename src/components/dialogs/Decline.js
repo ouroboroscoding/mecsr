@@ -48,9 +48,6 @@ import Events from 'shared/generic/events';
  */
 export default function Decline(props) {
 
-	// Constants
-	const ORDER_DECLINED = Tickets.subtype_id('QA Order Declined');
-
 	// State
 	let [reason, reasonSet] = useState('');
 
@@ -116,7 +113,7 @@ export default function Decline(props) {
 		}
 
 		// Resolve the ticket
-		Tickets.resolve(ORDER_DECLINED, props.ticket).then(data => {
+		Tickets.resolve('QA Order Declined', props.ticket).then(data => {
 
 			// Delete the claim
 			Claimed.remove(props.customerPhone).then(res => {

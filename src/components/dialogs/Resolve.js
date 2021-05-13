@@ -41,7 +41,6 @@ import Tickets from 'shared/data/tickets';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
-import { omap } from 'shared/generic/tools';
 
 /**
  * Resolve
@@ -54,9 +53,6 @@ import { omap } from 'shared/generic/tools';
  * @return React.Component
  */
 export default function Resolve(props) {
-
-	// Constants
-	const TYPES = omap(Tickets.subtype_ids('Resolved'), (name,id) => {return {value: id, text: name}});
 
 	// State
 	let [note, noteSet] = useState('');
@@ -138,7 +134,7 @@ export default function Resolve(props) {
 		}
 
 		// Close the ticket
-		Tickets.resolve(parseInt(type, 10)).then(data => {
+		Tickets.resolve(type).then(data => {
 
 			// Remove the claim
 			Claimed.remove(props.customerPhone).then(() => {
@@ -174,7 +170,12 @@ export default function Resolve(props) {
 						gridItemProps={{xs: 4}}
 						label="Resolution"
 						onChange={value => typeSet(value, 10)}
-						options={TYPES}
+						options={[
+							{value: 'Contact Attempted'},
+							{value: 'Follow Up Complete'},
+							{value: 'Information Provided'},
+							{value: 'Issue Resolved'}
+						]}
 						value={type}
 						variant="grid"
 					/>
@@ -231,5 +232,5 @@ Resolve.propTypes = {
 
 // Default props
 Resolve.defaultProps = {
-	title: 'Claim',
+	title: 'Claim'
 }

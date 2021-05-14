@@ -24,7 +24,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 
 // Composite components
-import SMSMessage from 'components/composites/SMSMessage';
+import SMSMessage from 'shared/components/Messages/SMS';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';

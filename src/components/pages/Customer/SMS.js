@@ -31,11 +31,12 @@ import EditIcon from '@material-ui/icons/Edit';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 //import PhoneIcon from '@material-ui/icons/Phone';
 
-// Composite components
-import Message from 'components/composites/SMSMessage';
+// Shared components
+import Messages from 'shared/components/Messages';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
+import Rights from 'shared/communication/rights';
 
 // Shared data modules
 import Tickets from 'shared/data/tickets';
@@ -43,10 +44,7 @@ import Tickets from 'shared/data/tickets';
 // Shared generic modules
 import Clipboard from 'shared/generic/clipboard';
 import Events from 'shared/generic/events';
-import { afindi, clone, ucfirst } from 'shared/generic/tools';
-
-// Local modules
-import Utils from 'utils';
+import { afindi, clone, nicePhone, ucfirst } from 'shared/generic/tools';
 
 // Regex
 const regTplVar = /{([^]+?)}/g
@@ -509,14 +507,14 @@ export default class SMS extends React.Component {
 					<span className="title">{this.props.mobile ? '#' : 'Phone Number'}: </span>
 					<span className="right20">
 						<a href={'tel:' + this.props.phoneNumber}>
-							{Utils.nicePhone(this.props.phoneNumber)}
+							{nicePhone(this.props.phoneNumber)}
 						</a>
 						<Tooltip title="Copy Phone Number">
 							<IconButton onClick={this.copyPhone}>
 								<FileCopyIcon />
 							</IconButton>
 						</Tooltip>
-						{!this.props.readOnly && Utils.hasRight(this.props.user, 'customers', 'update') &&
+						{!this.props.readOnly && Rights.has('customers', 'update') &&
 							<Tooltip title="Change Phone Number">
 								<IconButton onClick={ev => this.setState({phoneChange: true})}>
 									<EditIcon />
@@ -536,12 +534,10 @@ export default class SMS extends React.Component {
 					}
 				</div>
 				<div className="messages">
-					{this.state.messages.map((msg, i) =>
-						<Message
-							key={msg.id}
-							{...msg}
-						/>
-					)}
+					<Messages
+						type="sms"
+						value={this.state.messages}
+					/>
 					<div className="scroll" ref={el => this.refMessagesBottom = el} />
 				</div>
 				{!this.props.readOnly &&

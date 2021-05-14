@@ -6,6 +6,7 @@ $menu-width: 250px;
 
 /* shared */
 @import '../shared/sass/flex';
+@import '../shared/sass/Messages';
 @import '../shared/sass/RadioButtons';
 
 /* components */
@@ -16,7 +17,6 @@ $menu-width: 250px;
 /* composites */
 @import 'composites/cancelContinuous';
 @import 'composites/custom_lists';
-@import 'composites/message';
 @import 'composites/msg_summary';
 
 /* dialogs */

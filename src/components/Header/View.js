@@ -50,6 +50,7 @@ import Rest from 'shared/communication/rest';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
+import { nicePhone } from 'shared/generic/tools';
 
 // Local modules
 import Utils from 'utils';
@@ -196,7 +197,7 @@ export default function View(props) {
 							<React.Fragment>
 								<span>
 									ID: {props.customerId}<br/>
-									#: {Utils.nicePhone(props.customerPhone)}
+									#: {nicePhone(props.customerPhone)}
 								</span>
 								<span className="customerActions">
 									<span className="tooltip">

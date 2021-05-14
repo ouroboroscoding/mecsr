@@ -42,10 +42,7 @@ import customLists from 'data/customLists';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
-import { afindi, safeLocalStorage } from 'shared/generic/tools';
-
-// Project modules
-import Utils from 'utils';
+import { afindi, nicePhone, safeLocalStorage } from 'shared/generic/tools';
 
 // Material-UI is truly terrible
 const Accordion = withStyles({
@@ -121,7 +118,7 @@ function CustomListItem(props) {
 				secondary={
 					<span>
 						ID: {props.customer}<br/>
-						#: {Utils.nicePhone(props.number)}
+						#: {nicePhone(props.number)}
 					</span>
 				}
 			/>
@@ -502,7 +499,7 @@ export function CustomListsDialog(props) {
 			<DialogTitle>Add Conversation to Custom List</DialogTitle>
 			<DialogContent dividers>
 				<Typography type="p">
-					Add {props.customerName} {Utils.nicePhone(props.customerPhone)} to which Custom List<br /><br />
+					Add {props.customerName} {nicePhone(props.customerPhone)} to which Custom List<br /><br />
 				</Typography>
 				<CustomListsForm
 					ref={formRef}

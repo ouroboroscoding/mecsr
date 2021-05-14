@@ -22,13 +22,11 @@ import { Results } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
+import Rights from 'shared/communication/rights';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
 import { afindi, clone } from 'shared/generic/tools';
-
-// Local modules
-import Utils from 'utils';
 
 // Definitions
 import FillErrorDef from 'definitions/prescriptions/pharmacy_fill_error';
@@ -59,7 +57,7 @@ export default function FillError(props) {
 
 		// If we have a user with the correct rights
 		if(props.user) {
-			if(Utils.hasRight(props.user, 'pharmacy_fill', 'read')) {
+			if(Rights.has('pharmacy_fill', 'read')) {
 				fetchRecords();
 			} else {
 				recordsSet(-1);
@@ -71,7 +69,7 @@ export default function FillError(props) {
 	}, [props.user]); // React to user changes
 
 	// Update rights
-	let bUpdate = Utils.hasRight(props.user, 'pharmacy_fill', 'update')
+	let bUpdate = Rights.has('pharmacy_fill', 'update')
 
 	// Fetch all the records from the server
 	function fetchRecords() {
@@ -196,7 +194,7 @@ export default function FillError(props) {
 					noun="pharmacy/fill/error"
 					order="desc"
 					orderBy="fail_count"
-					remove={Utils.hasRight(props.user, 'pharmacy_fill', 'delete') ? removeRecord : false}
+					remove={Rights.has('pharmacy_fill', 'delete') ? removeRecord : false}
 					service="prescriptions"
 					tree={FillErrorTree}
 					update={bUpdate}

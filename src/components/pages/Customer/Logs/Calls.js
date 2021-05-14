@@ -16,8 +16,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 
-// Composite components
-import JustCallItem from 'components/composites/JustCallItem';
+// Shared components
+import Messages from 'shared/components/Messages';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -95,12 +95,12 @@ export default function Calls(props) {
 					{logs.length === 0 &&
 						<Typography>No logs found for this phone number</Typography>
 					}
-					{logs.length > 0 && logs.map(o =>
-						<JustCallItem
-							key={o.id}
-							{...o}
+					{logs.length > 0 &&
+						<Messages
+							type="justcall"
+							value={logs}
 						/>
-					)}
+					}
 					<Box className="scroll" ref={refScroll} />
 				</React.Fragment>
 			}

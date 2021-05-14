@@ -53,6 +53,7 @@ import reminders from 'data/reminders';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
+import Rights from 'shared/communication/rights';
 import TwoWay from 'shared/communication/twoway';
 
 // Shared data modules
@@ -81,9 +82,9 @@ export default class Header extends React.Component {
 			claimed_open: true,
 			menu: false,
 			newMsgs: safeLocalStorageJSON('newMsgs', {}),
-			overwrite: props.user ? Utils.hasRight(props.user, 'csr_overwrite', 'create') : false,
+			overwrite: props.user ? Rights.has('csr_overwrite', 'create') : false,
 			pending: 0,
-			providerTransfer: props.user ? Utils.hasRight(props.user, 'csr_claims_provider', 'create') : false,
+			providerTransfer: props.user ? Rights.has('csr_claims_provider', 'create') : false,
 			reminders: 0,
 			unclaimed: 0,
 			user: props.user || false,
@@ -456,7 +457,7 @@ export default class Header extends React.Component {
 		let drawer = (
 			<React.Fragment>
 				<List className="pages">
-					{Utils.hasRight(this.state.user, 'csr_stats', 'read') &&
+					{Rights.has('csr_stats', 'read') &&
 						<React.Fragment>
 							<Link to="/stats" onClick={this.menuClick}>
 								<ListItem button selected={this.props.history.location.pathname === "/stats"}>
@@ -467,7 +468,7 @@ export default class Header extends React.Component {
 							<Divider />
 						</React.Fragment>
 					}
-					{Utils.hasRight(this.state.user, 'csr_templates', 'read') &&
+					{Rights.has('csr_templates', 'read') &&
 						<React.Fragment>
 							<Link to="/templates" onClick={this.menuClick}>
 								<ListItem button selected={this.props.history.location.pathname === "/templates"}>
@@ -478,9 +479,9 @@ export default class Header extends React.Component {
 							<Divider />
 						</React.Fragment>
 					}
-					{(Utils.hasRight(this.state.user, 'pharmacy_fill', 'update') ||
-						Utils.hasRight(this.state.user, 'welldyne_adhoc', 'read') ||
-						Utils.hasRight(this.state.user, 'welldyne_outbound', 'read')) &&
+					{(Rights.has('pharmacy_fill', 'update') ||
+						Rights.has('welldyne_adhoc', 'read') ||
+						Rights.has('welldyne_outbound', 'read')) &&
 						<React.Fragment>
 							<Link to="/pharmacy" onClick={this.menuClick}>
 								<ListItem button selected={this.props.history.location.pathname === "/pharmacy"}>
@@ -652,8 +653,8 @@ export default class Header extends React.Component {
 
 		// Hide any modals and set the user
 		this.setState({
-			overwrite: Utils.hasRight(user, 'csr_overwrite', 'create'),
-			providerTransfer: Utils.hasRight(user, 'csr_claims_provider', 'create'),
+			overwrite: Rights.has('csr_overwrite', 'create'),
+			providerTransfer: Rights.has('csr_claims_provider', 'create'),
 			user: user
 		}, () => {
 

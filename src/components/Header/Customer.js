@@ -52,6 +52,9 @@ import { CustomListsDialog } from 'components/composites/CustomLists';
 // Shared data modules
 import Tickets from 'shared/data/tickets';
 
+// Shared generic modules
+import { nicePhone } from 'shared/generic/tools';
+
 // Local modules
 import Utils from 'utils';
 
@@ -166,7 +169,7 @@ export default function Customer(props) {
 						secondary={
 							<React.Fragment>
 								<span className="customerDetails MuiTypography-colorTextSecondary">
-									<Typography>#: {Utils.nicePhone(props.customerPhone)}</Typography>
+									<Typography>#: {nicePhone(props.customerPhone)}</Typography>
 									<Typography>ID: {props.customerId}</Typography>
 									{props.orderId &&
 										<Typography>Order: {props.orderId}</Typography>

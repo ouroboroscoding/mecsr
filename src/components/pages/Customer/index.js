@@ -42,13 +42,11 @@ import DoseSpot from 'shared/data/dosespot';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
+import Rights from 'shared/communication/rights';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
 import { afindi, clone } from 'shared/generic/tools';
-
-// Local modules
-import Utils from 'utils';
 
 // Customer component
 export default class Customer extends React.Component {
@@ -109,7 +107,7 @@ export default class Customer extends React.Component {
 				this.fetchMips();
 				this.fetchShipping();
 				this.fetchTriggers();
-				if(Utils.hasRight(this.props.user, 'prescriptions', 'read')) {
+				if(Rights.has('prescriptions', 'read')) {
 					this.dsId();
 					this.fetchPharmacyFill();
 				}

@@ -151,8 +151,8 @@ export default function Messages(props) {
 	// Render the messages
 	return (
 		<Box className="flexGrow">
-			<Table>
-				<TableBody className="messages">
+			<Table className="Messages">
+				<TableBody className="Messages_content">
 					{next !== false &&
 						<TableRow>
 							<TableCell colSpan={2} style={{textAlign: 'center'}}>

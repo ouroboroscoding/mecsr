@@ -21,10 +21,8 @@ import Paper from '@material-ui/core/Paper';
 import Claim from 'components/dialogs/Claim';
 
 // Shared generic modules
+import BBCode from 'shared/generic/bbcode';
 import Events from 'shared/generic/events';
-
-// Local modules
-import Utils from 'utils';
 
 // Regex
 const reReceived = /^Received at (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}|\d{1,2}\/\d{1,2}\/\d{4}, \d{1,2}:\d{2}:\d{2} [AP]M)\n([^]+)$/
@@ -70,7 +68,7 @@ function Message(props) {
 			<div className="content">
 				{msg.content.split('\n').map((s,i) => {
 					if(s[0] === '[') {
-						let oBB = Utils.bbUrl(s);
+						let oBB = BBCode.url(s);
 						if(oBB) {
 							return <p key={i}><a href={oBB.href} target="_blank" rel="noopener noreferrer">{oBB.text}</a></p>
 						}

@@ -55,7 +55,7 @@ export default function CustomerSummary(props) {
 						{props.claimedAt ?
 							<p>Claimed by {sClaimedBy}</p>
 						:
-							<p><Button variant="contained" color="primary" size="large" onClick={claim}>Claim</Button></p>
+							<p><Button variant="contained" color="primary" size="large" onClick={ev => claimSet(true)}>Claim</Button></p>
 						}
 					</Grid>
 					<Grid item xs={12} sm={5}>

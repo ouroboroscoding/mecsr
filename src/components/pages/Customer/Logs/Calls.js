@@ -97,6 +97,7 @@ export default function Calls(props) {
 					}
 					{logs.length > 0 &&
 						<Messages
+							addToTicket={true}
 							type="justcall"
 							value={logs}
 						/>

@@ -142,7 +142,7 @@ export default function MsgSummary(props) {
 			</Paper>
 			{claim &&
 				<Claim
-					customerId={props.customerId.toString()}
+					customerId={props.customerId ? props.customerId.toString() : null}
 					customerName={props.customerName}
 					customerPhone={props.customerPhone}
 					defaultType={props.claimType}

@@ -18,7 +18,7 @@ import DoseSpot from 'shared/data/dosespot';
 import Tickets from 'shared/data/tickets';
 
 // Shared hooks
-import { useEvent } from 'shared/hooks/event';
+import { useSignedIn, useSignedOut } from 'hooks/user';
 import { useResize } from 'shared/hooks/resize';
 
 // Composite component modules
@@ -36,6 +36,7 @@ import Pharmacy from './pages/Pharmacy';
 import Reminders from './pages/Reminders';
 import Search from './pages/Search';
 import Stats from './pages/Stats';
+import TicketsPage from './pages/Tickets';
 import Templates from './pages/Templates';
 import Unclaimed from './pages/Unclaimed';
 import VersionHistory from './pages/VersionHistory';
@@ -69,11 +70,11 @@ export default function Site(props) {
 	let history = useHistory();
 
 	// Sign in/out event hooks
-	useEvent('signedIn', user => {
-		userSet(user);
-		DoseSpot.init(user.dsClinicianId);
+	useSignedIn(value => {
+		userSet(value);
+		DoseSpot.init(value.dsClinicianId);
 	});
-	useEvent('signedOut', () => {
+	useSignedOut(() => {
 		userSet(false);
 		DoseSpot.init(0)
 	});
@@ -130,6 +131,9 @@ export default function Site(props) {
 						</Route>
 						<Route exact path="/stats">
 							<Stats user={user} />
+						</Route>
+						<Route exact path="/tickets">
+							<TicketsPage user={user} />
 						</Route>
 						<Route exact path="/templates">
 							<Templates user={user} />

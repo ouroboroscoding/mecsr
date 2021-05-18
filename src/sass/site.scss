@@ -6,6 +6,7 @@ $menu-width: 250px;
 
 /* shared */
 @import '../shared/sass/flex';
+@import '../shared/sass/format';
 @import '../shared/sass/Messages';
 @import '../shared/sass/RadioButtons';
 
@@ -33,6 +34,7 @@ $menu-width: 250px;
 @import 'pages/reminders';
 @import 'pages/search';
 @import 'pages/stats';
+@import 'pages/tickets';
 @import 'pages/templates';
 @import 'pages/unclaimed';
 @import 'pages/version';

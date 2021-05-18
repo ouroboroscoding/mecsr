@@ -9,8 +9,8 @@
  */
 
 // NPM modules
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 
 // Material UI
 import Box from '@material-ui/core/Box';
@@ -31,6 +31,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 import AssessmentIcon from '@material-ui/icons/Assessment';
 import CommentIcon from '@material-ui/icons/Comment';
+import ConfirmationNumberIcon from '@material-ui/icons/ConfirmationNumber';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import LocalPharmacyIcon from '@material-ui/icons/LocalPharmacy';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -48,8 +49,8 @@ import Customer from './Customer'
 import View from './View'
 
 // Data modules
-import claimed from 'data/claimed';
-import reminders from 'data/reminders';
+import Claimed from 'data/claimed';
+import Reminders from 'data/reminders';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
@@ -59,6 +60,9 @@ import TwoWay from 'shared/communication/twoway';
 // Shared data modules
 import Tickets from 'shared/data/tickets';
 
+// Shared hook modules
+import { useEvent } from 'shared/hooks/event';
+
 // Shared generic modules
 import Events from 'shared/generic/events';
 import PageVisibility from 'shared/generic/pageVisibility';
@@ -67,116 +71,146 @@ import { afindi, clone, empty, safeLocalStorageJSON } from 'shared/generic/tools
 // Local modules
 import Utils from 'utils';
 
-// Header component
-export default class Header extends React.Component {
+/**
+ * Header
+ *
+ * Handles the header for the site
+ *
+ * @name Header
+ * @access public
+ * @param Object props Attributes sent to the component
+ * @return React.Component
+ */
+export default function Header(props) {
 
-	constructor(props) {
+	// State
+	let [account, accountSet] = useState(false);
+	let [claimed, claimedSet] = useState([]);
+	let [claimedOpen, claimedOpenSet] = useState(true);
+	let [menu, menuSet] = useState(false);
+	let [newMsgs, newMsgsSet] = useState(safeLocalStorageJSON('newMsgs', {}));
+	let [pending, pendingSet] = useState(0);
+	let [reminders, remindersSet] = useState(0);
+	let [rights, rightsSet] = useState({
+		overwrite: false,
+		providerTransfer: false
+	});
+	let [timeouts, timeoutsSet] = useState({
+		messages: 0,
+		unclaimed: 0
+	});
+	let [unclaimed, unclaimedSet] = useState(0);
+	let [userId, userIdSet] = useState(0);
+	let [viewed, viewedSet] = useState([]);
+	let [viewedOpen, viewedOpenSet] = useState(true);
 
-		// Call the parent constructor
-		super(props);
+	// Hooks
+	let history = useHistory();
+	let location = useLocation();
 
-		// Initialise the state
-		this.state = {
-			account: false,
-			claimed: [],
-			claimed_open: true,
-			menu: false,
-			newMsgs: safeLocalStorageJSON('newMsgs', {}),
-			overwrite: props.user ? Rights.has('csr_overwrite', 'create') : false,
-			pending: 0,
-			providerTransfer: props.user ? Rights.has('csr_claims_provider', 'create') : false,
-			reminders: 0,
-			unclaimed: 0,
-			user: props.user || false,
-			viewed: [],
-			viewed_open: true
-		}
+	// Load effect
+	useEffect(() => {
 
-		// Timers
-		this.iUpdates = null;
-		this.iUnclaimed = null;
+		// Track page visibility
+		PageVisibility.add(visibilityChange);
 
-		// Bind methods to this instance
-		this.accountToggle = this.accountToggle.bind(this);
-		this.claimedAdd = this.claimedAdd.bind(this);
-		this.claimedRemove = this.claimedRemove.bind(this);
-		this.menuClose = this.menuClose.bind(this);
-		this.menuClick = this.menuClick.bind(this);
-		this.menuItem = this.menuItem.bind(this);
-		this.menuToggle = this.menuToggle.bind(this);
-		this.newMessages = this.newMessages.bind(this);
-		this.reminderCount = this.reminderCount.bind(this);
-		this.signedIn = this.signedIn.bind(this);
-		this.signedOut = this.signedOut.bind(this);
-		this.signout = this.signout.bind(this);
-		this.unclaimedCount = this.unclaimedCount.bind(this);
-		this.viewedAdd = this.viewedAdd.bind(this);
-		this.viewedDuplicate = this.viewedDuplicate.bind(this);
-		this.viewedRemove = this.viewedRemove.bind(this);
-		this.visibilityChange = this.visibilityChange.bind(this);
-		this.wsMessage = this.wsMessage.bind(this);
-	}
-
-	componentDidMount() {
-
-		// Track any signedIn/signedOut events
-		Events.add('signedIn', this.signedIn);
-		Events.add('signedOut', this.signedOut);
-		Events.add('claimedAdd', this.claimedAdd);
-		Events.add('claimedRemove', this.claimedRemove);
-		Events.add('viewedAdd', this.viewedAdd);
-		Events.add('viewedDuplicate', this.viewedDuplicate);
-		Events.add('viewedRemove', this.viewedRemove);
-
-		// Track document visibility
-		PageVisibility.add(this.visibilityChange);
-
-		// Track reminder count
-		reminders.subscribe(this.reminderCount);
+		// Track reminders
+		Reminders.subscribe(remindersSet);
 
 		// Check for a direct view
-		let lPath = Utils.parsePath(this.props.history.location.pathname);
-		if(lPath[0] === 'view' && !this.state.viewed.length) {
-			this.viewedAdd(lPath[1], '');
+		let lPath = Utils.parsePath(location.pathname);
+		if(lPath[0] === 'view' && !viewed.length) {
+			viewedAdd(lPath[1], '');
 		}
-	}
 
-	componentWillUnmount() {
+		// Stop tracking/unsubscribing
+		return () => {
+			PageVisibility.remove(visibilityChange);
+			Reminders.unsubscribe(remindersSet);
 
-		// Stop tracking any signedIn/signedOut events
-		Events.remove('signedIn', this.signedIn);
-		Events.remove('signedOut', this.signedOut);
-		Events.remove('claimedAdd', this.claimedAdd);
-		Events.remove('claimedRemove', this.claimedRemove);
-		Events.remove('viewedAdd', this.viewedAdd);
-		Events.remove('viewedDuplicate', this.viewedDuplicate);
-		Events.remove('viewedRemove', this.viewedRemove);
-
-		// Stop tracking document visibility
-		PageVisibility.remove(this.visibilityChange);
-
-		// Stop tracking reminder count
-		reminders.unsubscribe(this.reminderCount);
-
-		// Stop checking for new messages and unclaimed counts
-		if(this.iUpdates) {
-			clearInterval(this.iUpdates);
-			this.iUpdates = null;
+			// If we have any timers
+			if(timeouts.messages) {
+				clearInterval(timeouts.messages);
+			}
+			if(timeouts.unclaimed) {
+				clearInterval(timeouts.unclaimed);
+			}
 		}
-		if(this.iUnclaimed) {
-			clearInterval(this.iUnclaimed);
-			this.iUnclaimed = null;
+	// eslint-disable-next-line
+	}, []);
+
+	// User effect
+	useEffect(() => {
+
+		// If we have a user
+		if(props.user) {
+
+			// Set the rights
+			rightsSet({
+				overwrite: Rights.has('csr_overwrite', 'create'),
+				providerTransfer: Rights.has('csr_claims_provider', 'create')
+			});
+
+			// Track user websocket messages
+			TwoWay.track('monolith', 'user-' + props.user.id, wsMessage);
+			userIdSet(props.user.id);
+
+			// Fetch the claimed conversations
+			claimedFetch();
+
+			// Fetch the unclaimed counts
+			unclaimedCount();
+
+			// Start checking for new messages
+			timeoutsSet({
+				messages: setInterval(newMessages, 30000),
+				unclaimed: setInterval(unclaimedCount, 300000)
+			});
 		}
-	}
 
-	accountToggle() {
-		this.setState({"account": !this.state.account});
-	}
+		// Else, we have no user
+		else {
 
-	claimedAdd(ticket, number, name, customer_id, order_id=null, continuous=null, provider=null) {
+			// Stop checking for new messages and unclaimed counts
+			if(timeouts.messages) {
+				clearInterval(timeouts.messages);
+			}
+			if(timeouts.unclaimed) {
+				clearInterval(timeouts.unclaimed);
+			}
+			timeoutsSet({
+				messages: 0,
+				unclaimed: 0
+			});
+
+			// Stop tracking user websocket messages
+			TwoWay.untrack('monolith', 'user-' + userId, wsMessage);
+
+			// Remove all claims and views
+			claimedSet([]);
+			viewedSet([]);
+
+			// Remove rights
+			rightsSet({
+				overwrite: false,
+				providerTransfer: false
+			});
+		}
+	// eslint-disable-next-line
+	}, [props.user]);
+
+	// Event tracking
+	useEvent('claimedAdd', claimedAdd);
+	useEvent('claimedRemove', claimedRemove);
+	useEvent('viewedAdd', viewedAdd);
+	useEvent('viewedDuplicate', viewedDuplicate);
+	useEvent('viewedRemove', viewedRemove);
+
+	// Called when a new claim is added somewhere in the app
+	function claimedAdd(ticket, number, name, customer_id, order_id=null, continuous=null, provider=null) {
 
 		// Clone the claimed state
-		let lClaimed = clone(this.state.claimed);
+		let lClaimed = clone(claimed);
 
 		// Add the record to the end
 		lClaimed.push({
@@ -190,44 +224,41 @@ export default class Header extends React.Component {
 			viewed: 1
 		});
 
-		// Generate the path
-		let sPath = Utils.customerPath(number, customer_id);
-
-		// Create the new state
-		let oState = {claimed: lClaimed}
+		// Set the new claimed
+		claimedSet(lClaimed);
 
 		// Does the new claim exist in the viewed?
-		let iIndex = afindi(this.state.viewed, 'customerPhone', number);
+		let iIndex = afindi(viewed, 'customerPhone', number);
 
 		// If we found one
 		if(iIndex > -1) {
 
 			// Clone the viewed state
-			let lViewed = clone(this.state.viewed);
+			let lViewed = clone(viewed);
 
 			// Remove the element
 			lViewed.splice(iIndex, 1);
 
-			// Add it to the state
-			oState.viewed = lViewed;
+			// Update the viewed
+			viewedSet(lViewed);
 		}
 
-		// Set the new state
-		this.setState(oState);
-
 		// Push the history
-		this.props.history.push(sPath);
+		history.push(
+			Utils.customerPath(number, customer_id)
+		);
 	}
 
-	claimedFetch() {
+	// Called to fetch all existing claims by the user
+	function claimedFetch() {
 
-		claimed.fetch().then(data => {
+		Claimed.fetch().then(data => {
 
 			// Init new state
-			let oState = {claimed: data};
+			claimedSet(data);
 
 			// If we're on a customer
-			let lPath = Utils.parsePath(this.props.history.location.pathname);
+			let lPath = Utils.parsePath(location.pathname);
 			if(lPath[0] === 'customer') {
 
 				// Look for the index of the claim
@@ -247,44 +278,33 @@ export default class Header extends React.Component {
 				}
 			}
 
-			// Set the new path
-			this.setState(oState);
-
 		}, error => {
 			Events.trigger('error', Rest.errorMessage(error));
 		});
 	}
 
-	claimedRemove(number) {
+	// Called when an existing claim is removed somewhere in the app
+	function claimedRemove(number) {
 
 		// Find the index of the remove customer
-		let iClaimed = afindi(this.state.claimed, 'customerPhone', number);
+		let iClaimed = afindi(claimed, 'customerPhone', number);
 
 		// If we found one
 		if(iClaimed > -1) {
 
-			// Clone the claimed state
-			let lClaimed = clone(this.state.claimed);
-
-			// Store the claim
-			let oClaim = this.state.claimed[iClaimed];
-
-			// Remove the element
+			// Clone the state, remove, and update
+			let lClaimed = clone(claimed);
+			let oClaim = claimed[iClaimed];
 			lClaimed.splice(iClaimed, 1);
-
-			// Create new instance of state
-			let oState = {claimed: lClaimed}
+			claimedSet(lClaimed);
 
 			// If it's in the new messages
-			if(number in this.state.newMsgs) {
-				let dNewMsgs = clone(this.state.newMsgs);
+			if(number in newMsgs) {
+				let dNewMsgs = clone(newMsgs);
 				delete dNewMsgs[number];
 				localStorage.setItem('newMsgs', JSON.stringify(dNewMsgs))
-				oState.newMsgs = dNewMsgs;
+				newMsgsSet(dNewMsgs);
 			}
-
-			// Set the new state
-			this.setState(oState);
 
 			// Trigger the event that a customer was unclaimed
 			if(oClaim.provider !== null) {
@@ -295,60 +315,51 @@ export default class Header extends React.Component {
 		}
 	}
 
-	menuClose() {
-		this.setState({menu: false});
-	}
-
-	menuClick(event) {
-		this.menuItem(
-			event.currentTarget.pathname,
-			event.currentTarget.dataset.number
+	// Called when any menu item is clicked
+	function menuClick(ev) {
+		menuItem(
+			ev.currentTarget.pathname,
+			ev.currentTarget.dataset.number
 		);
 	}
 
-	menuItem(pathname, number) {
+	// Called when a customer or view is clicked
+	function menuItem(pathname, number) {
 
-		// New state
-		let state = {};
-
-		// If we're in mobile, hide the menu
-		if(this.props.mobile) {
-			state.menu = false;
+		// If we're in mobile and the menu is open, hide it
+		if(props.mobile && menu) {
+			menuSet(false);
 		}
 
 		// If we clicked on a claimed phone number
 		if(pathname.indexOf('customer/'+number+'/') > -1) {
 
 			// Do we have a new messages flag for this number?
-			if(number in this.state.newMsgs) {
+			if(number in newMsgs) {
 
 				// Clone the new messages
-				let dNewMsgs = clone(this.state.newMsgs);
+				let dNewMsgs = clone(newMsgs);
 
 				// Remove the corresponding key
 				delete dNewMsgs[number];
 
 				// Update the state
-				state.newMsgs = dNewMsgs;
+				newMsgsSet(dNewMsgs);
 
 				// Store the new messages in local storage
 				localStorage.setItem('newMsgs', JSON.stringify(dNewMsgs))
 			}
 
 			// Look for it in claimed
-			let iIndex = afindi(this.state.claimed, 'customerPhone', number);
+			let iIndex = afindi(claimed, 'customerPhone', number);
 
 			// If we have it, and it's a transfer
-			if(iIndex > -1 && !this.state.claimed[iIndex].viewed) {
+			if(iIndex > -1 && !claimed[iIndex].viewed) {
 
-				// Clone the claims
-				let lClaimed = clone(this.state.claimed);
-
-				// Set the viewed flag
+				// Clone, set the viewed flag, and update
+				let lClaimed = clone(claimed);
 				lClaimed[iIndex].viewed = 1;
-
-				// Update the state
-				state.claimed = lClaimed;
+				claimedSet(lClaimed);
 
 				// Tell the server
 				Rest.update('monolith', 'customer/claim/view', {
@@ -364,25 +375,15 @@ export default class Header extends React.Component {
 				});
 			}
 		}
-
-		// Set the new state
-		this.setState(state);
 	}
 
-	menuToggle() {
-
-		// Toggle the state of the menu
-		this.setState({
-			menu: !this.state.menu
-		});
-	}
-
-	newMessages() {
+	// Called to fetch new messages
+	function newMessages() {
 
 		// Generate the list of numbers
 		let lNumbers = [].concat(
-			this.state.claimed.map(o => o.customerPhone),
-			this.state.viewed.map(o => o.customerPhone)
+			claimed.map(o => o.customerPhone),
+			viewed.map(o => o.customerPhone)
 		);
 
 		// If there's none
@@ -413,13 +414,13 @@ export default class Header extends React.Component {
 					let bSetState = false;
 
 					// Clone the current messages
-					let dNewMsgs = clone(this.state.newMsgs);
+					let dNewMsgs = clone(newMsgs);
 
 					// Go through each one sent
 					for(let sNumber in res.data) {
 
 						// If we're on the customer's page
-						if(this.props.history.location.pathname.indexOf('/'+sNumber+'/') > -1) {
+						if(location.pathname.indexOf('/'+sNumber+'/') > -1) {
 							Events.trigger('newMessage');
 						}
 
@@ -437,7 +438,7 @@ export default class Header extends React.Component {
 						localStorage.setItem('newMsgs', JSON.stringify(dNewMsgs));
 
 						// Set the new state
-						this.setState({newMsgs: dNewMsgs});
+						newMsgsSet(dNewMsgs);
 					}
 
 					// Notify
@@ -447,235 +448,8 @@ export default class Header extends React.Component {
 		});
 	}
 
-	reminderCount(count) {
-		this.setState({reminders: count});
-	}
-
-	render() {
-
-		// Create the drawer items
-		let drawer = (
-			<React.Fragment>
-				<List className="pages">
-					{Rights.has('csr_stats', 'read') &&
-						<React.Fragment>
-							<Link to="/stats" onClick={this.menuClick}>
-								<ListItem button selected={this.props.history.location.pathname === "/stats"}>
-									<ListItemIcon><AssessmentIcon /></ListItemIcon>
-									<ListItemText primary="Stats" />
-								</ListItem>
-							</Link>
-							<Divider />
-						</React.Fragment>
-					}
-					{Rights.has('csr_templates', 'read') &&
-						<React.Fragment>
-							<Link to="/templates" onClick={this.menuClick}>
-								<ListItem button selected={this.props.history.location.pathname === "/templates"}>
-									<ListItemIcon><CommentIcon /></ListItemIcon>
-									<ListItemText primary="Templates" />
-								</ListItem>
-							</Link>
-							<Divider />
-						</React.Fragment>
-					}
-					{(Rights.has('pharmacy_fill', 'update') ||
-						Rights.has('welldyne_adhoc', 'read') ||
-						Rights.has('welldyne_outbound', 'read')) &&
-						<React.Fragment>
-							<Link to="/pharmacy" onClick={this.menuClick}>
-								<ListItem button selected={this.props.history.location.pathname === "/pharmacy"}>
-									<ListItemIcon><LocalPharmacyIcon /></ListItemIcon>
-									<ListItemText primary="Pharmacy" />
-								</ListItem>
-							</Link>
-							<Divider />
-						</React.Fragment>
-					}
-					<Link to="/reminders" onClick={this.menuClick}>
-						<ListItem button selected={this.props.history.location.pathname === "/reminders"}>
-							<ListItemIcon><AddAlertIcon /></ListItemIcon>
-							<ListItemText primary={'Reminders (' + this.state.reminders + ')'} />
-						</ListItem>
-					</Link>
-					<Divider />
-					<Link to="/hrt" onClick={this.menuClick}>
-						<ListItem button selected={this.props.history.location.pathname === "/hrt"}>
-							<ListItemIcon><AssessmentIcon /></ListItemIcon>
-							<ListItemText primary="HRT Patients" />
-						</ListItem>
-					</Link>
-					<Divider />
-					<React.Fragment>
-						<Link to="/pending" onClick={this.menuClick}>
-							<ListItem button selected={this.props.history.location.pathname === "/pending"}>
-								<ListItemIcon><AllInboxIcon /></ListItemIcon>
-								<ListItemText primary={'Pending Orders (' + this.state.pending + ')'} />
-							</ListItem>
-						</Link>
-						<Divider />
-					</React.Fragment>
-					<Link to="/unclaimed" onClick={this.menuClick}>
-						<ListItem button selected={this.props.history.location.pathname === "/unclaimed"}>
-							<ListItemIcon><AllInboxIcon /></ListItemIcon>
-							<ListItemText primary={'Incoming SMS (' + this.state.unclaimed + ')'} />
-						</ListItem>
-					</Link>
-					<Divider />
-					<Link to="/search" onClick={this.menuClick}>
-						<ListItem button selected={this.props.history.location.pathname === "/search"}>
-							<ListItemIcon><SearchIcon /></ListItemIcon>
-							<ListItemText primary="Search" />
-						</ListItem>
-					</Link>
-				</List>
-				<List className="claims">
-					{this.state.claimed.length > 0 &&
-						<Box className="type">
-							<Divider />
-							<ListItem className="menuHeader" onClick={() => this.toggleClaims('claimed')}>
-								<Typography>Claimed ({this.state.claimed.length})</Typography>
-								{this.state.claimed_open ?
-									<ArrowDropDownIcon />
-								:
-									<ArrowDropUpIcon />
-								}
-							</ListItem>
-							{this.state.claimed_open &&
-								<Box className="items">
-									{this.state.claimed.map((o,i) =>
-										<Customer
-											key={i}
-											newMsgs={o.customerPhone in this.state.newMsgs}
-											onClick={this.menuItem}
-											providerTransfer={this.state.providerTransfer}
-											selected={this.props.history.location.pathname === Utils.customerPath(o.customerPhone, o.customerId)}
-											user={this.state.user}
-											{...o}
-										/>
-									)}
-								</Box>
-							}
-						</Box>
-					}
-					{this.state.viewed.length > 0 &&
-						<Box className="type">
-							<Divider />
-							<ListItem className="menuHeader" onClick={() => this.toggleClaims('viewed')}>
-								<Typography>Viewing ({this.state.viewed.length})</Typography>
-								{this.state.viewed_open ?
-									<ArrowDropDownIcon />
-								:
-									<ArrowDropUpIcon />
-								}
-							</ListItem>
-							{this.state.viewed_open &&
-								<Box className="items">
-									{this.state.viewed.map((o,i) =>
-										<View
-											key={i}
-											newMsgs={o.customerPhone in this.state.newMsgs}
-											onClick={this.menuItem}
-											overwrite={this.state.overwrite}
-											selected={this.props.history.location.pathname === Utils.viewedPath(o.customerPhone, o.customerId)}
-											user={this.state.user}
-											{...o}
-										/>
-									)}
-								</Box>
-							}
-						</Box>
-					}
-				</List>
-			</React.Fragment>
-		);
-
-		return (
-			<div id="header">
-				<div className="bar">
-					{this.props.mobile &&
-						<IconButton edge="start" color="inherit" aria-label="menu" onClick={this.menuToggle}>
-							<MenuIcon />
-						</IconButton>
-					}
-					<div><Typography className="title">
-						<Link to="/" onClick={this.menuClick}>{this.props.mobile ? 'ME CS' : 'ME Customer Service'}</Link>
-					</Typography></div>
-					<div id="loaderWrapper">
-						<Loader />
-					</div>
-					{this.state.user &&
-						<React.Fragment>
-							<Tooltip title="Edit User">
-								<IconButton onClick={this.accountToggle}>
-									<PermIdentityIcon />
-								</IconButton>
-							</Tooltip>
-							<Tooltip title="Sign Out">
-								<IconButton onClick={this.signout}>
-									<ExitToAppIcon />
-								</IconButton>
-							</Tooltip>
-						</React.Fragment>
-					}
-				</div>
-				{this.props.mobile ?
-					<Drawer
-						anchor="left"
-						id="menu"
-						open={this.state.menu}
-						onClose={this.menuClose}
-						variant="temporary"
-					>
-						{drawer}
-					</Drawer>
-				:
-					<Drawer
-						anchor="left"
-						id="menu"
-						open
-						variant="permanent"
-					>
-						{drawer}
-					</Drawer>
-				}
-				{this.state.account &&
-					<Account
-						onCancel={this.accountToggle}
-						user={this.state.user}
-					/>
-				}
-			</div>
-		);
-	}
-
-	signedIn(user) {
-
-		// Hide any modals and set the user
-		this.setState({
-			overwrite: Rights.has('csr_overwrite', 'create'),
-			providerTransfer: Rights.has('csr_claims_provider', 'create'),
-			user: user
-		}, () => {
-
-			// Track user websocket messages
-			TwoWay.track('monolith', 'user-' + user.id, this.wsMessage);
-
-			// Fetch the claimed conversations
-			this.claimedFetch();
-
-			// Fetch the unclaimed counts
-			this.unclaimedCount();
-
-			// Start checking for new messages
-			this.iUpdates = setInterval(this.update.bind(this), 30000);
-
-			// Start checking for unclaimed counts
-			this.iUnclaimed = setInterval(this.unclaimedCount.bind(this), 300000);
-		});
-	}
-
-	signout(ev) {
+	// Called to sign out of the app
+	function signout(ev) {
 
 		// Call the signout
 		Rest.create('csr', 'signout', {}).done(res => {
@@ -700,38 +474,8 @@ export default class Header extends React.Component {
 		});
 	}
 
-	// Called when the user signs out
-	signedOut() {
-
-		// Stop tracking user websocket messages
-		TwoWay.untrack('monolith', 'user-' + this.state.user.id, this.wsMessage);
-
-		// Hide and modals and set the user to false
-		this.setState({
-			claimed: [],
-			overwrite: false,
-			providerTransfer: false,
-			user: false
-		});
-
-		// Stop checking for new messages and unclaimed counts
-		if(this.iUpdates) {
-			clearInterval(this.iUpdates);
-			this.iUpdates = null;
-		}
-		if(this.iUnclaimed) {
-			clearInterval(this.iUnclaimed);
-			this.iUnclaimed = null;
-		}
-	}
-
-	toggleClaims(type) {
-		let state = type + '_open';
-		this.setState({[state]: !this.state[state]});
-	}
-
 	// Gets the number of unclaimed messages
-	unclaimedCount() {
+	function unclaimedCount() {
 
 		// Fetch the unclaimed conversations count from the service
 		Rest.read('monolith', 'msgs/unclaimed/count', {}).done(res => {
@@ -746,7 +490,7 @@ export default class Header extends React.Component {
 
 			// If there's data
 			if(res.data) {
-				this.setState({unclaimed: res.data});
+				unclaimedSet(res.data);
 			}
 		});
 
@@ -763,45 +507,39 @@ export default class Header extends React.Component {
 
 			// If there's data
 			if(res.data) {
-				this.setState({pending: res.data});
+				pendingSet(res.data);
 			}
 		});
 	}
 
-	update() {
-		this.newMessages();
-	}
-
 	// A viewed conversation was added
-	viewedAdd(number, name, customer) {
+	function viewedAdd(number, name, customer) {
 
 		// Does it already exist in the claimed?
-		let iClaimed = afindi(this.state.claimed, 'customerPhone', number);
+		let iClaimed = afindi(claimed, 'customerPhone', number);
 
 		// If it does
 		if(iClaimed > -1) {
 
-			// Generate the path
-			let sPath = Utils.customerPath(number, this.state.claimed[iClaimed].customerId);
-
 			// Push the history
-			this.props.history.push(sPath);
+			history.push(
+				Utils.customerPath(number, claimed[iClaimed].customerId)
+			);
 		}
 
 		// Else, add it to the viewed
 		else {
 
 			// Find the index of the customer
-			let iViewed = afindi(this.state.viewed, 'customerPhone', number);
+			let iViewed = afindi(viewed, 'customerPhone', number);
 
 			// If we found one
 			if(iViewed > -1) {
 
-				// Generate the path
-				let sPath = Utils.viewedPath(number, this.state.viewed[iViewed].customerId);
-
 				// Push the history
-				this.props.history.push(sPath);
+				history.push(
+					Utils.viewedPath(number, viewed[iViewed].customerId)
+				);
 			}
 
 			// Else, add it
@@ -824,7 +562,7 @@ export default class Header extends React.Component {
 					if('data' in res) {
 
 						// Clone the viewed state
-						let lView = clone(this.state.viewed);
+						let lView = clone(viewed);
 
 						// If we got no data
 						if(res.data === 0) {
@@ -843,14 +581,13 @@ export default class Header extends React.Component {
 							claimedUser: res.data.claimedUser
 						});
 
-						// Generate the path
-						let sPath = Utils.viewedPath(number, res.data.customerId);
-
 						// Set the new state
-						this.setState({viewed: lView});
+						viewedSet(lView);
 
 						// Push the history
-						this.props.history.push(sPath);
+						history.push(
+							Utils.viewedPath(number, res.data.customerId)
+						);
 					}
 				});
 			}
@@ -858,64 +595,55 @@ export default class Header extends React.Component {
 	}
 
 	// A viewed conversation matches a claimed conversation
-	viewedDuplicate(number, user_id) {
+	function viewedDuplicate(number, user_id) {
 
 		// Find the index of the viewed
-		let iIndex = afindi(this.state.viewed, 'customerPhone', number);
+		let iIndex = afindi(viewed, 'customerPhone', number);
 
 		// If we found one
 		if(iIndex > -1) {
 
-			// Clone the viewed state
-			let lView = clone(this.state.viewed);
-
-			// Update the viewed
+			// Clone, set the user, and update
+			let lView = clone(viewed);
 			lView[iIndex].claimedUser = user_id;
-
-			// Set the new state
-			this.setState({viewed: lView});
+			viewedSet(lView);
 		}
 	}
 
 	// A viewed conversation was removed
-	viewedRemove(number) {
+	function viewedRemove(number) {
 
 		// Find the index of the remove viewed
-		let iIndex = afindi(this.state.viewed, 'customerPhone', number);
+		let iIndex = afindi(viewed, 'customerPhone', number);
 
 		// If we found one
 		if(iIndex > -1) {
 
-			// Clone the viewed state
-			let lView = clone(this.state.viewed);
-
-			// Remove the element
+			// Clone, remove the view, and update
+			let lView = clone(viewed);
 			lView.splice(iIndex, 1);
-
-			// Set the new state
-			let oState = {viewed: lView}
-			this.setState(oState);
+			viewedSet(lView);
 		}
 	}
 
 	// Current tab changed state from hidden/visible
-	visibilityChange(property, state) {
+	function visibilityChange(property, state) {
 
 		// If we've become visible
 		if(state === 'visible') {
 
 			// If we have a user
-			if(this.state.user) {
+			if(props.user) {
 
 				// Update
-				this.update();
-				this.unclaimedCount();
+				newMessages();
+				unclaimedCount();
 
 				// Start checking for new messages
-				this.iUpdates = setInterval(this.update.bind(this), 30000);
-
-				// Start checking for unclaimed counts
-				this.iUnclaimed = setInterval(this.unclaimedCount.bind(this), 300000);
+				timeoutsSet({
+					messages: setInterval(newMessages, 30000),
+					unclaimed: setInterval(unclaimedCount, 300000)
+				});
 			}
 		}
 
@@ -923,19 +651,21 @@ export default class Header extends React.Component {
 		else if(state === 'hidden') {
 
 			// Stop checking for new messages and unclaimed counts
-			if(this.iUpdates) {
-				clearInterval(this.iUpdates);
-				this.iUpdates = null;
+			if(timeouts.messages) {
+				clearInterval(timeouts.messages);
 			}
-			if(this.iUnclaimed) {
-				clearInterval(this.iUnclaimed);
-				this.iUnclaimed = null;
+			if(timeouts.unclaimed) {
+				clearInterval(timeouts.unclaimed);
 			}
+			timeoutsSet({
+				messages: 0,
+				unclaimed: 0
+			});
 		}
 	}
 
 	// WebSocket message
-	wsMessage(data) {
+	function wsMessage(data) {
 
 		// Move forward based on the type
 		switch(data.type) {
@@ -944,24 +674,18 @@ export default class Header extends React.Component {
 			case 'claim_removed': {
 
 				// Look for the claim
-				let iIndex = afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
+				let iIndex = afindi(claimed, 'customerPhone', data.phoneNumber);
 
 				// If we found one
 				if(iIndex > -1) {
 
-					// Clone the claims
-					let lClaimed = clone(this.state.claimed);
-
-					// Delete the claim
+					// Clone, remove the claim, and update
+					let lClaimed = clone(claimed);
 					lClaimed.splice(iIndex, 1);
-
-					// Set the new state
-					this.setState({
-						claimed: lClaimed
-					});
+					claimedSet(lClaimed);
 
 					// If we're on a customer
-					let lPath = Utils.parsePath(this.props.history.location.pathname);
+					let lPath = Utils.parsePath(location.pathname);
 					if(lPath[0] === 'customer') {
 
 						// If it's the one removed
@@ -996,14 +720,14 @@ export default class Header extends React.Component {
 					if('data' in res) {
 
 						// Clone the claims
-						let lClaimed = clone(this.state.claimed);
+						let lClaimed = clone(claimed);
 
 						// If there's no actual data
 						if(res.data === 0) {
 							res.data = {
 								customerId: 0,
 								customerName: 'N/A',
-								claimedUser: this.state.user.id
+								claimedUser: props.user.id
 							}
 						}
 
@@ -1022,9 +746,7 @@ export default class Header extends React.Component {
 						lClaimed.unshift(res.data);
 
 						// Save the state
-						this.setState({
-							claimed: lClaimed
-						});
+						claimedSet(lClaimed);
 
 						// Notify the agent
 						Events.trigger('info', 'A conversation claim has been transferred to you');
@@ -1037,21 +759,15 @@ export default class Header extends React.Component {
 			case 'claim_updated': {
 
 				// Look for the claim
-				let iIndex = afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
+				let iIndex = afindi(claimed, 'customerPhone', data.phoneNumber);
 
 				// If we found one
 				if(iIndex > -1) {
 
-					// Clone the claims
-					let lClaimed = clone(this.state.claimed);
-
-					// Update the claim
+					// Clone, set the claim, and update
+					let lClaimed = clone(claimed);
 					lClaimed[iIndex] = data.claim;
-
-					// Save the state
-					this.setState({
-						claimed: lClaimed
-					});
+					claimedSet(lClaimed);
 
 					// Notify the agent
 					Events.trigger('info', 'A conversation claim has been updated with new info, please check notes');
@@ -1063,40 +779,30 @@ export default class Header extends React.Component {
 			case 'claim_swapped': {
 
 				// Look for the claim
-				let iIndex = afindi(this.state.claimed, 'customerPhone', data.phoneNumber);
+				let iIndex = afindi(claimed, 'customerPhone', data.phoneNumber);
 
 				// If we found one
 				if(iIndex > -1) {
 
-					// Clone the claims
-					let lClaimed = clone(this.state.claimed);
-
-					// Change the phone number
+					// Clone, change the number, and update
+					let lClaimed = clone(claimed);
 					lClaimed[iIndex]['customerPhone'] = data['newNumber'];
-
-					// Init the state
-					let oState = {
-						claimed: lClaimed
-					}
+					claimedSet(lClaimed);
 
 					// If we're on a customer
-					let lPath = Utils.parsePath(this.props.history.location.pathname);
+					let lPath = Utils.parsePath(location.pathname);
 					if(lPath[0] === 'customer') {
 
 						// If it's the one swapped
 						if(lPath[1] === data.phoneNumber) {
 
 							// Change the page we're on
-							this.props.history.replace(
+							history.replace(
 								Utils.customerPath(data.newNumber, lPath[2])
 							);
 						}
 					}
-
-					// Set the new state
-					this.setState(oState);
 				}
-
 				break;
 			}
 
@@ -1106,4 +812,207 @@ export default class Header extends React.Component {
 				break;
 		}
 	}
+
+	// Create the drawer items
+	let drawer = (
+		<React.Fragment>
+			<List className="pages">
+				{Rights.has('csr_stats', 'read') &&
+					<React.Fragment>
+						<Link to="/stats" onClick={menuClick}>
+							<ListItem button selected={location.pathname === "/stats"}>
+								<ListItemIcon><AssessmentIcon /></ListItemIcon>
+								<ListItemText primary="Stats" />
+							</ListItem>
+						</Link>
+						<Divider />
+					</React.Fragment>
+				}
+				{Rights.has('csr_templates', 'read') &&
+					<React.Fragment>
+						<Link to="/templates" onClick={menuClick}>
+							<ListItem button selected={location.pathname === "/templates"}>
+								<ListItemIcon><CommentIcon /></ListItemIcon>
+								<ListItemText primary="Templates" />
+							</ListItem>
+						</Link>
+						<Divider />
+					</React.Fragment>
+				}
+				{(Rights.has('pharmacy_fill', 'update') ||
+					Rights.has('welldyne_adhoc', 'read') ||
+					Rights.has('welldyne_outbound', 'read')) &&
+					<React.Fragment>
+						<Link to="/pharmacy" onClick={menuClick}>
+							<ListItem button selected={location.pathname === "/pharmacy"}>
+								<ListItemIcon><LocalPharmacyIcon /></ListItemIcon>
+								<ListItemText primary="Pharmacy" />
+							</ListItem>
+						</Link>
+						<Divider />
+					</React.Fragment>
+				}
+				<Link to="/reminders" onClick={menuClick}>
+					<ListItem button selected={location.pathname === "/reminders"}>
+						<ListItemIcon><AddAlertIcon /></ListItemIcon>
+						<ListItemText primary={'Reminders (' + reminders + ')'} />
+					</ListItem>
+				</Link>
+				<Divider />
+				<Link to="/hrt" onClick={menuClick}>
+					<ListItem button selected={location.pathname === "/hrt"}>
+						<ListItemIcon><AssessmentIcon /></ListItemIcon>
+						<ListItemText primary="HRT Patients" />
+					</ListItem>
+				</Link>
+				<Divider />
+				<React.Fragment>
+					<Link to="/pending" onClick={menuClick}>
+						<ListItem button selected={location.pathname === "/pending"}>
+							<ListItemIcon><AllInboxIcon /></ListItemIcon>
+							<ListItemText primary={'Pending Orders (' + pending + ')'} />
+						</ListItem>
+					</Link>
+					<Divider />
+				</React.Fragment>
+				<Link to="/unclaimed" onClick={menuClick}>
+					<ListItem button selected={location.pathname === "/unclaimed"}>
+						<ListItemIcon><AllInboxIcon /></ListItemIcon>
+						<ListItemText primary={'Incoming SMS (' + unclaimed + ')'} />
+					</ListItem>
+				</Link>
+				<Divider />
+				<Link to="/search" onClick={menuClick}>
+					<ListItem button selected={location.pathname === "/search"}>
+						<ListItemIcon><SearchIcon /></ListItemIcon>
+						<ListItemText primary="Search" />
+					</ListItem>
+				</Link>
+			</List>
+			<List className="claims">
+				{claimed.length > 0 &&
+					<Box className="type">
+						<Divider />
+						<ListItem className="menuHeader" onClick={ev => claimedOpenSet(b => !b)}>
+							<Typography>Claimed ({claimed.length})</Typography>
+							{claimedOpen ?
+								<ArrowDropDownIcon />
+							:
+								<ArrowDropUpIcon />
+							}
+						</ListItem>
+						{claimedOpen &&
+							<Box className="items">
+								{claimed.map((o,i) =>
+									<Customer
+										key={i}
+										newMsgs={o.customerPhone in newMsgs}
+										onClick={menuItem}
+										providerTransfer={rights.providerTransfer}
+										selected={location.pathname === Utils.customerPath(o.customerPhone, o.customerId)}
+										user={props.user}
+										{...o}
+									/>
+								)}
+							</Box>
+						}
+					</Box>
+				}
+				{viewed.length > 0 &&
+					<Box className="type">
+						<Divider />
+						<ListItem className="menuHeader" onClick={ev => viewedOpenSet(b => !b)}>
+							<Typography>Viewing ({viewed.length})</Typography>
+							{viewedOpen ?
+								<ArrowDropDownIcon />
+							:
+								<ArrowDropUpIcon />
+							}
+						</ListItem>
+						{viewedOpen &&
+							<Box className="items">
+								{viewed.map((o,i) =>
+									<View
+										key={i}
+										newMsgs={o.customerPhone in newMsgs}
+										onClick={menuItem}
+										overwrite={rights.overwrite}
+										selected={location.pathname === Utils.viewedPath(o.customerPhone, o.customerId)}
+										user={props.user}
+										{...o}
+									/>
+								)}
+							</Box>
+						}
+					</Box>
+				}
+			</List>
+		</React.Fragment>
+	);
+
+	// Render
+	return (
+		<div id="header">
+			<div className="bar">
+				{props.mobile &&
+					<IconButton edge="start" color="inherit" aria-label="menu" onClick={ev => menuSet(b => !b)}>
+						<MenuIcon />
+					</IconButton>
+				}
+				<div><Typography className="title">
+					<Link to="/" onClick={menuClick}>{props.mobile ? 'ME CS' : 'ME Customer Service'}</Link>
+				</Typography></div>
+				<div id="loaderWrapper">
+					<Loader />
+				</div>
+				{props.user &&
+					<React.Fragment>
+						<Link to="/tickets" onClick={menuClick}>
+							<Tooltip title="Tickets">
+								<IconButton style={{paddingTop: '14px'}}>
+									<ConfirmationNumberIcon />
+								</IconButton>
+							</Tooltip>
+						</Link>
+						<Tooltip title="Edit User">
+							<IconButton onClick={ev => accountSet(b => !b)}>
+								<PermIdentityIcon />
+							</IconButton>
+						</Tooltip>
+						<Tooltip title="Sign Out">
+							<IconButton onClick={signout}>
+								<ExitToAppIcon />
+							</IconButton>
+						</Tooltip>
+					</React.Fragment>
+				}
+			</div>
+			{props.mobile ?
+				<Drawer
+					anchor="left"
+					id="menu"
+					open={menu}
+					onClose={ev => menuSet(false)}
+					variant="temporary"
+				>
+					{drawer}
+				</Drawer>
+			:
+				<Drawer
+					anchor="left"
+					id="menu"
+					open
+					variant="permanent"
+				>
+					{drawer}
+				</Drawer>
+			}
+			{account &&
+				<Account
+					onCancel={ev => accountSet(false)}
+					user={props.user}
+				/>
+			}
+		</div>
+	);
 }

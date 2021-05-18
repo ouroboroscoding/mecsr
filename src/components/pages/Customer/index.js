@@ -630,6 +630,7 @@ export default class Customer extends React.Component {
 				</div>
 				{this.state.tab === 1 &&
 					<Logs
+						customerId={this.props.customerId}
 						emailAddress={this.state.customer ? this.state.customer.email : ''}
 						phoneNumber={this.props.phoneNumber}
 						readOnly={this.props.readOnly}

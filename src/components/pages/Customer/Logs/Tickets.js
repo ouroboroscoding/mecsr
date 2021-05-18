@@ -1,7 +1,7 @@
 /**
  * Tickets
  *
- * Page to view tickets by range and agent
+ * Tab to view all tickets for the customer
  *
  * @author Chris Nasr <bast@maleexcel.com>
  * @copyright MaleExcelMedical
@@ -10,13 +10,11 @@
 
 // NPM modules
 import PropTypes from 'prop-types';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Tree from 'format-oc/Tree'
 
 // Material UI
 import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
@@ -31,13 +29,22 @@ import Rest from 'shared/communication/rest';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
-import { date, dateInc } from 'shared/generic/tools';
+import { clone } from 'shared/generic/tools';
 
 // Ticket Definition
 import TicketDef from 'definitions/csr/ticket_with_state';
 
+// Clone the tickets with state and remove the phone and customer ID
+let CustomerTicket = clone(TicketDef)
+CustomerTicket.__react__.results = [
+	'opened_ts', 'opened_type', 'opened_by',
+	'resolved_ts', 'resolved_type', 'resolved_by'
+]
+delete CustomerTicket['phone_number']
+delete CustomerTicket['crm_id']
+
 // Generate the ticket Tree
-const TicketTree = new Tree(TicketDef);
+const TicketTree = new Tree(CustomerTicket);
 
 /**
  * Ticket Breakdown
@@ -98,44 +105,37 @@ function TicketBreakdown(props) {
  */
 export default function Tickets(props) {
 
-	// State
-	let [range, rangeSet] = useState(null);
-	let [tickets, ticketsSet] = useState(false);
+	console.log(props);
 
-	// Refs
-	let refStart = useRef();
-	let refEnd = useRef();
+	// State
+	let [tickets, ticketsSet] = useState(false);
 
 	// Date range change
 	useEffect(() => {
-		if(range) {
-			ticketsFetch()
+		if(props.user) {
+			ticketsFetch();
 		} else {
 			ticketsSet(false);
 		}
 	// eslint-disable-next-line
-	}, [range]);
-
-	// Converts the start and end dates into timestamps
-	function rangeUpdate() {
-
-		// Convert the start and end into timestamps
-		let iStart = (new Date(refStart.current.value + ' 00:00:00')).getTime() / 1000;
-		let iEnd = (new Date(refEnd.current.value + ' 23:59:59')).getTime() / 1000;
-
-		// Set the new range
-		rangeSet([iStart, iEnd]);
-	}
+	}, [props.user]);
 
 	// Get the tickets
 	function ticketsFetch() {
 
+		// Init the request data
+		let oData = {}
+
+		// If there's a customer ID
+		if(props.customerId) {
+			oData.crm_type = 'knk';
+			oData.crm_id = props.customerId
+		} else {
+			oData.phone_number = props.phoneNumber
+		}
+
 		// Fetch the tickets from the server
-		Rest.read('csr', 'tickets', {
-			start: range[0],
-			end: range[1],
-			memo_id: props.user.id
-		}).done(res => {
+		Rest.read('csr', 'tickets/customer', oData).done(res => {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
@@ -149,56 +149,18 @@ export default function Tickets(props) {
 			if(res.data) {
 				ticketsSet(res.data);
 			}
-		})
+		});
 	}
-
-	// Generate today date
-	let sToday = date(new Date(), '-');
 
 	// Return the rendered component
 	return (
-		<Box id="agentTickets" className="page flexGrow">
-			<Box className="page_header">
-				<Typography className="title">Tickets</Typography>
-			</Box>
-			<Box className="filter">
-				<TextField
-					defaultValue={date(dateInc(-14), '-')}
-					inputRef={refStart}
-					inputProps={{
-						min: '2021-05-01',
-						max: sToday
-					}}
-					label="Start"
-					size="small"
-					type="date"
-					variant="outlined"
-					InputLabelProps={{ shrink: true }}
-				/>
-				<Typography>-</Typography>
-				<TextField
-					defaultValue={sToday}
-					inputRef={refEnd}
-					inputProps={{
-						min: '2021-05-01',
-						max: sToday
-					}}
-					label="End"
-					size="small"
-					type="date"
-					variant="outlined"
-					InputLabelProps={{ shrink: true }}
-				/>
-				<Button
-					color="primary"
-					onClick={rangeUpdate}
-					variant="contained"
-				>Fetch</Button>
-			</Box>
-			{tickets &&
-				<Box className="tickets">
+		<React.Fragment>
+			{tickets === false ?
+				<Typography>Loading...</Typography>
+			:
+				<React.Fragment>
 					{tickets.length === 0 ?
-						<Typography>No tickets</Typography>
+						<Typography>This customer has no tickets</Typography>
 					:
 						<Results
 							actions={[{
@@ -215,9 +177,9 @@ export default function Tickets(props) {
 							update={false}
 						/>
 					}
-				</Box>
+				</React.Fragment>
 			}
-		</Box>
+		</React.Fragment>
 	);
 }
 

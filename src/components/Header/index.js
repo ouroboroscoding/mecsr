@@ -11,6 +11,7 @@
 // NPM modules
 import React, { useEffect, useState } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
+import Sound from 'react-sound';
 
 // Material UI
 import Box from '@material-ui/core/Box';
@@ -91,6 +92,7 @@ export default function Header(props) {
 	let [claimedOpen, claimedOpenSet] = useState(true);
 	let [menu, menuSet] = useState(false);
 	let [newMsgs, newMsgsSet] = useState(safeLocalStorageJSON('newMsgs', {}));
+	let [oneUp, oneUpSet] = useState(false);
 	let [pending, pendingSet] = useState(0);
 	let [reminders, remindersSet] = useState(0);
 	let [rights, rightsSet] = useState({
@@ -129,6 +131,9 @@ export default function Header(props) {
 		// Watch ticket resolved stats
 		Tickets.watchStats(ticketStatsSet);
 
+		// Watch for tickets being resolved
+		Tickets.watchResolve(resolvedCallback);
+
 		// Stop tracking/unsubscribing
 		return () => {
 			PageVisibility.remove(visibilityChange);
@@ -144,6 +149,9 @@ export default function Header(props) {
 
 			// Stop watching ticket resolved stats
 			Tickets.watchStats(ticketStatsSet, true);
+
+			// Stop watching resolves
+			Tickets.watchResolve(resolvedCallback, true);
 		}
 	// eslint-disable-next-line
 	}, []);
@@ -455,6 +463,11 @@ export default function Header(props) {
 				}
 			}
 		});
+	}
+
+	// Update one up on resolved
+	function resolvedCallback() {
+		oneUpSet(true);
 	}
 
 	// Called to sign out of the app
@@ -1030,6 +1043,13 @@ export default function Header(props) {
 				<Account
 					onCancel={ev => accountSet(false)}
 					user={props.user}
+				/>
+			}
+			{oneUp &&
+				<Sound
+					url="/sounds/1Up.mp3"
+					playStatus={Sound.status.PLAYING}
+					onFinishedPlaying={ev => oneUpSet(false)}
 				/>
 			}
 		</div>

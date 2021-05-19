@@ -134,7 +134,7 @@ export default function Resolve(props) {
 		}
 
 		// Close the ticket
-		Tickets.resolve(type).then(data => {
+		Tickets.resolve(type, props.ticket).then(data => {
 
 			// Remove the claim
 			Claimed.remove(props.customerPhone).then(() => {

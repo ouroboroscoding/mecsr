@@ -73,10 +73,12 @@ export default function Site(props) {
 	useSignedIn(value => {
 		userSet(value);
 		DoseSpot.init(value.dsClinicianId);
+		Tickets.agent(value.id);
 	});
 	useSignedOut(() => {
 		userSet(false);
 		DoseSpot.init(0)
+		Tickets.agent(null);
 	});
 
 	// Resize hooks

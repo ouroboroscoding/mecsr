@@ -32,11 +32,13 @@ import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 import AssessmentIcon from '@material-ui/icons/Assessment';
 import CommentIcon from '@material-ui/icons/Comment';
 import ConfirmationNumberIcon from '@material-ui/icons/ConfirmationNumber';
+import DateRangeIcon from '@material-ui/icons/DateRange';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import LocalPharmacyIcon from '@material-ui/icons/LocalPharmacy';
 import MenuIcon from '@material-ui/icons/Menu';
 import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import SearchIcon from '@material-ui/icons/Search';
+import TodayIcon from '@material-ui/icons/Today';
 
 // Dialogs components
 import Account from 'components/dialogs/Account';
@@ -95,6 +97,7 @@ export default function Header(props) {
 		overwrite: false,
 		providerTransfer: false
 	});
+	let [ticketStats, ticketStatsSet] = useState({});
 	let [timeouts, timeoutsSet] = useState({
 		messages: 0,
 		unclaimed: 0
@@ -123,6 +126,9 @@ export default function Header(props) {
 			viewedAdd(lPath[1], '');
 		}
 
+		// Watch ticket resolved stats
+		Tickets.watchStats(ticketStatsSet);
+
 		// Stop tracking/unsubscribing
 		return () => {
 			PageVisibility.remove(visibilityChange);
@@ -135,6 +141,9 @@ export default function Header(props) {
 			if(timeouts.unclaimed) {
 				clearInterval(timeouts.unclaimed);
 			}
+
+			// Stop watching ticket resolved stats
+			Tickets.watchStats(ticketStatsSet, true);
 		}
 	// eslint-disable-next-line
 	}, []);
@@ -967,6 +976,16 @@ export default function Header(props) {
 				</div>
 				{props.user &&
 					<React.Fragment>
+						<Box className="ticketStats">
+							<Tooltip title="Week"><DateRangeIcon /></Tooltip>
+							<span className="current"> {ticketStats.this_week || 0} </span>
+							<span className="previous"> {ticketStats.last_week || 0} </span>
+						</Box>
+						<Box className="ticketStats">
+							<Tooltip title="Day"><TodayIcon /></Tooltip>
+							<span className="current"> {ticketStats.today || 0} </span>
+							<span className="previous"> {ticketStats.yesterday || 0} </span>
+						</Box>
 						<Link to="/tickets" onClick={menuClick}>
 							<Tooltip title="Tickets">
 								<IconButton style={{paddingTop: '14px'}}>

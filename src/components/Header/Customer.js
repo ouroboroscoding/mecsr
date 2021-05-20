@@ -216,7 +216,7 @@ export default function Customer(props) {
 										</React.Fragment>
 									:
 										<React.Fragment>
-											{props.providerTransfer ?
+											{props.providerTransfer && Number(props.customerId) !== 0 ?
 												<span className="tooltip">
 													<Tooltip title="Transfer">
 														<IconButton onClick={transferMoreClick}>

@@ -105,8 +105,6 @@ function TicketBreakdown(props) {
  */
 export default function Tickets(props) {
 
-	console.log(props);
-
 	// State
 	let [tickets, ticketsSet] = useState(false);
 

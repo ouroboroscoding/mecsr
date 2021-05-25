@@ -31,16 +31,20 @@ import EditIcon from '@material-ui/icons/Edit';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 //import PhoneIcon from '@material-ui/icons/Phone';
 
+// Shared components
+import Messages from 'shared/components/Messages';
+
 // Shared communications modules
 import Rest from 'shared/communication/rest';
+import Rights from 'shared/communication/rights';
+
+// Shared data modules
+import Tickets from 'shared/data/tickets';
 
 // Shared generic modules
 import Clipboard from 'shared/generic/clipboard';
 import Events from 'shared/generic/events';
-import { afindi, clone, datetime, ucfirst } from 'shared/generic/tools';
-
-// Local modules
-import Utils from 'utils';
+import { afindi, clone, nicePhone, ucfirst } from 'shared/generic/tools';
 
 // Regex
 const regTplVar = /{([^]+?)}/g
@@ -51,48 +55,6 @@ const _MIP_PATHS = [
 	{path: '/mip/form/6via?formId=MIP-A2', name: 'ED - 100mg Sildenafil'},
 	{path: '/mip/form/6cial?formId=MIP-A2', name: 'ED - 20mg Tadalafil'}
 ];
-
-/**
- * Message
- *
- * Handles individual messages
- *
- * @name Message
- * @access private
- * @param Object props Attributes sent to the component
- * @returns React.Component
- */
-function Message(props) {
-	return (
-		<div className={"message " + props.type}>
-			<div className="content">
-				{props.notes.split('\n').map((s,i) => {
-					if(s[0] === '[') {
-						let oBB = Utils.bbUrl(s);
-						if(oBB) {
-							return <p key={i}><a href={oBB.href} target="_blank" rel="noopener noreferrer">{oBB.text}</a></p>
-						}
-					}
-					return <p key={i}>{s}</p>
-				})}
-			</div>
-			<div className="footer">
-				{props.type === 'Outgoing' &&
-					<span>{props.fromName} at </span>
-				}
-				<span>{datetime(props.createdAt)}</span>
-				{(props.type === 'Outgoing' && props.status !== null) &&
-					<React.Fragment>
-						<span> / {props.status}</span>
-						{props.error &&
-							<span className="error"> ({props.error})</span>
-						}
-					</React.Fragment>
-				}
-			</div>
-		</div>
-	);
-}
 
 /**
  * SMS
@@ -545,14 +507,14 @@ export default class SMS extends React.Component {
 					<span className="title">{this.props.mobile ? '#' : 'Phone Number'}: </span>
 					<span className="right20">
 						<a href={'tel:' + this.props.phoneNumber}>
-							{Utils.nicePhone(this.props.phoneNumber)}
+							{nicePhone(this.props.phoneNumber)}
 						</a>
 						<Tooltip title="Copy Phone Number">
 							<IconButton onClick={this.copyPhone}>
 								<FileCopyIcon />
 							</IconButton>
 						</Tooltip>
-						{!this.props.readOnly && Utils.hasRight(this.props.user, 'customers', 'update') &&
+						{!this.props.readOnly && Rights.has('customers', 'update') &&
 							<Tooltip title="Change Phone Number">
 								<IconButton onClick={ev => this.setState({phoneChange: true})}>
 									<EditIcon />
@@ -572,12 +534,10 @@ export default class SMS extends React.Component {
 					}
 				</div>
 				<div className="messages">
-					{this.state.messages.map((msg, i) =>
-						<Message
-							key={msg.id}
-							{...msg}
-						/>
-					)}
+					<Messages
+						type="sms"
+						value={this.state.messages}
+					/>
 					<div className="scroll" ref={el => this.refMessagesBottom = el} />
 				</div>
 				{!this.props.readOnly &&
@@ -843,6 +803,9 @@ export default class SMS extends React.Component {
 
 			// If we're ok
 			if(res.data) {
+
+				// Add the SMS to the current ticket
+				Tickets.item('sms', res.data);
 
 				// Clear the message
 				this.refText.value = '';

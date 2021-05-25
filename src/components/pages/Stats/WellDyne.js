@@ -22,12 +22,10 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
+import Rights from 'shared/communication/rights';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
-
-// Local modules
-import Utils from 'utils';
 
 /**
  * WellDyne
@@ -47,7 +45,7 @@ export default function WellDyne(props) {
 
 		// If we have a user with the correct rights
 		if(props.user) {
-			if(Utils.hasRight(props.user, 'csr_stats', 'read')) {
+			if(Rights.has('csr_stats', 'read')) {
 				fetchRecords();
 			} else {
 				recordsSet(-1);

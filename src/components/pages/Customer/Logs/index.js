@@ -19,8 +19,9 @@ import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 
 // Local components
-import Calls from './Logs_Calls';
-import Emails from './Logs_Emails';
+import Calls from './Calls';
+import Emails from './Emails';
+import Tickets from './Tickets';
 
 /**
  * Logs
@@ -48,6 +49,7 @@ export default function Logs(props) {
 				>
 					<Tab label="JustCall" />
 					<Tab label="HubSpot" />
+					<Tab label="Tickets" />
 				</Tabs>
 			</AppBar>
 			<Box className="logsContent">
@@ -65,6 +67,14 @@ export default function Logs(props) {
 						user={props.user}
 					/>
 				</Box>
+				<Box className="tickets" style={{display: tab === 2 ? 'block' : 'none'}}>
+					<Tickets
+						customerId={props.customerId}
+						phoneNumber={props.phoneNumber}
+						readOnly={props.readOnly}
+						user={props.user}
+					/>
+				</Box>
 			</Box>
 		</Box>
 	);
@@ -72,6 +82,7 @@ export default function Logs(props) {
 
 // Valid types
 Logs.propTypes = {
+	customerId: PropTypes.number.isRequired,
 	emailAddress: PropTypes.string.isRequired,
 	phoneNumber: PropTypes.string.isRequired
 }

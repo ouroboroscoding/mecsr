@@ -26,12 +26,10 @@ import { Results } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
+import Rights from 'shared/communication/rights';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
-
-// Local modules
-import Utils from 'utils';
 
 // Generate the Tree
 const ClaimedTree = new Tree({
@@ -58,7 +56,7 @@ export default function Claimed(props) {
 
 		// If we have a user with the correct rights
 		if(props.user) {
-			if(Utils.hasRight(props.user, 'csr_stats', 'read')) {
+			if(Rights.has('csr_stats', 'read')) {
 				fetchRecords();
 			} else {
 				recordsSet(-1);

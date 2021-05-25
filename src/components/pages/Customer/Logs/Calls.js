@@ -14,52 +14,16 @@ import React, { useEffect, useRef, useState } from 'react';
 
 // Material UI
 import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogContent from '@material-ui/core/DialogContent';
-import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+
+// Shared components
+import Messages from 'shared/components/Messages';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
-import { nicePhone } from 'shared/generic/tools';
-
-/**
- * Call
- *
- * Display a single call
- *
- * @name Call
- * @access private
- * @param Object props Attributes sent to the component
- * @return React.Component
- */
-function Call(props) {
-
-	// Render
-	return (
-		<Box className={"message " + (props.type === '2' ? 'Outgoing' : 'Incoming')}>
-			<Grid container spacing={1}>
-				<Grid item xs={3} md={2}>Date</Grid>
-				<Grid item xs={9} md={10}>{props.time}</Grid>
-				<Grid item xs={3} md={2}>Type</Grid>
-				<Grid item xs={9} md={10}>{props.typeText}</Grid>
-				<Grid item xs={3} md={2}>Agent</Grid>
-				<Grid item xs={9} md={10}>{props.justcall_agent}</Grid>
-				<Grid item xs={3} md={2}>JustCall #</Grid>
-				<Grid item xs={9} md={10}>{nicePhone(props.justcall_number)}</Grid>
-				<Grid item xs={3} md={2}>Notes</Grid>
-				<Grid item xs={9} md={10}>{props.notes}</Grid>
-				<Grid item xs={12}>
-					<Button onClick={ev => props.info(props.callinfo)} size="small" variant="outlined">View Recording</Button>
-				</Grid>
-			</Grid>
-		</Box>
-	);
-}
 
 /**
  * Calls
@@ -74,7 +38,6 @@ function Call(props) {
 export default function Calls(props) {
 
 	// State
-	let [info, infoSet] = useState(false);
 	let [logs, logsSet] = useState(null);
 
 	// Refs
@@ -132,27 +95,15 @@ export default function Calls(props) {
 					{logs.length === 0 &&
 						<Typography>No logs found for this phone number</Typography>
 					}
-					{logs.length > 0 && logs.map(o =>
-						<Call
-							info={infoSet}
-							key={o.id}
-							{...o}
+					{logs.length > 0 &&
+						<Messages
+							addToTicket={true}
+							type="justcall"
+							value={logs}
 						/>
-					)}
+					}
 					<Box className="scroll" ref={refScroll} />
 				</React.Fragment>
-			}
-			{info &&
-				<Dialog
-					fullWidth={true}
-					maxWidth="sm"
-					onClose={ev => infoSet(false)}
-					open={true}
-				>
-					<DialogContent>
-						<iframe title="JustCall Info" className="justcall" src={info} />
-					</DialogContent>
-				</Dialog>
 			}
 		</React.Fragment>
 	);

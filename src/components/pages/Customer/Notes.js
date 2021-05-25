@@ -16,51 +16,21 @@ import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 
+// Shared components
+import Messages from 'shared/components/Messages';
+
 // Shared communications modules
 import Rest from 'shared/communication/rest';
 
+// Shared data modules
+import Tickets from 'shared/data/tickets';
+
 // Shared generic modules
 import Events from 'shared/generic/events';
-import { clone, datetime } from 'shared/generic/tools';
+import { clone } from 'shared/generic/tools';
 
 // Data
 import lLabels from 'definitions/status_labels.json';
-
-// Note Component
-function Note(props) {
-
-	let sClass = '';
-
-	// If we got a Receive Communication it's incoming
-	if(props.data.action === 'Receive Communication') {
-		sClass = 'Incoming';
-	} else {
-		if(props.data.userRole === 'Doctor') {
-			sClass = 'Outgoing Doctor';
-		} else if(props.data.userRole === 'System') {
-			sClass = 'Outgoing System';
-		} else {
-			sClass = 'Outgoing';
-		}
-	}
-
-	return (
-		<div className={"message " + sClass}>
-			<div className="action">
-				{props.data.action}
-			</div>
-			<div className="content">
-				{props.data.note.split('\n').map((s,i) =>
-					<p key={i}>{s}</p>
-				)}
-			</div>
-			<div className="footer">
-				<span className="name">{props.data.createdBy} at </span>
-				<span className="date">{datetime(props.data.createdAt)}</span>
-			</div>
-		</div>
-	);
-}
 
 // Notes component
 export default class Notes extends React.Component {
@@ -177,10 +147,10 @@ export default class Notes extends React.Component {
 
 		// Else, process the notes
 		else {
-			notes = this.state.notes.map((note, i) =>
-				<Note
-					data={note}
-					key={i}
+			notes = (
+				<Messages
+					type="note"
+					value={this.state.notes}
 				/>
 			);
 		}
@@ -232,7 +202,9 @@ export default class Notes extends React.Component {
 	}
 
 	scrollToBottom(type) {
-		this.messagesBottom.scrollIntoView({ behavior: type });
+		if(this.messagesBottom) {
+			this.messagesBottom.scrollIntoView({ behavior: type });
+		}
 	}
 
 	send() {
@@ -287,6 +259,9 @@ export default class Notes extends React.Component {
 
 			// If we're ok
 			if(res.data) {
+
+				// Add the Note to the current ticket
+				Tickets.item('note', res.data);
 
 				// Clear the note content
 				this.text.value = '';

@@ -21,19 +21,21 @@ import Events from 'shared/generic/events';
  *
  * @name add
  * @public
+ * @param String ticket The ID of the ticket associated
  * @param String number The conversation phone number
  * @param String order The orderId associated
- * @param Boolean continuius
+ * @param Boolean continuous Marks an order as a continuous one
  * @param Number provider The ID of the provider associated
  * @return Promise
  */
-export function add(number, order=null, continuous=null, provider=null) {
+export function add(ticket, number, order=null, continuous=null, provider=null) {
 
 	// Return promise
 	return new Promise((resolve, reject) => {
 
 		// Send the claim  to the server
 		Rest.create('monolith', 'customer/claim', {
+			ticket: ticket,
 			phoneNumber: number,
 			orderId: order,
 			continuous: continuous,

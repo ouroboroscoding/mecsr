@@ -23,9 +23,6 @@ import TextField from '@material-ui/core/TextField';
 // Components
 import MsgSummary from 'components/composites/MsgSummary';
 
-// Data modules
-import claimed from 'data/claimed';
-
 // Shared communications modules
 import Rest from 'shared/communication/rest';
 
@@ -54,7 +51,6 @@ export default class Search extends React.Component {
 		}
 
 		// Bind methods
-		this.claim = this.claim.bind(this);
 		this.contentChange = this.contentChange.bind(this);
 		this.emailChange = this.emailChange.bind(this);
 		this.idChange = this.idChange.bind(this);
@@ -81,21 +77,6 @@ export default class Search extends React.Component {
 		// Stop tracking any signedIn/signedOut events
 		Events.remove('signedIn', this.signedIn);
 		Events.remove('signedOut', this.signedOut);
-	}
-
-	claim(number, name, customer_id) {
-
-		// Get the claimed add promise
-		claimed.add(number).then(res => {
-			Events.trigger('claimedAdd', number, name, customer_id || '0');
-		}, error => {
-			// If we got a duplicate
-			if(error.code === 1101) {
-				Events.trigger('error', 'Customer has already been claimed.');
-			} else {
-				Events.trigger('error', Rest.errorMessage(error));
-			}
-		});
 	}
 
 	contentChange(event) {
@@ -333,7 +314,7 @@ export default class Search extends React.Component {
 				<Box className="summaries">
 					{this.state.records.map((o,i) =>
 						<MsgSummary
-							onClaim={this.claim}
+							claimType="Call"
 							key={i}
 							user={this.state.user}
 							{...o}

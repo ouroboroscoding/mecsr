@@ -21,13 +21,11 @@ import { Results } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
+import Rights from 'shared/communication/rights';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
 import { afindi, clone } from 'shared/generic/tools';
-
-// Local modules
-import Utils from 'utils';
 
 // Definitions
 import AdHocDef from 'definitions/welldyne/adhoc';
@@ -60,7 +58,7 @@ export default function AdHoc(props) {
 
 		// If we have a user with the correct rights
 		if(props.user) {
-			if(Utils.hasRight(props.user, 'welldyne_adhoc', 'read')) {
+			if(Rights.has('welldyne_adhoc', 'read')) {
 				fetchRecords();
 			} else {
 				recordsSet(-1);
@@ -143,7 +141,7 @@ export default function AdHoc(props) {
 					data={records}
 					noun="adhoc"
 					orderBy="title"
-					remove={Utils.hasRight(props.user, 'welldyne_adhoc', 'delete') ? removeRecord : false}
+					remove={Rights.has('welldyne_adhoc', 'delete') ? removeRecord : false}
 					service="welldyne"
 					tree={AdHocTree}
 					update={false}

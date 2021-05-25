@@ -25,13 +25,11 @@ import { Results } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
+import Rights from 'shared/communication/rights';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
 import { afindi, clone, isObject } from 'shared/generic/tools';
-
-// Local modules
-import Utils from 'utils';
 
 // Definitions
 import OutboundDef from 'definitions/welldyne/outbound';
@@ -62,7 +60,7 @@ export default function Outbound(props) {
 
 		// If we have a user with the correct rights
 		if(props.user) {
-			if(Utils.hasRight(props.user, 'welldyne_outbound', 'read')) {
+			if(Rights.has('welldyne_outbound', 'read')) {
 				fetchRecords();
 			} else {
 				recordsSet(-1);
@@ -73,11 +71,11 @@ export default function Outbound(props) {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [props.user]); // React to user changes
 
-	function adhocSwitch(_id) {
+	function adhocSwitch(adhoc) {
 
 		// Send the request to the service
 		Rest.update('welldyne', 'outbound/adhoc', {
-			"_id": _id
+			"_id": adhoc._id
 		}).done(res => {
 
 			// If there's an error or a warning
@@ -108,7 +106,7 @@ export default function Outbound(props) {
 					let ret = clone(records);
 
 					// Find the index
-					let iIndex = afindi(ret, '_id', _id);
+					let iIndex = afindi(ret, '_id', adhoc._id);
 
 					// If one is found, remove it
 					if(iIndex > -1) {
@@ -222,7 +220,7 @@ export default function Outbound(props) {
 	} else {
 		// If the user has both outbound delete, and adhoc create, all for
 		//	switching
-		let lActions = Utils.hasRight(props.user, 'welldyne_adhoc', 'create') ?
+		let lActions = Rights.has('welldyne_adhoc', 'create') ?
 						[{"tooltip": "AdHoc (Remove Error)", "icon": ArrowBackIcon, "callback": adhocSwitch}] :
 						[];
 

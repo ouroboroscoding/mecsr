@@ -19,6 +19,9 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 
 const VERSION = [
+	['1.34.0', 'May 31st, 2021', [
+		'Added ticketing system.'
+	]],
 	['1.33.6', 'April 14th, 2021', [
 		'Added ability to re-check identity in E-Verification section for those with permission to do so.'
 	]],

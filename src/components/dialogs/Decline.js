@@ -149,7 +149,7 @@ export default function Decline(props) {
 						gridContainerProps={{spacing: 2}}
 						gridItemProps={{xs: 12, md: 6, xl: 3}}
 						label="Reason for decline"
-						onChange={value => reasonSet(value, 10)}
+						onChange={value => reasonSet(value)}
 						options={[
 							{value: 'Ran CC Successfully'},
 							{value: 'Duplicate Order*'},

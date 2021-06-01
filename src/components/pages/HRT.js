@@ -22,8 +22,8 @@ import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
 
-// Data modules
-import claimed from 'data/claimed';
+// Dialog components
+import Claim from 'components/dialogs/Claim';
 
 // Shared Components
 import { Results } from 'shared/components/Format';
@@ -59,6 +59,7 @@ const HrtTree = new Tree({
 function Patients(props) {
 
 	// State
+	let [claim, claimSet] = useState(false);
 	let [customers, customersSet] = useState(false);
 
 	// User change effect
@@ -71,33 +72,12 @@ function Patients(props) {
 	// eslint-disable-next-line
 	}, [props.user]);
 
-	// Claim the customer
-	function claim(customer) {
-
-		// Get the claimed add promise
-		claimed.add(customer.phoneNumber).then(res => {
-			Events.trigger(
-				'claimedAdd',
-				customer.phoneNumber,
-				customer.firstName + ' ' + customer.lastName,
-				customer.customerId
-			);
-		}, error => {
-			// If we got a duplicate
-			if(error.code === 1101) {
-				Events.trigger('error', 'Customer has already been claimed.');
-			} else {
-				Events.trigger('error', Rest.errorMessage(error));
-			}
-		});
-	}
-
 	// Render the claim button
 	function claimRender(customer) {
 		return (
 			<Button
 				color="primary"
-				onClick={ev => claim(customer)}
+				onClick={ev => claimSet(customer)}
 				variant="contained"
 			>Claim</Button>
 		)
@@ -135,16 +115,27 @@ function Patients(props) {
 
 	// Render
 	return (
-		<Results
-			custom={{"claim": claimRender}}
-			data={customers}
-			noun=""
-			orderBy="joinDate"
-			remove={false}
-			service=""
-			tree={HrtTree}
-			update={false}
-		/>
+		<React.Fragment>
+			<Results
+				custom={{"claim": claimRender}}
+				data={customers}
+				noun=""
+				orderBy="joinDate"
+				remove={false}
+				service=""
+				tree={HrtTree}
+				update={false}
+			/>
+			{claim &&
+				<Claim
+					customerId={claim.customerId.toString()}
+					customerName={claim.firstName + ' ' + claim.lastName}
+					customerPhone={claim.phoneNumber}
+					defaultType="followup"
+					onClose={() => claimSet(false)}
+				/>
+			}
+		</React.Fragment>
 	);
 }
 

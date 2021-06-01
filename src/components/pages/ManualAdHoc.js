@@ -24,13 +24,11 @@ import Typography from '@material-ui/core/Typography';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
+import Rights from 'shared/communication/rights';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
 import { afindi, clone } from 'shared/generic/tools';
-
-// Local modules
-import Utils from 'utils';
 
 /**
  * Line
@@ -106,7 +104,7 @@ export default function ManualAdHoc(props) {
 
 		// If we have a user with the correct rights
 		if(props.user) {
-			if(Utils.hasRight(props.user, 'manual_adhoc', 'read')) {
+			if(Rights.has('manual_adhoc', 'read')) {
 				fetchRecords();
 			} else {
 				recordsSet(-1);

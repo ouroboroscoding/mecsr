@@ -21,9 +21,6 @@ import Select from '@material-ui/core/Select';
 // Components
 import MsgSummary from 'components/composites/MsgSummary';
 
-// Data modules
-import claimed from 'data/claimed';
-
 // Shared communications modules
 import Rest from 'shared/communication/rest';
 
@@ -51,7 +48,6 @@ export default class Unclaimed extends React.Component {
 		}
 
 		// Bind methods
-		this.claim = this.claim.bind(this);
 		this.filter = this.filter.bind(this);
 		this.hide = this.hide.bind(this);
 		this.orderChanged = this.orderChanged.bind(this);
@@ -82,22 +78,6 @@ export default class Unclaimed extends React.Component {
 		Events.remove('signedIn', this.signedIn);
 		Events.remove('signedOut', this.signedOut);
 		Events.remove('Unclaimed', this.fetch);
-	}
-
-	claim(number, name, customer_id) {
-
-		// Get the claimed add promise
-		claimed.add(number).then(res => {
-			Events.trigger('claimedAdd', number, name, customer_id);
-		}, error => {
-			// If we got a duplicate
-			if(error.code === 1101) {
-				Events.trigger('error', 'Customer has already been claimed. Refreshing unclaimed.');
-				Events.trigger('Unclaimed');
-			} else {
-				Events.trigger('error', Rest.errorMessage(error));
-			}
-		});
 	}
 
 	hide(number) {
@@ -253,7 +233,7 @@ export default class Unclaimed extends React.Component {
 				<Box className="summaries">
 					{this.state.filtered.map((o,i) =>
 						<MsgSummary
-							onClaim={this.claim}
+							claimType="SMS / Voicemail"
 							key={i}
 							onHide={this.hide}
 							user={this.state.user}

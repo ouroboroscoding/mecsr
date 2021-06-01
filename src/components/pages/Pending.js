@@ -18,9 +18,6 @@ import Typography from '@material-ui/core/Typography';
 // Composite components
 import CustomerSummary from 'components/composites/CustomerSummary';
 
-// Data modules
-import claimed from 'data/claimed';
-
 // Shared communications modules
 import Rest from 'shared/communication/rest';
 
@@ -42,7 +39,6 @@ export default class Pending extends React.Component {
 		}
 
 		// Bind methods
-		this.claim = this.claim.bind(this);
 		this.fetch = this.fetch.bind(this);
 		this.signedIn = this.signedIn.bind(this);
 		this.signedOut = this.signedOut.bind(this);
@@ -67,22 +63,6 @@ export default class Pending extends React.Component {
 		Events.remove('signedIn', this.signedIn);
 		Events.remove('signedOut', this.signedOut);
 		Events.remove('Pending', this.fetch);
-	}
-
-	claim(customer_id, order_id, continuous, name, phone) {
-
-		// Get the claimed add promise
-		claimed.add(phone, order_id, continuous, 0).then(res => {
-			Events.trigger('claimedAdd', phone, name, customer_id, order_id, continuous, 0);
-		}, error => {
-			// If we got a duplicate
-			if(error.code === 1101) {
-				Events.trigger('error', 'Order has already been claimed. Refreshing queue.');
-				this.fetch();
-			} else {
-				Events.trigger('error', Rest.errorMessage(error));
-			}
-		});
 	}
 
 	fetch() {
@@ -118,7 +98,6 @@ export default class Pending extends React.Component {
 				<Box className="summaries">
 					{this.state.records.map((o,i) =>
 						<CustomerSummary
-							onClaim={this.claim}
 							key={o.orderId}
 							user={this.state.user}
 							{...o}

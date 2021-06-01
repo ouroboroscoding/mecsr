@@ -28,13 +28,11 @@ import { Results } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
+import Rights from 'shared/communication/rights';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
 import { afindi, clone } from 'shared/generic/tools';
-
-// Local modules
-import Utils from 'utils';
 
 // Definitions
 import NeverStartedDef from 'definitions/welldyne/never_started';
@@ -71,7 +69,7 @@ export default function NeverStarted(props) {
 
 		// If we have a user with the correct rights
 		if(props.user) {
-			if(Utils.hasRight(props.user, 'welldyne_never_started', 'read')) {
+			if(Rights.has('welldyne_never_started', 'read')) {
 				fetchRecords();
 			} else {
 				recordsSet(-1);
@@ -240,7 +238,7 @@ export default function NeverStarted(props) {
 					data={records}
 					noun="never/started"
 					orderBy="triggered"
-					remove={Utils.hasRight(props.user, 'welldyne_never_started', 'delete') ? removeRecord : false}
+					remove={Rights.has('welldyne_never_started', 'delete') ? removeRecord : false}
 					service="welldyne"
 					tree={NeverStartedTree}
 					update={false}
@@ -251,7 +249,7 @@ export default function NeverStarted(props) {
 		<React.Fragment>
 			<Box className="page_header">
 				<Typography className="title">Never Started Claims</Typography>
-				{Utils.hasRight(props.user, 'welldyne_never_started', 'update') &&
+				{Rights.has('welldyne_never_started', 'update') &&
 					<React.Fragment>
 						<TextField
 							inputRef={pollRef}

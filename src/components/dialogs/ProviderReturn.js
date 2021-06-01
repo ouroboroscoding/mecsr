@@ -10,7 +10,7 @@
  */
 
 // NPM modules
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 
 // Material UI
 import Button from '@material-ui/core/Button';
@@ -20,8 +20,14 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import TextField from '@material-ui/core/TextField';
 
+// Data modules
+import Claimed from 'data/claimed';
+
 // Shared communications modules
 import Rest from 'shared/communication/rest';
+
+// Shared data modules
+import Tickets from 'shared/data/tickets';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
@@ -38,27 +44,18 @@ import Events from 'shared/generic/events';
  */
 export default function ProviderReturn(props) {
 
-	// Refs
-	let noteRef = useRef();
+	// State
+	let [note, noteSet] = useState('');
 
 	// Submite notes / resolve conversation
-	function submit() {
-
-		// Check for notes
-		let content = noteRef.current.value.trim();
-
-		// If we got text
-		if(content.trim() === '') {
-			Events.trigger('error', 'Please leave a note explaining the resolution.');
-			return;
-		}
+	function submitTransfer() {
 
 		// Send the message to the server
 		Rest.update('monolith', 'customer/provider/return', {
 			phoneNumber: props.customerPhone,
 			customerId: props.customerId,
 			orderId: props.orderId,
-			note: content,
+			note: note,
 			provider: props.provider
 		}).done(res => {
 
@@ -72,8 +69,51 @@ export default function ProviderReturn(props) {
 
 			// If we're ok
 			if(res.data) {
-				props.onTransfer();
+
+				// Add it to the ticket
+				if(props.ticket) {
+					Tickets.item('note', res.data, props.ticket);
+				}
+
+				// Start the resolving
+				submitResolution();
 			}
+		});
+	}
+
+	// Called to submit the resolution, close the ticket, and remove the claim
+	function submitResolution() {
+
+		// If there's no ticket (eventually we can remove this)
+		if(!props.ticket) {
+
+			// Remove the claim
+			Claimed.remove(props.customerPhone).then(() => {
+				Events.trigger('claimedRemove', props.customerPhone);
+			}, error => {
+				Events.trigger('error', Rest.errorMessage(error));
+			});
+
+			// Notify the parent
+			props.onSubmit();
+			return;
+		}
+
+		// Close the ticket
+		Tickets.resolve('Issue Resolved', props.ticket).then(data => {
+
+			// Remove the claim
+			Claimed.remove(props.customerPhone).then(() => {
+				Events.trigger('claimedRemove', props.customerPhone);
+			}, error => {
+				Events.trigger('error', Rest.errorMessage(error));
+			});
+
+			// Notify the parent
+			props.onSubmit();
+
+		}, error => {
+			Events.trigger('error', Rest.errorMessage(error));
 		});
 	}
 
@@ -87,13 +127,14 @@ export default function ProviderReturn(props) {
 				className: "resolve"
 			}}
 		>
-			<DialogTitle id="confirmation-dialog-title">Send to Provider</DialogTitle>
+			<DialogTitle id="confirmation-dialog-title">Return to Provider</DialogTitle>
 			<DialogContent dividers>
 				<TextField
 					label="Add Note"
 					multiline
-					inputRef={noteRef}
+					onChange={ev => noteSet(ev.currentTarget.value)}
 					rows="4"
+					value={note}
 					variant="outlined"
 				/>
 			</DialogContent>
@@ -101,9 +142,11 @@ export default function ProviderReturn(props) {
 				<Button variant="contained" color="secondary" onClick={props.onClose}>
 					Cancel
 				</Button>
-				<Button variant="contained" color="primary" onClick={submit}>
-					Send to Provider
-				</Button>
+				{note !== '' &&
+					<Button variant="contained" color="primary" onClick={submitTransfer}>
+						Send to Provider
+					</Button>
+				}
 			</DialogActions>
 		</Dialog>
 	);

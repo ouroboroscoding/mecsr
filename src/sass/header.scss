@@ -30,6 +30,26 @@
 			flex-shrink: 1;
 			padding-top: 15px;
 			text-align: center;
+			z-index: 2000;
+		}
+
+		.ticketStats {
+			flex-basis: auto;
+			flex-grow: 0;
+			flex-shrink: 0;
+			margin-right: 15px;
+			padding-top: 14px;
+
+			span {
+				font-size: 1.25rem;
+				font-weight: bold;
+				line-height: 1.5rem;
+				vertical-align: top;
+			}
+
+			span.previous {
+				color: #cecece;
+			}
 		}
 
 		.MuiSvgIcon-root {

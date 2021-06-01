@@ -16,8 +16,12 @@ import Box from '@material-ui/core/Box';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import Typography from '@material-ui/core/Typography';
 
 const VERSION = [
+	['1.34.0', 'May 31st, 2021', [
+		'Added ticketing system.'
+	]],
 	['1.33.6', 'April 14th, 2021', [
 		'Added ability to re-check identity in E-Verification section for those with permission to do so.'
 	]],
@@ -172,9 +176,10 @@ export default function VersionHistory(props) {
 					{VERSION.map(v =>
 						<ListItem key={v[0]}>
 							<ListItemText
+								disableTypography={true}
 								primary={"Version " + v[0] + ' - ' + v[1]}
 								secondary={
-									<ul>{v[2].map((s,i) => <li key={i}>{s}</li>)}</ul>
+									<ul className="MuiTypography-colorTextSecondary">{v[2].map((s,i) => <li key={i}><Typography>{s}</Typography></li>)}</ul>
 								}
 							>
 							</ListItemText>

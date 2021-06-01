@@ -35,13 +35,11 @@ import { Form, Results } from 'shared/components/Format';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
+import Rights from 'shared/communication/rights';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
 import { afindi, clone } from 'shared/generic/tools';
-
-// Local modules
-import Utils from 'utils';
 
 // Definitions
 //import TemplateEmailDef from '../../definitions/csr/tpl_email';
@@ -142,7 +140,7 @@ function GenericTemplates(props) {
 		<React.Fragment>
 			<Box className="page_header">
 				<Typography className="title">{props.title}</Typography>
-				{Utils.hasRight(props.user, 'csr_templates', 'create') &&
+				{Rights.has('csr_templates', 'create') &&
 					<Tooltip title="Create new template">
 						<IconButton onClick={createToggle}>
 							<AddCircleIcon />
@@ -171,10 +169,10 @@ function GenericTemplates(props) {
 					data={templates}
 					noun={props.noun}
 					orderBy="title"
-					remove={Utils.hasRight(props.user, 'csr_templates', 'delete') ? removeTemplate : false}
+					remove={Rights.has('csr_templates', 'delete') ? removeTemplate : false}
 					service="csr"
 					tree={props.tree}
-					update={Utils.hasRight(props.user, 'csr_templates', 'update')}
+					update={Rights.has('csr_templates', 'update')}
 				/>
 			}
 		</React.Fragment>

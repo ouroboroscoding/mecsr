@@ -9,15 +9,18 @@
  */
 
 // NPM modules
-import React, { useState } from 'react';
+import Confetti from 'react-confetti'
+import React, { useEffect, useState } from 'react';
 import { Switch, Route, useHistory } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
+import Sound from 'react-sound';
 
 // Shared data modules
 import DoseSpot from 'shared/data/dosespot';
+import Tickets from 'shared/data/tickets';
 
 // Shared hooks
-import { useEvent } from 'shared/hooks/event';
+import { useSignedIn, useSignedOut } from 'hooks/user';
 import { useResize } from 'shared/hooks/resize';
 
 // Composite component modules
@@ -35,6 +38,7 @@ import Pharmacy from './pages/Pharmacy';
 import Reminders from './pages/Reminders';
 import Search from './pages/Search';
 import Stats from './pages/Stats';
+import TicketsPage from './pages/Tickets';
 import Templates from './pages/Templates';
 import Unclaimed from './pages/Unclaimed';
 import VersionHistory from './pages/VersionHistory';
@@ -44,6 +48,9 @@ import 'rest_init';
 
 // SASS CSS
 import 'sass/site.scss';
+
+// Init tickets module
+Tickets.init();
 
 /**
  * Site
@@ -58,24 +65,48 @@ import 'sass/site.scss';
 export default function Site(props) {
 
 	// State
+	let [confetti, confettiSet] = useState(false);
 	let [mobile, mobileSet] = useState(document.documentElement.clientWidth < 600 ? true : false);
+	let [oneUp, oneUpSet] = useState(false);
 	let [user, userSet] = useState(false);
 
 	// Hooks
 	let history = useHistory();
 
+	// Load effect
+	useEffect(() => {
+
+		// Watch for tickets being resolved
+		Tickets.watchResolve(resolvedCallback);
+
+		return () => {
+
+			// Stop watching resolves
+			Tickets.watchResolve(resolvedCallback, true);
+		}
+	}, []);
+
 	// Sign in/out event hooks
-	useEvent('signedIn', user => {
-		userSet(user);
-		DoseSpot.init(user.dsClinicianId);
+	useSignedIn(value => {
+		userSet(value);
+		DoseSpot.init(value.dsClinicianId);
+		Tickets.agent(value.id);
 	});
-	useEvent('signedOut', () => {
+	useSignedOut(() => {
 		userSet(false);
 		DoseSpot.init(0)
+		Tickets.agent(null);
 	});
 
 	// Resize hooks
 	useResize(() => mobileSet(document.documentElement.clientWidth < 600 ? true : false));
+
+	// Called when any ticket is resolved
+	function resolvedCallback() {
+		oneUpSet(true);
+		confettiSet(true);
+		setTimeout(() => confettiSet(false), 5000);
+	}
 
 	// Return the Site
 	return (
@@ -127,6 +158,9 @@ export default function Site(props) {
 						<Route exact path="/stats">
 							<Stats user={user} />
 						</Route>
+						<Route exact path="/tickets">
+							<TicketsPage user={user} />
+						</Route>
 						<Route exact path="/templates">
 							<Templates user={user} />
 						</Route>
@@ -156,6 +190,19 @@ export default function Site(props) {
 					user={user}
 				/>
 			</div>
+			{oneUp &&
+				<Sound
+					url="/sounds/1Up.mp3"
+					playStatus={Sound.status.PLAYING}
+					onFinishedPlaying={ev => oneUpSet(false)}
+				/>
+			}
+			{confetti &&
+				<Confetti
+					width={window.innerWidth}
+					height={window.innerHeight}
+				/>
+			}
 		</SnackbarProvider>
 	);
 }

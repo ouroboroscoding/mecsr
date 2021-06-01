@@ -8,9 +8,6 @@
  * @created 2021-04-01
  */
 
-// Local modules
-import { LoaderHide, LoaderShow } from 'components/Loader';
-
 // Error codes/messages
 import errors from 'definitions/errors';
 
@@ -25,12 +22,12 @@ Rest.init(process.env.REACT_APP_MEMS_DOMAIN, {
 
 	// Called after a request returns, error or not
 	after: (method, url, data, opts) => {
-		LoaderHide();
+		Events.trigger('LoaderHide');
 	},
 
 	// Called before a request is sent out
 	before: (method, url, data, opts) => {
-		LoaderShow();
+		Events.trigger('LoaderShow');
 	},
 
 	cookie: process.env.REACT_APP_WS_DOMAIN,
@@ -111,4 +108,4 @@ if(Rest.session()) {
 }
 
 // Hide the loader
-LoaderHide();
+Events.trigger('LoaderHide');

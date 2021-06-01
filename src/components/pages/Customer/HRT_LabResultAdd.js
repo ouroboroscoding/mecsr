@@ -163,7 +163,7 @@ export default function LabResultAdd(props) {
 			{tests.map((o,i) =>
 				<Paper key={o.key} className="hrt_lab_result_test_add padded form">
 					<Box className="flexColumns">
-						<Box className="grow">
+						<Box className="flexGrow">
 							<ParentComponent
 								name="HrtLabResultTest"
 								node={LabResultTestParent}
@@ -171,7 +171,7 @@ export default function LabResultAdd(props) {
 								type="create"
 							/>
 						</Box>
-						<Box className="static">
+						<Box className="flexStatic">
 							<Tooltip title="Remove Test">
 								<IconButton onClick={ev => testRemove(i)}>
 									<RemoveCircleIcon color="secondary" />

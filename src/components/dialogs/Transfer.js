@@ -60,10 +60,12 @@ import { afindi, clone, omap } from 'shared/generic/tools';
 export default function Transfer(props) {
 
 	// Constants
-	let REQUESTED_AGENT = Tickets.actionTypeID('Requested Specific Agent/PA').toString();
+	let PA_REQUIRED = Tickets.actionTypeID('PA Required').toString();
+	let HRT_ONBOARD = Tickets.actionTypeID('HRT Onboarding').toString();
 	let TYPES = {
 		'Transferred': [
 			{value: Tickets.actionTypeID('PA Required').toString(), text: 'PA Required'},
+			{value: Tickets.actionTypeID('HRT Onboarding').toString(), text: 'HRT Onboarding'},
 			{value: Tickets.actionTypeID('Requested Specific Agent/PA').toString(), text: 'Requested Specific Agent/PA'}
 		],
 		'Escalated': omap(
@@ -131,6 +133,11 @@ export default function Transfer(props) {
 					}
 				}
 
+				// Split all types into lists
+				for(let i in res.data) {
+					res.data[i].type = res.data[i].type.split(',');
+				}
+
 				// Save the agents
 				agentsAllSet(res.data);
 			}
@@ -146,21 +153,32 @@ export default function Transfer(props) {
 		// If the action is transfer
 		if(action === 'Transferred') {
 
-			// If we want all agents
-			if(type === REQUESTED_AGENT) {
-				agentsSet(clone(agentsAll));
-				return;
-			}
-
-			// Else, look for PAs
-			else {
+			// If we need a PA
+			if(type === PA_REQUIRED) {
 
 				// Go through all agents
 				for(let o of agentsAll) {
-					if(o.type === 'pa') {
+					if(o.type.includes('pa')) {
 						lAgents.push(o);
 					}
 				}
+			}
+
+			// Else if we need an HRT specialist
+			else if(type === HRT_ONBOARD) {
+
+				// Go through all agents
+				for(let o of agentsAll) {
+					if(o.type.includes('on_hrt')) {
+						lAgents.push(o);
+					}
+				}
+			}
+
+			// Else, everyone
+			else {
+				agentsSet(clone(agentsAll));
+				return;
 			}
 		}
 
@@ -264,7 +282,7 @@ export default function Transfer(props) {
 	return (
 		<Dialog
 			fullWidth={true}
-			maxWidth="sm"
+			maxWidth="md"
 			open={true}
 			onClose={props.onClose}
 			PaperProps={{

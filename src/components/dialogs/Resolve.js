@@ -167,7 +167,7 @@ export default function Resolve(props) {
 					<RadioButtons
 						buttonProps={{style: {width: '100%'}}}
 						gridContainerProps={{spacing: 2}}
-						gridItemProps={{xs: 4}}
+						gridItemProps={{xs: 6}}
 						label="Resolution"
 						onChange={value => typeSet(value, 10)}
 						options={[

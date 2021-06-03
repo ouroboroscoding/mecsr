@@ -804,8 +804,10 @@ export default class SMS extends React.Component {
 			// If we're ok
 			if(res.data) {
 
-				// Add the SMS to the current ticket
-				Tickets.item('sms', res.data);
+				// Add the SMS to the current ticket (if there is one)
+				if(Tickets.current()) {
+					Tickets.item('sms', res.data);
+				}
 
 				// Clear the message
 				this.refText.value = '';

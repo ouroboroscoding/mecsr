@@ -104,6 +104,7 @@ export default function Header(props) {
 	let [viewedOpen, viewedOpenSet] = useState(true);
 
 	// Refs
+	let refLocation = useRef();
 	let refNumbers = useRef();
 	let refTimeouts = useRef({
 		messages: 0,
@@ -212,6 +213,11 @@ export default function Header(props) {
 		refNumbers.current = lNumbers;
 
 	}, [claimed, viewed]);
+
+	// Location effect
+	useEffect(() => {
+		refLocation.current = location;
+	}, [location.pathname])
 
 	// Event tracking
 	useEvent('claimedAdd', claimedAdd);
@@ -428,7 +434,7 @@ export default function Header(props) {
 					for(let sNumber in res.data) {
 
 						// If we're on the customer's page
-						if(location.pathname.indexOf('/'+sNumber+'/') > -1) {
+						if(refLocation.current.pathname.indexOf('/'+sNumber+'/') > -1) {
 							Events.trigger('newMessage');
 						}
 
@@ -711,7 +717,7 @@ export default function Header(props) {
 					claimedSet(lClaimed);
 
 					// If we're on a customer
-					let lPath = Utils.parsePath(location.pathname);
+					let lPath = Utils.parsePath(refLocation.current.pathname);
 					if(lPath[0] === 'customer') {
 
 						// If it's the one removed
@@ -816,7 +822,7 @@ export default function Header(props) {
 					claimedSet(lClaimed);
 
 					// If we're on a customer
-					let lPath = Utils.parsePath(location.pathname);
+					let lPath = Utils.parsePath(refLocation.current.pathname);
 					if(lPath[0] === 'customer') {
 
 						// If it's the one swapped

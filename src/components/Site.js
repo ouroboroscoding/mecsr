@@ -67,7 +67,7 @@ export default function Site(props) {
 	// State
 	let [confetti, confettiSet] = useState(false);
 	let [mobile, mobileSet] = useState(document.documentElement.clientWidth < 600 ? true : false);
-	let [oneUp, oneUpSet] = useState(false);
+	let [swish, swishSet] = useState(false);
 	let [user, userSet] = useState(false);
 
 	// Hooks
@@ -103,7 +103,7 @@ export default function Site(props) {
 
 	// Called when any ticket is resolved
 	function resolvedCallback() {
-		oneUpSet(true);
+		swishSet(true);
 		confettiSet(true);
 		setTimeout(() => confettiSet(false), 5000);
 	}
@@ -190,11 +190,11 @@ export default function Site(props) {
 					user={user}
 				/>
 			</div>
-			{oneUp &&
+			{swish &&
 				<Sound
-					url="/sounds/1Up.mp3"
+					url="/sounds/Swish.mp3"
 					playStatus={Sound.status.PLAYING}
-					onFinishedPlaying={ev => oneUpSet(false)}
+					onFinishedPlaying={ev => swishSet(false)}
 				/>
 			}
 			{confetti &&

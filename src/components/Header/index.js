@@ -104,6 +104,7 @@ export default function Header(props) {
 	let [viewedOpen, viewedOpenSet] = useState(true);
 
 	// Refs
+	let refHistory = useRef();
 	let refLocation = useRef();
 	let refNumbers = useRef();
 	let refTimeouts = useRef({
@@ -217,7 +218,8 @@ export default function Header(props) {
 	// Location effect
 	useEffect(() => {
 		refLocation.current = location;
-	}, [location.pathname])
+		refHistory.current = history;
+	}, [location, location.pathname], history);
 
 	// Event tracking
 	useEvent('claimedAdd', claimedAdd);
@@ -705,30 +707,37 @@ export default function Header(props) {
 			// If a claim was removed
 			case 'claim_removed': {
 
-				// Look for the claim
-				let iIndex = afindi(claimed, 'customerPhone', data.phoneNumber);
+				// Make sure we always have the latest claimed
+				claimedSet(claimed => {
 
-				// If we found one
-				if(iIndex > -1) {
+					// Look for the claim
+					let iIndex = afindi(claimed, 'customerPhone', data.phoneNumber);
 
-					// Clone, remove the claim, and update
-					let lClaimed = clone(claimed);
-					lClaimed.splice(iIndex, 1);
-					claimedSet(lClaimed);
+					// If we found one
+					if(iIndex > -1) {
 
-					// If we're on a customer
-					let lPath = Utils.parsePath(refLocation.current.pathname);
-					if(lPath[0] === 'customer') {
+						// Remove the claim
+						claimed.splice(iIndex, 1);
 
-						// If it's the one removed
-						if(lPath[1] === data.phoneNumber) {
+						// If we're on a customer
+						let lPath = Utils.parsePath(refLocation.current.pathname);
+						if(lPath[0] === 'customer') {
 
-							// Switch to view
-							Events.trigger('viewedAdd', lPath[1], lPath[2]);
-							Events.trigger('error', 'This customer is not claimed, switching to view only.');
+							// If it's the one removed
+							if(lPath[1] === data.phoneNumber) {
+
+								// Switch to view
+								Events.trigger('viewedAdd', lPath[1], lPath[2]);
+								Events.trigger('error', 'This customer is not claimed, switching to view only.');
+							}
 						}
+
+						// Clone and return the new data
+						return clone(claimed);
+					} else {
+						return claimed;
 					}
-				}
+				});
 				break;
 			}
 
@@ -751,37 +760,38 @@ export default function Header(props) {
 					// If there's data
 					if('data' in res) {
 
-						// Clone the claims
-						let lClaimed = clone(claimed);
+						// Make sure we always have the latest claimed
+						claimedSet(claimed => {
 
-						// If there's no actual data
-						if(res.data === 0) {
-							res.data = {
-								customerId: 0,
-								customerName: 'N/A',
-								claimedUser: props.user.id
+							// If there's no actual data
+							if(res.data === 0) {
+								res.data = {
+									customerId: 0,
+									customerName: 'N/A',
+									claimedUser: props.user.id
+								}
 							}
-						}
 
-						// Add the number and transferred by to the data
-						res.data['ticket'] = data.claim.ticket;
-						res.data['customerPhone'] = data.claim.phoneNumber;
-						res.data['transferredBy'] = data.claim.transferredBy;
-						res.data['transferredByName'] = data.claim.transferredByName;
-						res.data['viewed'] = data.claim.viewed;
-						res.data['orderId'] = data.claim.orderId;
-						res.data['provider'] = data.claim.provider;
-						res.data['providerName'] = data.claim.providerName;
-						res.data['continuous'] = data.claim.continuous;
+							// Add the number and transferred by to the data
+							res.data['ticket'] = data.claim.ticket;
+							res.data['customerPhone'] = data.claim.phoneNumber;
+							res.data['transferredBy'] = data.claim.transferredBy;
+							res.data['transferredByName'] = data.claim.transferredByName;
+							res.data['viewed'] = data.claim.viewed;
+							res.data['orderId'] = data.claim.orderId;
+							res.data['provider'] = data.claim.provider;
+							res.data['providerName'] = data.claim.providerName;
+							res.data['continuous'] = data.claim.continuous;
 
-						// Push the transfer to the top
-						lClaimed.unshift(res.data);
+							// Push the transfer to the top
+							claimed.unshift(res.data);
 
-						// Save the state
-						claimedSet(lClaimed);
+							// Notify the agent
+							Events.trigger('info', 'A conversation claim has been transferred to you');
 
-						// Notify the agent
-						Events.trigger('info', 'A conversation claim has been transferred to you');
+							// Clone and return the new claimed
+							return clone(claimed);
+						});
 					}
 				})
 				break;
@@ -790,51 +800,68 @@ export default function Header(props) {
 			// If a claim we already has got new data
 			case 'claim_updated': {
 
-				// Look for the claim
-				let iIndex = afindi(claimed, 'customerPhone', data.phoneNumber);
+				// Make sure we always have the latest claimed
+				claimedSet(claimed => {
 
-				// If we found one
-				if(iIndex > -1) {
+					// Look for the claim
+					let iIndex = afindi(claimed, 'customerPhone', data.phoneNumber);
 
-					// Clone, set the claim, and update
-					let lClaimed = clone(claimed);
-					lClaimed[iIndex] = data.claim;
-					claimedSet(lClaimed);
+					// If we found one
+					if(iIndex > -1) {
 
-					// Notify the agent
-					Events.trigger('info', 'A conversation claim has been updated with new info, please check notes');
-				}
+						// Update
+						claimed[iIndex] = data.claim;
+
+						// Notify the agent
+						Events.trigger('info', 'A conversation claim has been updated with new info, please check notes');
+
+						// Clone and return the new claimed
+						return clone(claimed);
+
+					} else {
+						return claimed;
+					}
+				});
 				break;
 			}
 
 			// If a claim had it's number swapped
 			case 'claim_swapped': {
 
-				// Look for the claim
-				let iIndex = afindi(claimed, 'customerPhone', data.phoneNumber);
+				// Make sure we always have the latest claimed
+				claimedSet(claimed => {
 
-				// If we found one
-				if(iIndex > -1) {
+					// Look for the claim
+					let iIndex = afindi(claimed, 'customerPhone', data.phoneNumber);
 
-					// Clone, change the number, and update
-					let lClaimed = clone(claimed);
-					lClaimed[iIndex]['customerPhone'] = data['newNumber'];
-					claimedSet(lClaimed);
+					// If we found one
+					if(iIndex > -1) {
 
-					// If we're on a customer
-					let lPath = Utils.parsePath(refLocation.current.pathname);
-					if(lPath[0] === 'customer') {
+						// Update
+						claimed[iIndex]['customerPhone'] = data['newNumber'];
 
-						// If it's the one swapped
-						if(lPath[1] === data.phoneNumber) {
+						// If we're on a customer
+						let lPath = Utils.parsePath(refLocation.current.pathname);
+						if(lPath[0] === 'customer') {
 
-							// Change the page we're on
-							history.replace(
-								Utils.customerPath(data.newNumber, lPath[2])
-							);
+							// If it's the one swapped
+							if(lPath[1] === data.phoneNumber) {
+
+								// Change the page we're on
+								history.replace(
+									Utils.customerPath(data.newNumber, lPath[2])
+								);
+							}
 						}
+
+						// Clone and return the new claimed
+						return clone(claimed);
+
+					} else {
+						return claimed;
 					}
-				}
+				});
+
 				break;
 			}
 

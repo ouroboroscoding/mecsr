@@ -260,8 +260,10 @@ export default class Notes extends React.Component {
 			// If we're ok
 			if(res.data) {
 
-				// Add the Note to the current ticket
-				Tickets.item('note', res.data);
+				// Add the Note to the current ticket (if there is one)
+				if(Tickets.current()) {
+					Tickets.item('note', res.data);
+				}
 
 				// Clear the note content
 				this.text.value = '';

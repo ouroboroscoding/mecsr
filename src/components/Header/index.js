@@ -219,7 +219,7 @@ export default function Header(props) {
 	useEffect(() => {
 		refLocation.current = location;
 		refHistory.current = history;
-	}, [location, location.pathname], history);
+	}, [location, location.pathname, history]);
 
 	// Event tracking
 	useEvent('claimedAdd', claimedAdd);

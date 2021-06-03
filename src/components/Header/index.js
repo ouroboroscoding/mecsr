@@ -9,7 +9,7 @@
  */
 
 // NPM modules
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
 // Material UI
@@ -106,6 +106,9 @@ export default function Header(props) {
 	let [userId, userIdSet] = useState(0);
 	let [viewed, viewedSet] = useState([]);
 	let [viewedOpen, viewedOpenSet] = useState(true);
+
+	// Refs
+	let refNumbers = useRef();
 
 	// Hooks
 	let history = useHistory();
@@ -207,6 +210,20 @@ export default function Header(props) {
 		}
 	// eslint-disable-next-line
 	}, [props.user]);
+
+	// Claimed/Viewed effect
+	useEffect(() => {
+
+		// Generate the list of numbers
+		let lNumbers = [].concat(
+			claimed.map(o => o.customerPhone),
+			viewed.map(o => o.customerPhone)
+		);
+
+		// Set the ref
+		refNumbers.current = lNumbers;
+
+	}, [claimed, viewed])
 
 	// Event tracking
 	useEvent('claimedAdd', claimedAdd);
@@ -389,20 +406,14 @@ export default function Header(props) {
 	// Called to fetch new messages
 	function newMessages() {
 
-		// Generate the list of numbers
-		let lNumbers = [].concat(
-			claimed.map(o => o.customerPhone),
-			viewed.map(o => o.customerPhone)
-		);
-
 		// If there's none
-		if(lNumbers.length === 0) {
+		if(refNumbers.current.length === 0) {
 			return;
 		}
 
 		// Send the removal to the server
 		Rest.read('monolith', 'msgs/claimed/new', {
-			numbers: lNumbers
+			numbers: refNumbers.current
 		}).done(res => {
 
 			// If there's an error or warning

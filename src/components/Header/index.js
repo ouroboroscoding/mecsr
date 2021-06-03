@@ -9,7 +9,7 @@
  */
 
 // NPM modules
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
 // Material UI
@@ -98,14 +98,18 @@ export default function Header(props) {
 		providerTransfer: false
 	});
 	let [ticketStats, ticketStatsSet] = useState({});
-	let [timeouts, timeoutsSet] = useState({
-		messages: 0,
-		unclaimed: 0
-	});
 	let [unclaimed, unclaimedSet] = useState(0);
 	let [userId, userIdSet] = useState(0);
 	let [viewed, viewedSet] = useState([]);
 	let [viewedOpen, viewedOpenSet] = useState(true);
+
+	// Refs
+	let refNumbers = useRef();
+	let refTimeouts = useRef({
+		messages: 0,
+		unclaimed: 0
+	});
+	let refUser = useRef(props.user);
 
 	// Hooks
 	let history = useHistory();
@@ -134,13 +138,8 @@ export default function Header(props) {
 			PageVisibility.remove(visibilityChange);
 			Reminders.unsubscribe(remindersSet);
 
-			// If we have any timers
-			if(timeouts.messages) {
-				clearInterval(timeouts.messages);
-			}
-			if(timeouts.unclaimed) {
-				clearInterval(timeouts.unclaimed);
-			}
+			// Stop checking for new messages and unclaimed counts
+			timeoutsStop();
 
 			// Stop watching ticket resolved stats
 			Tickets.watchStats(ticketStatsSet, true);
@@ -170,27 +169,15 @@ export default function Header(props) {
 			// Fetch the unclaimed counts
 			unclaimedCount();
 
-			// Start checking for new messages
-			timeoutsSet({
-				messages: setInterval(newMessages, 30000),
-				unclaimed: setInterval(unclaimedCount, 300000)
-			});
+			// Start checking for new messages and unclaimed counts
+			timeoutsStart();
 		}
 
 		// Else, we have no user
 		else {
 
 			// Stop checking for new messages and unclaimed counts
-			if(timeouts.messages) {
-				clearInterval(timeouts.messages);
-			}
-			if(timeouts.unclaimed) {
-				clearInterval(timeouts.unclaimed);
-			}
-			timeoutsSet({
-				messages: 0,
-				unclaimed: 0
-			});
+			timeoutsStop();
 
 			// Stop tracking user websocket messages
 			TwoWay.untrack('monolith', 'user-' + userId, wsMessage);
@@ -205,8 +192,26 @@ export default function Header(props) {
 				providerTransfer: false
 			});
 		}
+
+		// Always set the ref
+		refUser.current = props.user;
+
 	// eslint-disable-next-line
 	}, [props.user]);
+
+	// Claimed/Viewed effect
+	useEffect(() => {
+
+		// Generate the list of numbers
+		let lNumbers = [].concat(
+			claimed.map(o => o.customerPhone),
+			viewed.map(o => o.customerPhone)
+		);
+
+		// Set the ref
+		refNumbers.current = lNumbers;
+
+	}, [claimed, viewed]);
 
 	// Event tracking
 	useEvent('claimedAdd', claimedAdd);
@@ -389,20 +394,14 @@ export default function Header(props) {
 	// Called to fetch new messages
 	function newMessages() {
 
-		// Generate the list of numbers
-		let lNumbers = [].concat(
-			claimed.map(o => o.customerPhone),
-			viewed.map(o => o.customerPhone)
-		);
-
 		// If there's none
-		if(lNumbers.length === 0) {
+		if(refNumbers.current.length === 0) {
 			return;
 		}
 
 		// Send the removal to the server
 		Rest.read('monolith', 'msgs/claimed/new', {
-			numbers: lNumbers
+			numbers: refNumbers.current
 		}).done(res => {
 
 			// If there's an error or warning
@@ -519,6 +518,36 @@ export default function Header(props) {
 				pendingSet(res.data);
 			}
 		});
+	}
+
+	// Called to start the intervals
+	function timeoutsStart() {
+
+		// If we don't have a messages ones
+		if(refTimeouts.current.messages === 0) {
+			refTimeouts.current.messages = setInterval(newMessages, 30000);
+		}
+
+		// If we don't have an unclaimed one
+		if(refTimeouts.current.unclaimed === 0) {
+			refTimeouts.current.unclaimed = setInterval(unclaimedCount, 300000);
+		}
+	}
+
+	// Called to stop the intervals
+	function timeoutsStop() {
+
+		// If we have a messages ones
+		if(refTimeouts.current.messages !== 0) {
+			clearInterval(refTimeouts.current.messages);
+			refTimeouts.current.messages = 0;
+		}
+
+		// If we have an unclaimed one
+		if(refTimeouts.current.unclaimed === 0) {
+			clearInterval(refTimeouts.current.unclaimed);
+			refTimeouts.current.unclaimed = 0;
+		}
 	}
 
 	// A viewed conversation was added
@@ -642,17 +671,14 @@ export default function Header(props) {
 		if(state === 'visible') {
 
 			// If we have a user
-			if(props.user) {
+			if(refUser.current) {
 
 				// Update
 				newMessages();
 				unclaimedCount();
 
-				// Start checking for new messages
-				timeoutsSet({
-					messages: setInterval(newMessages, 30000),
-					unclaimed: setInterval(unclaimedCount, 300000)
-				});
+				// Start checking for new messages and unclaimed counts
+				timeoutsStart();
 			}
 		}
 
@@ -660,16 +686,7 @@ export default function Header(props) {
 		else if(state === 'hidden') {
 
 			// Stop checking for new messages and unclaimed counts
-			if(timeouts.messages) {
-				clearInterval(timeouts.messages);
-			}
-			if(timeouts.unclaimed) {
-				clearInterval(timeouts.unclaimed);
-			}
-			timeoutsSet({
-				messages: 0,
-				unclaimed: 0
-			});
+			timeoutsStop();
 		}
 	}
 

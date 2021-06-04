@@ -187,13 +187,14 @@ export default function Claim(props) {
 						<RadioButtons
 							buttonProps={{style: {width: '100%'}}}
 							gridContainerProps={{spacing: 2}}
-							gridItemProps={{xs: 4}}
+							gridItemProps={{xs: 6}}
 							label="Claim Type"
 							onChange={value => typeSet(value)}
 							options={[
 								{value: 'SMS / Voicemail', text: 'SMS / Voicemail'},
 								{value: 'Call', text: 'Ongoing Call'},
-								{value: 'Follow Up', text: 'Follow Up'}
+								{value: 'Follow Up', text: 'Follow Up'},
+								{value: 'Script Entry', text: 'Script Entry'}
 							]}
 							value={type}
 							variant="grid"
@@ -239,7 +240,7 @@ export default function Claim(props) {
 				<Button variant="contained" color="secondary" onClick={props.onClose}>
 					Cancel
 				</Button>
-				{(mode === 'ticket_new' && (['Call', 'Follow Up'].includes(type) || ('SMS / Voicemail' === type && items.length > 0))) &&
+				{(mode === 'ticket_new' && (['Call', 'Follow Up', 'Script Entry'].includes(type) || ('SMS / Voicemail' === type && items.length > 0))) &&
 					<Button variant="contained" color="primary" onClick={submitTicket}>
 						Claim
 					</Button>

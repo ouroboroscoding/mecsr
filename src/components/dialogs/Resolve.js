@@ -70,35 +70,43 @@ export default function Resolve(props) {
 			reminderRef.current.run();
 		}
 
-		// Send the message to the server
-		Rest.create('monolith', 'customer/note', {
-			action: 'CSR Note - ' + props.title + ' Resolved',
-			content: note,
-			customerId: props.customerId
-		}).done(res => {
+		// If we have a note
+		if(note.trim() !== '') {
 
-			// If there's an error
-			if(res.error && !res._handled) {
-				Events.trigger('error', Rest.errorMessage(res.error));
-			}
+			// Send the message to the server
+			Rest.create('monolith', 'customer/note', {
+				action: 'CSR Note - ' + props.title + ' Resolved',
+				content: note,
+				customerId: props.customerId
+			}).done(res => {
 
-			// If there's a warning
-			if(res.warning) {
-				Events.trigger('warning', JSON.stringify(res.warning));
-			}
-
-			// If we're ok
-			if(res.data) {
-
-				// Add it to the ticket
-				if(props.ticket) {
-					Tickets.item('note', res.data, props.ticket);
+				// If there's an error
+				if(res.error && !res._handled) {
+					Events.trigger('error', Rest.errorMessage(res.error));
 				}
 
-				// Start the resolving
-				submitResolution();
-			}
-		});
+				// If there's a warning
+				if(res.warning) {
+					Events.trigger('warning', JSON.stringify(res.warning));
+				}
+
+				// If we're ok
+				if(res.data) {
+
+					// Add it to the ticket
+					if(props.ticket) {
+						Tickets.item('note', res.data, props.ticket);
+					}
+
+					// Start the resolving
+					submitResolution();
+				}
+			});
+		} else {
+
+			// Start the resolving
+			submitResolution();
+		}
 	}
 
 	// Called to submit the resolution, close the ticket, and remove the claim
@@ -174,7 +182,8 @@ export default function Resolve(props) {
 							{value: 'Contact Attempted'},
 							{value: 'Follow Up Complete'},
 							{value: 'Information Provided'},
-							{value: 'Issue Resolved'}
+							{value: 'Issue Resolved'},
+							{value: 'Script Entered'}
 						]}
 						value={type}
 						variant="grid"
@@ -212,7 +221,7 @@ export default function Resolve(props) {
 				<Button variant="contained" color="secondary" onClick={props.onClose}>
 					Cancel
 				</Button>
-				{(type !== '' && note.trim() !== '') &&
+				{(type !== '' && (note.trim() !== '' || type === 'Script Entered')) &&
 					<Button variant="contained" color="primary" onClick={submit}>
 						Resolve
 					</Button>

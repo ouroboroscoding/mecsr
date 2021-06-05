@@ -84,5 +84,6 @@ export default function Logs(props) {
 Logs.propTypes = {
 	customerId: PropTypes.number.isRequired,
 	emailAddress: PropTypes.string.isRequired,
-	phoneNumber: PropTypes.string.isRequired
+	phoneNumber: PropTypes.string.isRequired,
+	readOnly: PropTypes.bool.isRequired
 }

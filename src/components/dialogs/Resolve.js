@@ -62,6 +62,17 @@ export default function Resolve(props) {
 	// Refs
 	let reminderRef = useRef();
 
+	// Called to close the claim
+	function claimClose() {
+
+		// Remove the claim
+		Claimed.remove(props.customerPhone).then(() => {
+			Events.trigger('claimedRemove', props.customerPhone);
+		}, error => {
+			Events.trigger('error', Rest.errorMessage(error));
+		});
+	}
+
 	// Submite notes / resolve conversation
 	function submit() {
 
@@ -130,14 +141,11 @@ export default function Resolve(props) {
 		if(!props.ticket) {
 
 			// Remove the claim
-			Claimed.remove(props.customerPhone).then(() => {
-				Events.trigger('claimedRemove', props.customerPhone);
-			}, error => {
-				Events.trigger('error', Rest.errorMessage(error));
-			});
+			claimClose();
 
 			// Notify the parent
 			props.onSubmit();
+
 			return;
 		}
 
@@ -145,17 +153,21 @@ export default function Resolve(props) {
 		Tickets.resolve(type, props.ticket).then(data => {
 
 			// Remove the claim
-			Claimed.remove(props.customerPhone).then(() => {
-				Events.trigger('claimedRemove', props.customerPhone);
-			}, error => {
-				Events.trigger('error', Rest.errorMessage(error));
-			});
+			claimClose();
 
 			// Notify the parent
 			props.onSubmit();
 
 		}, error => {
-			Events.trigger('error', Rest.errorMessage(error));
+
+			// If it's a duplicate, assume the ticket was already closed and
+			//	there was some sort of communication error
+			if(error.code === 1101) {
+				claimClose();
+				props.onSubmit();
+			} else {
+				Events.trigger('error', Rest.errorMessage(error));
+			}
 		});
 	}
 

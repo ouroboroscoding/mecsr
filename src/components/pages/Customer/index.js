@@ -708,10 +708,10 @@ export default class Customer extends React.Component {
 
 // Valid props
 Customer.propTypes = {
-	"customerId": PropTypes.number,
-	"phoneNumber": PropTypes.string,
-	"readyOnly": PropTypes.bool,
-	"user": PropTypes.oneOfType([
+	customerId: PropTypes.number,
+	phoneNumber: PropTypes.string,
+	readyOnly: PropTypes.bool,
+	user: PropTypes.oneOfType([
 		PropTypes.bool,
 		PropTypes.object
 	])
@@ -719,6 +719,6 @@ Customer.propTypes = {
 
 // Default props
 Customer.defaultProps = {
-	"readOnly": false,
-	"user": false
+	readOnly: false,
+	user: false
 }

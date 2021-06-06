@@ -27,6 +27,9 @@ import Typography from '@material-ui/core/Typography';
 // Composite components
 import { ReminderForm } from 'components/composites/Reminder';
 
+// Customer Page components
+import Calls from 'components/pages/Customer/Logs/Calls';
+
 // Data modules
 import Claimed from 'data/claimed';
 
@@ -55,6 +58,7 @@ import Events from 'shared/generic/events';
 export default function Resolve(props) {
 
 	// State
+	let [calls, callsSet] = useState(null);
 	let [note, noteSet] = useState('');
 	let [reminder, reminderSet] = useState(null);
 	let [type, typeSet] = useState('');
@@ -182,58 +186,86 @@ export default function Resolve(props) {
 			}}
 		>
 			<DialogTitle id="confirmation-dialog-title">Resolve {props.title}</DialogTitle>
-			<DialogContent dividers>
-				<Box className="field">
-					<RadioButtons
-						buttonProps={{style: {width: '100%'}}}
-						gridContainerProps={{spacing: 2}}
-						gridItemProps={{xs: 6}}
-						label="Resolution"
-						onChange={value => typeSet(value, 10)}
-						options={[
-							{value: 'Contact Attempted'},
-							{value: 'Follow Up Complete'},
-							{value: 'Information Provided'},
-							{value: 'Issue Resolved'},
-							{value: 'Script Entered'}
-						]}
-						value={type}
-						variant="grid"
-					/>
+			<DialogContent dividers className="flexColumns">
+				<Box className="flexGrow">
+					<br />
+					<Box className="field">
+						<RadioButtons
+							buttonProps={{style: {width: '100%'}}}
+							gridContainerProps={{spacing: 2}}
+							gridItemProps={{xs: 6}}
+							label="Resolution"
+							onChange={value => typeSet(value)}
+							options={[
+								{value: 'Contact Attempted'},
+								{value: 'Follow Up Complete'},
+								{value: 'Information Provided'},
+								{value: 'Issue Resolved'},
+								{value: 'Script Entered'}
+							]}
+							value={type}
+							variant="grid"
+						/>
+					</Box>
+					<Box className="field">
+						<RadioButtons
+							buttonProps={{style: {width: '100%'}}}
+							gridContainerProps={{spacing: 2}}
+							gridItemProps={{xs: 6}}
+							label="Have you added all call logs to this ticket?"
+							onChange={value => callsSet(value)}
+							options={[
+								{value: 'Yes'},
+								{value: 'No'}
+							]}
+							value={calls}
+							variant="grid"
+						/>
+					</Box>
+					<Box className="field">
+						<TextField
+							label="Add Note"
+							multiline
+							onChange={ev => noteSet(ev.currentTarget.value)}
+							rows="4"
+							value={note}
+							variant="outlined"
+						/>
+					</Box>
+					<Typography><strong>Optional</strong></Typography>
+					<Box className="field">
+						<FormControlLabel
+							control={<Checkbox
+								color="primary"
+								checked={reminder}
+								onChange={ev => reminderSet(ev.currentTarget.checked)}
+							/>}
+							label={<span>Add Reminder?</span>}
+						/>
+					</Box>
+					{reminder &&
+						<ReminderForm
+							ref={reminderRef}
+							{...props}
+						/>
+					}
 				</Box>
-				<Box className="field">
-					<TextField
-						label="Add Note"
-						multiline
-						onChange={ev => noteSet(ev.currentTarget.value)}
-						rows="4"
-						value={note}
-						variant="outlined"
-					/>
-				</Box>
-				<Typography><strong>Optional</strong></Typography>
-				<Box className="field">
-					<FormControlLabel
-						control={<Checkbox
-							color="primary"
-							checked={reminder}
-							onChange={ev => reminderSet(ev.currentTarget.checked)}
-						/>}
-						label={<span>Add Reminder?</span>}
-					/>
-				</Box>
-				{reminder &&
-					<ReminderForm
-						ref={reminderRef}
-						{...props}
-					/>
+				{calls === 'No' &&
+					<Box className="flexGrow" style={{marginLeft: '10px', passing: '10px'}}>
+						<br />
+						<Calls
+							phoneNumber={props.customerPhone}
+							readOnly={false}
+							user={props.user}
+						/>
+					</Box>
 				}
 			</DialogContent>
 			<DialogActions>
 				<Button variant="contained" color="secondary" onClick={props.onClose}>
 					Cancel
 				</Button>
-				{(type !== '' && (note.trim() !== '' || type === 'Script Entered')) &&
+				{(type !== '' && (note.trim() !== '' || type === 'Script Entered') && calls === 'Yes') &&
 					<Button variant="contained" color="primary" onClick={submit}>
 						Resolve
 					</Button>

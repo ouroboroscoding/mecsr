@@ -96,7 +96,10 @@ export default function Claim(props) {
 				ticket,
 				props.customerPhone,
 				props.customerName,
-				props.customerId
+				props.customerId,
+				props.orderId === '' ? null : props.orderId,
+				props.continuous,
+				props.provider
 			);
 
 			// Tell the parent to close the dialog
@@ -265,7 +268,7 @@ Claim.propTypes = {
 
 // Default props
 Claim.defaultProps = {
-	continuous: 0,
+	continuous: null,
 	defaultType: 'sms',
 	orderId: '',
 	provider: null

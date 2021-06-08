@@ -52,7 +52,7 @@ export default function CancelContinuous(props) {
 	let [reason, reasonSet] = useState('');
 
 	// Submite notes / resolve conversation
-	function submitCancel(reason) {
+	function submitCancel() {
 
 		// CancelContinuous the order
 		Rest.update('monolith', 'order/continuous/cancel', {
@@ -178,7 +178,7 @@ export default function CancelContinuous(props) {
 						options={[
 							{value: 'Current Customer', text: 'Customer Request'},
 							{value: 'Contact Attempt', text: 'Contact Attempt'},
-							{value: 'Medication Switch', text: 'Medication Switch'}
+							{value: 'Medication Switch', text: 'Medication Switch*'}
 						]}
 						value={reason}
 						variant="grid"

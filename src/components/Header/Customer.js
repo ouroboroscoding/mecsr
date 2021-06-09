@@ -296,6 +296,7 @@ export default function Customer(props) {
 					ignore={props.user.id}
 					onClose={e => dialogSet(false)}
 					onSubmit={dialogClose}
+					removeType="claimedRemove"
 					{...props}
 				/>
 			}

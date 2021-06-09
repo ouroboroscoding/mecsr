@@ -265,7 +265,7 @@ export default function Transfer(props) {
 			}
 
 			// Trigger the claimed being removed
-			Events.trigger('claimedRemove', props.customerPhone);
+			Events.trigger(props.removeType, props.customerPhone);
 
 			// Call the parent
 			props.onSubmit();
@@ -393,7 +393,8 @@ Transfer.propTypes = {
 	customerPhone: PropTypes.string.isRequired,
 	ignore: PropTypes.number,
 	onClose: PropTypes.func.isRequired,
-	onSubmit: PropTypes.func.isRequired
+	onSubmit: PropTypes.func.isRequired,
+	removeType: PropTypes.string.isRequired
 };
 
 // Default props

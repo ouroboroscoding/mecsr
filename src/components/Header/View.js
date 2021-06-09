@@ -42,12 +42,6 @@ import Transfer from 'components/dialogs/Transfer';
 import { ReminderDialog } from 'components/composites/Reminder';
 import { CustomListsDialog } from 'components/composites/CustomLists';
 
-// Data modules
-import claimed from 'data/claimed';
-
-// Shared communications modules
-import Rest from 'shared/communication/rest';
-
 // Shared generic modules
 import Events from 'shared/generic/events';
 import { nicePhone } from 'shared/generic/tools';
@@ -155,29 +149,15 @@ export default function View(props) {
 	}
 
 	// Transfer dialog submit
-	function transferSubmit(agent) {
+	function transferSubmit() {
 
-		// Call the request
-		claimed.transfer(props.customerPhone, agent).then(res => {
+		// Hide the dialog
+		transferSet(false);
 
-			// Remove transfer dialog
-			transferSet(false);
-
-			// Trigger the claimed being removed
-			Events.trigger('viewedRemove', props.customerPhone, false);
-
-			// If it's selected
-			if(props.selected) {
-				history.push('/');
-			}
-
-		}, error => {
-			if(error.code === 1104) {
-				Events.trigger('error', 'Claim no longer exists, can not transfer.');
-			} else {
-				Events.trigger('error', Rest.errorMessage(error));
-			}
-		});
+		// If we're currently selected, change the page
+		if(props.selected) {
+			history.push('/');
+		}
 	}
 
 	// Render
@@ -268,6 +248,7 @@ export default function View(props) {
 				<Transfer
 					onClose={e => transferSet(false)}
 					onSubmit={transferSubmit}
+					removeType="viewedRemove"
 					{...props}
 				/>
 			}

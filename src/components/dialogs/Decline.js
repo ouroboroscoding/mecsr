@@ -151,10 +151,10 @@ export default function Decline(props) {
 						label="Reason for decline"
 						onChange={value => reasonSet(value)}
 						options={[
-							{value: 'Ran CC Successfully'},
-							{value: 'Duplicate Order*'},
-							{value: 'Customer Request*'},
-							{value: 'Contact Attempt*'}
+							{value: 'Ran CC Successfully', text: 'Ran CC Successfully'},
+							{value: 'Duplicate Order', text: 'Duplicate Order*'},
+							{value: 'Current Customer', text: 'Customer Request*'},
+							{value: 'Contact Attempt', text: 'Contact Attempt*'}
 						]}
 						value={reason}
 						variant="grid"

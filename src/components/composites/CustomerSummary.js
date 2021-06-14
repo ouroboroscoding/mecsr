@@ -63,12 +63,18 @@ export default function CustomerSummary(props) {
 						<p>{props.customerId}</p>
 						<p>{props.customerName}</p>
 						<p>{props.shipCity + ', ' + props.shipState + (props.encounter === '' ? '' : ' / ' + _encounter[props.encounter])}</p>
+						{props.lastProviderId !== null &&
+							<p>&nbsp;</p>
+						}
 					</Grid>
 					<Grid item xs={12} sm={5} className="messages">
 						<Typography variant="h6">Order</Typography>
 						<p>{props.continuous && 'C-'}{props.type.toUpperCase()} - {props.orderId}</p>
 						<p>{sLabel}</p>
 						<p>{datetime(props.createdAt)}</p>
+						{props.lastProviderId &&
+							<p>{props.lastProviderName}</p>
+						}
 					</Grid>
 				</Grid>
 			</Paper>

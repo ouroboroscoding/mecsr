@@ -342,7 +342,7 @@ export default function Transfer(props) {
 						>
 							<option aria-label="None" value="" />
 							{agents.map(o =>
-								<option key={o.memo_id} value={o.memo_id}>{o.firstName + ' ' + o.lastName}</option>
+								<option key={o.memo_id} value={o.memo_id}>{o.firstName + ' ' + o.lastName}{o.label !== '' && (' - ' + o.label)}</option>
 							)}
 						</Select>
 					</FormControl>

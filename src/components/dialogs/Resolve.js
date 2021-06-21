@@ -251,7 +251,7 @@ export default function Resolve(props) {
 					}
 				</Box>
 				{calls === 'No' &&
-					<Box className="flexGrow" style={{marginLeft: '10px', passing: '10px', maxHeight: '500px', overflow: 'auto'}}>
+					<Box className="flexGrow" style={{marginLeft: '10px', passing: '10px', maxHeight: '450px', overflow: 'auto'}}>
 						<br />
 						<Calls
 							phoneNumber={props.customerPhone}

@@ -250,18 +250,20 @@ export default function NeverStarted(props) {
 			<Box className="page_header">
 				<Typography className="title">Never Started Claims</Typography>
 				{Rights.has('welldyne_never_started', 'update') &&
-					<React.Fragment>
-						<TextField
-							inputRef={pollRef}
-							label="File date"
-							defaultValue={getFlatDate()}
-						/>
+					<Box className="flexColumns">
+						<Box className="flexGrow">
+							<TextField
+								inputRef={pollRef}
+								label="File date"
+								defaultValue={getFlatDate()}
+							/>
+						</Box>
 						<Tooltip title="Update from FTP">
 							<IconButton onClick={pollRecords}>
 								<CloudDownloadIcon />
 							</IconButton>
 						</Tooltip>
-					</React.Fragment>
+					</Box>
 				}
 			</Box>
 			{results}

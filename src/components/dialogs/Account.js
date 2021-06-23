@@ -37,6 +37,7 @@ const UserTree = new Tree(UserDef);
 
 // Override the react values
 UserTree.special('react', {
+	primary: 'id',
 	update: ['firstName', 'lastName', 'email', 'cellNumber']
 })
 
@@ -44,6 +45,11 @@ UserTree.special('react', {
 export default function Account(props) {
 
 	let passForm = useRef();
+
+	function beforeUpdate(values) {
+		delete values['id'];
+		return values;
+	}
 
 	function passwordCheck(values) {
 		if(values.new_passwd !== values.confirm_passwd) {
@@ -75,6 +81,7 @@ export default function Account(props) {
 			<DialogTitle id="confirmation-dialog-title">Account Details</DialogTitle>
 			<DialogContent dividers>
 				<Form
+					beforeSubmit={beforeUpdate}
 					noun={"user"}
 					service="monolith"
 					success={updateSuccess}

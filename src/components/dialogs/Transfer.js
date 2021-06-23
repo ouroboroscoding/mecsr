@@ -45,7 +45,7 @@ import Tickets from 'shared/data/tickets';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
-import { afindi, clone, omap } from 'shared/generic/tools';
+import { afindi, omap } from 'shared/generic/tools';
 
 /**
  * Transfer
@@ -136,6 +136,9 @@ export default function Transfer(props) {
 				// Split all types into lists
 				for(let i in res.data) {
 					res.data[i].type = res.data[i].type.split(',');
+					if(res.data[i].type[0] === '') {
+						res.data[i].type = [];
+					}
 				}
 
 				// Save the agents
@@ -175,10 +178,15 @@ export default function Transfer(props) {
 				}
 			}
 
-			// Else, everyone
+			// Else, everyone with a type
 			else {
-				agentsSet(clone(agentsAll));
-				return;
+
+				// Go through all agents
+				for(let o of agentsAll) {
+					if(o.type.length) {
+						lAgents.push(o);
+					}
+				}
 			}
 		}
 

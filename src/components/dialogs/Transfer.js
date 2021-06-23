@@ -341,9 +341,19 @@ export default function Transfer(props) {
 							value={agent}
 						>
 							<option aria-label="None" value="" />
-							{agents.map(o =>
-								<option key={o.memo_id} value={o.memo_id}>{o.firstName + ' ' + o.lastName}{o.label !== '' && (' - ' + o.label)}</option>
-							)}
+							{agents.map(o => {
+								let sExtend = '';
+								if(o.oof) {
+									sExtend = ' - OUT OF OFFICE';
+									if(o.oof_replacement) {
+										sExtend += ' replaced by ' + o.oof_replacement_firstName + ' ' + o.oof_replacement_lastName;
+									}
+								} else if(o.offline) {
+									sExtend = ' - OFFLINE returns ' + o.offline;
+								}
+
+								return <option key={o.memo_id} value={o.oof_replacement || o.memo_id}>{o.firstName + ' ' + o.lastName}{o.label !== '' && (' - ' + o.label)}{sExtend}</option>
+							})}
 						</Select>
 					</FormControl>
 				</Box>

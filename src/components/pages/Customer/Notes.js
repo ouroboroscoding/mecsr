@@ -262,7 +262,7 @@ export default class Notes extends React.Component {
 
 				// Add the Note to the current ticket (if there is one)
 				if(Tickets.current()) {
-					Tickets.item('note', res.data);
+					Tickets.item('note', 'outgoing', res.data, this.props.user.id);
 				}
 
 				// Clear the note content

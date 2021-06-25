@@ -206,9 +206,9 @@ export default function Emails(props) {
 					{logs.length === 0 &&
 						<Typography>No logs found for this e-mail address</Typography>
 					}
-					{logs.length > 0 && logs.map(o =>
+					{logs.length > 0 && logs.map((o,i) =>
 						<Email
-							key={o.id}
+							key={i}
 							{...o}
 						/>
 					)}

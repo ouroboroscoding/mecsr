@@ -145,7 +145,9 @@ export default function Claim(props) {
 			for(let id of items) {
 				lItems.push({
 					type: 'sms',
-					identifier: id
+					direction: 'incoming',
+					identifier: id,
+					memo_id: 0
 				});
 			}
 		}

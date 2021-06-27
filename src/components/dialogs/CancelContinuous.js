@@ -78,7 +78,7 @@ export default function CancelContinuous(props) {
 
 				// Add the note to the ticket
 				if(props.ticket) {
-					Tickets.item('note', res.data, props.ticket);
+					Tickets.item('note', 'outgoing', res.data, props.user.id, props.ticket);
 				}
 
 				// Start the resolution
@@ -205,5 +205,6 @@ CancelContinuous.propTypes = {
 	customerId: PropTypes.string.isRequired,
 	orderId: PropTypes.string.isRequired,
 	onClose: PropTypes.func.isRequired,
-	onSubmit: PropTypes.func.isRequired
+	onSubmit: PropTypes.func.isRequired,
+	user: PropTypes.object.isRequired
 }

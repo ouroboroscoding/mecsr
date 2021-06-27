@@ -131,7 +131,7 @@ export default function ProviderTransfer(props) {
 				if(props.ticket) {
 
 					// Add the note
-					Tickets.item('note', res.data, props.ticket);
+					Tickets.item('note', 'outgoing', res.data, props.user.id, props.ticket);
 
 					// Add the action
 					Tickets.action('Transferred', 'Provider Required', props.ticket);

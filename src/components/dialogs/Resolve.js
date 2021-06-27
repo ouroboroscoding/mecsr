@@ -110,7 +110,7 @@ export default function Resolve(props) {
 
 					// Add it to the ticket
 					if(props.ticket) {
-						Tickets.item('note', res.data, props.ticket);
+						Tickets.item('note', 'outgoing', res.data, props.user.id, props.ticket);
 					}
 
 					// Start the resolving

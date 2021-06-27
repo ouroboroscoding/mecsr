@@ -10,6 +10,7 @@
  */
 
 // NPM modules
+import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 // Material UI
@@ -72,7 +73,7 @@ export default function ProviderReturn(props) {
 
 				// Add it to the ticket
 				if(props.ticket) {
-					Tickets.item('note', res.data, props.ticket);
+					Tickets.item('note', 'outgoing', res.data, props.user.id, props.ticket);
 				}
 
 				// Start the resolving
@@ -150,4 +151,16 @@ export default function ProviderReturn(props) {
 			</DialogActions>
 		</Dialog>
 	);
+}
+
+// Valid props
+ProviderReturn.propTypes = {
+	customerId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+	customerPhone: PropTypes.string.isRequired,
+	onClose: PropTypes.func.isRequired,
+	onSubmit: PropTypes.func.isRequired,
+	orderId: PropTypes.string.isRequired,
+	provider: PropTypes.number.isRequired,
+	ticket: PropTypes.string,
+	user: PropTypes.object.isRequired
 }

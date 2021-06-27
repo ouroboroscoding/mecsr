@@ -242,6 +242,7 @@ export default function View(props) {
 					defaultType="sms"
 					onClose={() => claimSet(false)}
 					onFailure={claimFailure}
+					user={props.user}
 				/>
 			}
 			{transfer !== false &&

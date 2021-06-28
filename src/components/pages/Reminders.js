@@ -75,7 +75,7 @@ function Reminder(props) {
 	let [resolve, resolveSet] = useState(false);
 
 	// Catch a click on the resolve button
-	function resolveClick() {
+	/*function resolveClick() {
 
 		// If we have a customer ID
 		if(props.data.claimed) {
@@ -86,7 +86,7 @@ function Reminder(props) {
 		else {
 			props.onResolve(props.data);
 		}
-	}
+	}*/
 
 	// View the customer associated with the reminder
 	function view() {
@@ -110,13 +110,13 @@ function Reminder(props) {
 			<Grid container spacing={3} className="summary">
 				<Grid item xs={6} md={2}>
 					<Typography><strong>Actions:</strong></Typography>
-					<Button className="action" variant="contained" color="primary" size="large" onClick={resolveClick}>Resolve</Button>
+					{/*<Button className="action" variant="contained" color="primary" size="large" onClick={resolveClick}>Resolve</Button>*/}
 					{props.data.claimed &&
 						<React.Fragment>
 							{props.data.claimed.claimedAt ?
 								<span>Claimed by {sClaimedBy}</span>
 							:
-								<Button className="action" variant="contained" color="primary" size="large" onClick={claim}>Claim</Button>
+								<Button className="action" variant="contained" color="primary" size="large" onClick={ev => claimSet(true)}>Claim</Button>
 							}
 							{sClaimedBy !== 'You' &&
 								<Button className="action" variant="contained" color="primary" size="large" onClick={view}>View</Button>
@@ -178,11 +178,9 @@ function Reminder(props) {
 			</Grid>
 			{claim &&
 				<Claim
-					customerId={props.customerId.toString()}
-					customerName={props.customerName}
-					customerPhone={props.customerPhone}
-					defaultType="followup"
+					defaultType="Follow Up"
 					onClose={() => claimSet(false)}
+					{...props.data.claimed}
 				/>
 			}
 			{resolve &&
@@ -202,8 +200,9 @@ function Reminder(props) {
 
 // Valid props
 Reminder.propTypes = {
-	customerId: PropTypes.string.isRequired,
-	name: PropTypes.string.isRequired,
+	data: PropTypes.object.isRequired,
+	onRemove: PropTypes.func.isRequired,
+	onResolve: PropTypes.func.isRequired,
 	onUpdate: PropTypes.func.isRequired,
 	user: PropTypes.object.isRequired
 }

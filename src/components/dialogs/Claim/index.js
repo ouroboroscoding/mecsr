@@ -261,7 +261,7 @@ Claim.propTypes = {
 	customerId: PropTypes.string.isRequired,
 	customerName: PropTypes.string.isRequired,
 	customerPhone: PropTypes.string.isRequired,
-	defaultType: PropTypes.oneOf(['', 'sms', 'ongoing', 'followup']),
+	defaultType: PropTypes.oneOf(['', 'SMS / Voicemail', 'Call', 'Follow Up', 'Script Entry']),
 	onClose: PropTypes.func.isRequired,
 	onFailure: PropTypes.func,
 	orderId: PropTypes.string,
@@ -271,7 +271,7 @@ Claim.propTypes = {
 // Default props
 Claim.defaultProps = {
 	continuous: null,
-	defaultType: 'sms',
+	defaultType: 'SMS / Voicemail',
 	orderId: '',
 	provider: null
 }

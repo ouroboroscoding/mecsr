@@ -992,7 +992,7 @@ export default class SMS extends React.Component {
 
 					// If we have an ID
 					if(oLanding) {
-						sReplacement = `https://www.maleexcelmip.com/mip/form/CHRT?landing_id=${oLanding.id}&formId=${oLanding.form}&ktCustomerId=${this.props.customer.customerId}`
+						sReplacement = `https://www.maleexcelmip.com/hormone-assessment/cchrt?landing_id=${oLanding.id}&formId=${oLanding.form}&ktCustomerId=${this.props.customer.customerId}`
 					} else {
 						sReplacement = 'NO PREVIOUS COMPLETED HRT MIP FOUND!';
 						Events.trigger('error', 'No previous completed HRT MIP was found for this customer, you should not message them without further research');

@@ -75,11 +75,18 @@ function Patients(props) {
 	// Render the claim button
 	function claimRender(customer) {
 		return (
-			<Button
-				color="primary"
-				onClick={ev => claimSet(customer)}
-				variant="contained"
-			>Claim</Button>
+			<React.Fragment>
+				<Button
+					color="primary"
+					onClick={ev => claimSet(customer)}
+					variant="contained"
+				>Claim</Button>&nbsp;
+				<Button
+					color="primary"
+					onClick={() => Events.trigger('viewedAdd', customer.phoneNumber, customer.firstName + ' ' + customer.lastName, customer.customerId)}
+					variant="contained"
+				>View</Button>
+			</React.Fragment>
 		)
 	}
 

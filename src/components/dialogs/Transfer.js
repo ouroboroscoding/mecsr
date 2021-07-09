@@ -45,7 +45,7 @@ import Tickets from 'shared/data/tickets';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
-import { afindi, omap } from 'shared/generic/tools';
+import { afindi, afindo, omap } from 'shared/generic/tools';
 
 /**
  * Transfer
@@ -77,6 +77,7 @@ export default function Transfer(props) {
 	// State
 	let [action, actionSet] = useState('Transferred');
 	let [agent, agentSet] = useState('');
+	let [agentActual, agentActualSet] = useState(0);
 	let [agents, agentsSet] = useState([]);
 	let [agentsAll, agentsAllSet] = useState([]);
 	let [note, noteSet] = useState('');
@@ -105,6 +106,25 @@ export default function Transfer(props) {
 		agentsFilter();
 	// eslint-disable-next-line
 	}, [agentsAll, action, type]);
+
+	// Called when the agent changes
+	function agentChange(val) {
+
+		// Set the select agent
+		agentSet(val);
+
+		// Look for the agent in the list
+		let oAgent = afindo(agentsAll, 'memo_id', parseInt(val, 10));
+
+		// If we find one
+		if(oAgent) {
+
+			// Set the replacement if there is one
+			agentActualSet(oAgent.oof ? oAgent.oof_replacement : oAgent.memo_id);
+		} else {
+			agentActualSet(0);
+		}
+	}
 
 	// Fetch agents we can transfer to
 	function agentsFetch() {
@@ -265,7 +285,7 @@ export default function Transfer(props) {
 	function submitTransfer() {
 
 		// Call the request
-		Claimed.transfer(props.customerPhone, parseInt(agent, 10)).then(res => {
+		Claimed.transfer(props.customerPhone, agentActual).then(res => {
 
 			// Add it to the ticket if we have one
 			if(props.ticket) {
@@ -345,7 +365,7 @@ export default function Transfer(props) {
 							}}
 							label="Transfer To"
 							native
-							onChange={ev => agentSet(ev.target.value)}
+							onChange={ev => agentChange(ev.target.value)}
 							value={agent}
 						>
 							<option aria-label="None" value="" />
@@ -360,7 +380,7 @@ export default function Transfer(props) {
 									sExtend = ' - OFFLINE returns ' + o.offline;
 								}
 
-								return <option key={o.memo_id} value={o.oof_replacement || o.memo_id}>{o.firstName + ' ' + o.lastName}{o.label !== '' && (' - ' + o.label)}{sExtend}</option>
+								return <option key={o.memo_id} value={o.memo_id}>{o.firstName + ' ' + o.lastName}{o.label !== '' && (' - ' + o.label)}{sExtend}</option>
 							})}
 						</Select>
 					</FormControl>

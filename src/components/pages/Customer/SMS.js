@@ -871,6 +871,22 @@ export default class SMS extends React.Component {
 			let sReplacement = null;
 			switch(lMatch[1]) {
 
+				case 'agent_first':
+					if(!this.props.user) {
+						Events.trigger('error', 'Can not use template without agent data');
+						return;
+					}
+					sReplacement = this.props.user.firstName;
+					break;
+
+				case 'agent_last':
+					if(!this.props.user) {
+						Events.trigger('error', 'Can not use template without agent data');
+						return;
+					}
+					sReplacement = this.props.user.lastName;
+					break;
+
 				// Billing info, name + address
 				case 'billing':
 					if(!this.props.customer) {

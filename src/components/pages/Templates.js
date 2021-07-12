@@ -239,6 +239,14 @@ export default function Templates(props) {
 					</TableHead>
 					<TableBody>
 						<TableRow>
+							<TableCell>{"{agent_first}"}</TableCell>
+							<TableCell>Karll</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell>{"{agent_last}"}</TableCell>
+							<TableCell>Ferreri</TableCell>
+						</TableRow>
+						<TableRow>
 							<TableCell>{"{billing}"}</TableCell>
 							<TableCell>
 								John Smith<br />

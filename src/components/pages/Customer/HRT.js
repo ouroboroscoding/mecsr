@@ -123,7 +123,7 @@ function Patient(props) {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				if(res.error.code === 1001) {
+				if(res.error.code === 1005) {
 					Events.trigger('error', 'There is an error processing the HRT table, this error is most likely due to changes in Memo that were not communicated to the CS team. Please contact Charlotte devs to resolve this issue.')
 				} else {
 					Events.trigger('error', Rest.errorMessage(res.error));
@@ -196,7 +196,7 @@ function Patient(props) {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				if(res.error.code === 1001) {
+				if(res.error.code === 1005) {
 					Events.trigger('error', 'There is an error processing the HRT table, this error is most likely due to changes in Memo that were not communicated to the CS team. Please contact Charlotte devs to resolve this issue.')
 				} else {
 					Events.trigger('error', Rest.errorMessage(res.error));

@@ -123,7 +123,11 @@ function Patient(props) {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', Rest.errorMessage(res.error));
+				if(res.error.code === 1001) {
+					Events.trigger('error', 'There is an error processing the HRT table, this error is most likely due to changes in Memo that were not passed on to the CS team. Please contact Charlotte devs to resolve this issue.')
+				} else {
+					Events.trigger('error', Rest.errorMessage(res.error));
+				}
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));
@@ -192,7 +196,11 @@ function Patient(props) {
 
 			// If there's an error or warning
 			if(res.error && !res._handled) {
-				Events.trigger('error', Rest.errorMessage(res.error));
+				if(res.error.code === 1001) {
+					Events.trigger('error', 'There is an error processing the HRT table, this error is most likely due to changes in Memo that were not passed on to the CS team. Please contact Charlotte devs to resolve this issue.')
+				} else {
+					Events.trigger('error', Rest.errorMessage(res.error));
+				}
 			}
 			if(res.warning) {
 				Events.trigger('warning', JSON.stringify(res.warning));

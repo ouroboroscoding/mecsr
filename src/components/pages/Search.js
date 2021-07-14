@@ -171,6 +171,9 @@ export default class Search extends React.Component {
 		if(this.state.email.trim() !== '') {
 			oParams.email = this.state.email;
 		}
+		if(this.state.phone.trim() !== '') {
+			oParams.phone = this.state.phone;
+		}
 
 		// If there's no params, do nothing
 		if(empty(oParams)) {
@@ -282,6 +285,19 @@ export default class Search extends React.Component {
 									onKeyPress={this.keyPressedCustomer}
 									type="text"
 									value={this.state.id}
+									variant="outlined"
+									InputLabelProps={{
+										shrink: true,
+									}}
+								/>
+							</Grid>
+							<Grid item xs={12} sm={6} md={3}>
+								<TextField
+									label="Phone Number"
+									onChange={this.phoneChange}
+									onKeyPress={this.keyPressedCustomer}
+									type="text"
+									value={this.state.phone}
 									variant="outlined"
 									InputLabelProps={{
 										shrink: true,

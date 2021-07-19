@@ -99,7 +99,8 @@ export default function Claim(props) {
 				props.customerId,
 				props.orderId === '' ? null : props.orderId,
 				props.continuous,
-				props.provider
+				props.provider,
+				props.reviews || null
 			);
 
 			// Tell the parent to close the dialog

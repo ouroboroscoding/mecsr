@@ -27,6 +27,9 @@ import AddCircleIcon from '@material-ui/icons/AddCircle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 
+// Composite components
+import ReviewSummary from 'components/composites/ReviewSummary';
+
 // Dialog components
 import Claim from 'components/dialogs/Claim';
 import Resolve from 'components/dialogs/Resolve';
@@ -130,6 +133,9 @@ function Reminder(props) {
 						<React.Fragment>
 							<Typography>{props.data.claimed.customerName}</Typography>
 							<Typography>{props.data.claimed.customerPhone}</Typography>
+							{props.data.claimed.reviews &&
+								<Typography><ReviewSummary {...props.data.claimed.reviews} /></Typography>
+							}
 						</React.Fragment>
 					:
 						<Typography>No customer</Typography>

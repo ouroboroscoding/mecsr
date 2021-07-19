@@ -22,6 +22,9 @@ import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
 
+// Composite components
+import ReviewSummary from 'components/composites/ReviewSummary';
+
 // Dialog components
 import Claim from 'components/dialogs/Claim';
 
@@ -43,7 +46,8 @@ const HrtTree = new Tree({
 	phoneNumber: {__type__: "string", __react__: {title: 'Phone Number'}},
 	firstName: {__type__: "string", __react__: {title: 'First'}},
 	lastName: {__type__: "string", __react__: {title: 'Last'}},
-	shipState: {__type__: "string", __react__:{title: 'State'}}
+	shipState: {__type__: "string", __react__:{title: 'State'}},
+	reviews: {__type__: "string", __react__:{title: 'Reviews'}}
 });
 
 /**
@@ -115,6 +119,15 @@ function Patients(props) {
 		});
 	}
 
+	// Render the review column
+	function reviewRender(customer) {
+		if(customer.reviews) {
+			return <ReviewSummary {...customer.reviews} />
+		} else {
+			return '';
+		}
+	}
+
 	// If we're still fetching
 	if(!customers) {
 		return <Typography>Loading...</Typography>
@@ -124,7 +137,10 @@ function Patients(props) {
 	return (
 		<React.Fragment>
 			<Results
-				custom={{"claim": claimRender}}
+				custom={{
+					claim: claimRender,
+					reviews: reviewRender
+				}}
 				data={customers}
 				noun=""
 				orderBy="joinDate"
@@ -140,6 +156,7 @@ function Patients(props) {
 					customerPhone={claim.phoneNumber}
 					defaultType="followup"
 					onClose={() => claimSet(false)}
+					reviews={claim.reviews || null}
 				/>
 			}
 		</React.Fragment>

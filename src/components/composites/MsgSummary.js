@@ -17,6 +17,9 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 
+// Composite components
+import ReviewSummary from 'components/composites/ReviewSummary';
+
 // Dialog components
 import Claim from 'components/dialogs/Claim';
 
@@ -126,6 +129,9 @@ export default function MsgSummary(props) {
 						<p><strong>Customer:</strong></p>
 						<p>{props.customerName}</p>
 						<p>{props.customerPhone}</p>
+						{props.reviews &&
+							<p><ReviewSummary {...props.reviews} /></p>
+						}
 						<p>&nbsp;</p>
 						<p><strong>SMS Received:</strong> <span>{props.totalIncoming}</span></p>
 						<p><strong>SMS Sent:</strong> <span>{props.totalOutGoing === null ? '0' : props.totalOutGoing}</span></p>
@@ -147,6 +153,7 @@ export default function MsgSummary(props) {
 					customerPhone={props.customerPhone}
 					defaultType={props.claimType}
 					onClose={() => claimSet(false)}
+					reviews={props.reviews || null}
 				/>
 			}
 		</React.Fragment>

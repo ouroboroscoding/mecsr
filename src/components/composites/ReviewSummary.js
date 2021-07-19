@@ -28,25 +28,28 @@ export default function ReviewSummary(props) {
 	let fAverage = (props.total / props.count);
 
 	// Figure out the average colour
-	let sAverage = 'green';
+	let sAvgColor = 'green';
 	if(fAverage < 6.0) {
-		sAverage = 'red';
+		sAvgColor = 'red';
 	} else if(fAverage < 8.0) {
-		sAverage = '#ffca00';
+		sAvgColor = '#ffca00';
 	}
 
+	// Figure out whether to include a decimal or not
+	let sAverage =  ? fAverage.toFixed(fAverage % 1 ? 1 : 0);
+
 	// Figure out the last colour
-	let sLast = 'green';
+	let sLastColor = 'green';
 	if(props.last < 6) {
-		sLast = 'red';
+		sLastColor = 'red';
 	} else if(props.last < 8) {
-		sLast = '#ffca00';
+		sLastColor = '#ffca00';
 	}
 
 	// Render
 	return (
 		<span className="customerReview">
-			<span style={{color: sLast}}>{props.last}</span> / <span style={{color: sAverage}}>{fAverage.toFixed(1)}</span> A
+			<span style={{color: sLastColor}}>{props.last}</span> / <span style={{color: sAvgColor}}>{sAverage}</span> A
 		</span>
 	);
 }

@@ -35,9 +35,6 @@ export default function ReviewSummary(props) {
 		sAvgColor = '#ffca00';
 	}
 
-	// Figure out whether to include a decimal or not
-	let sAverage =  ? fAverage.toFixed(fAverage % 1 ? 1 : 0);
-
 	// Figure out the last colour
 	let sLastColor = 'green';
 	if(props.last < 6) {
@@ -49,7 +46,7 @@ export default function ReviewSummary(props) {
 	// Render
 	return (
 		<span className="customerReview">
-			<span style={{color: sLastColor}}>{props.last}</span> / <span style={{color: sAvgColor}}>{sAverage}</span> A
+			<span style={{color: sLastColor}}>{props.last}</span> / <span style={{color: sAvgColor}}>{fAverage.toFixed(fAverage % 1 ? 1 : 0)}</span> A
 		</span>
 	);
 }

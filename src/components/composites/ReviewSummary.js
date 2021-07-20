@@ -46,7 +46,7 @@ export default function ReviewSummary(props) {
 	// Render
 	return (
 		<span className="customerReview">
-			<span style={{color: sLastColor}}>{props.last}</span> / <span style={{color: sAvgColor}}>{fAverage.toFixed(fAverage % 1 ? 1 : 0)}</span> A
+			<span style={{color: sLastColor}}>{props.last}</span> / <span style={{color: sAvgColor}}>{fAverage.toFixed(fAverage % 1 ? 1 : 0)}</span>A
 		</span>
 	);
 }

@@ -23,6 +23,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
 
 // Material UI Icons
 import AddAlertIcon from '@material-ui/icons/AddAlert';
@@ -34,13 +35,14 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import NewReleasesIcon from '@material-ui/icons/NewReleases';
 import ViewListIcon from '@material-ui/icons/ViewList';
 
+// Composite components
+import ReviewSummary from 'components/composites/ReviewSummary';
+import { ReminderDialog } from 'components/composites/Reminder';
+import { CustomListsDialog } from 'components/composites/CustomLists';
+
 // Dialogs components
 import Claim from 'components/dialogs/Claim';
 import Transfer from 'components/dialogs/Transfer';
-
-// Composite components
-import { ReminderDialog } from 'components/composites/Reminder';
-import { CustomListsDialog } from 'components/composites/CustomLists';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
@@ -176,8 +178,13 @@ export default function View(props) {
 						secondary={
 							<React.Fragment>
 								<span>
-									ID: {props.customerId}<br/>
-									#: {nicePhone(props.customerPhone)}
+									<Typography>#: {nicePhone(props.customerPhone)}</Typography>
+									<Typography>
+										<span>ID: {props.customerId}</span>
+										{props.reviews &&
+											<span>&nbsp;&nbsp;<ReviewSummary {...props.reviews} /></span>
+										}
+									</Typography>
 								</span>
 								<span className="customerActions">
 									<span className="tooltip">
@@ -242,6 +249,7 @@ export default function View(props) {
 					defaultType="sms"
 					onClose={() => claimSet(false)}
 					onFailure={claimFailure}
+					reviews={props.reviews || null}
 					user={props.user}
 				/>
 			}

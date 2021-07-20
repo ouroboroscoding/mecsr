@@ -18,6 +18,9 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 
+// Composite components
+import ReviewSummary from 'components/composites/ReviewSummary';
+
 // Dialog components
 import Claim from 'components/dialogs/Claim';
 
@@ -60,12 +63,18 @@ export default function CustomerSummary(props) {
 					</Grid>
 					<Grid item xs={12} sm={5}>
 						<Typography variant="h6">Customer</Typography>
-						<p>{props.customerId}</p>
+						<p>
+							<span>{props.customerId}</span>
+							{props.reviews &&
+								<span> <ReviewSummary {...props.reviews} /></span>
+							}
+						</p>
 						<p>{props.customerName}</p>
 						<p>{props.shipCity + ', ' + props.shipState + (props.encounter === '' ? '' : ' / ' + _encounter[props.encounter])}</p>
 						{props.lastProviderId !== null &&
 							<p>&nbsp;</p>
 						}
+
 					</Grid>
 					<Grid item xs={12} sm={5} className="messages">
 						<Typography variant="h6">Order</Typography>
@@ -88,6 +97,7 @@ export default function CustomerSummary(props) {
 					onClose={() => claimSet(false)}
 					orderId={props.orderId}
 					provider={0}
+					reviews={props.reviews || null}
 				/>
 			}
 		</React.Fragment>

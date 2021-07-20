@@ -229,7 +229,7 @@ export default function Header(props) {
 	useEvent('viewedRemove', viewedRemove);
 
 	// Called when a new claim is added somewhere in the app
-	function claimedAdd(ticket, number, name, customer_id, order_id=null, continuous=null, provider=null) {
+	function claimedAdd(ticket, number, name, customer_id, order_id=null, continuous=null, provider=null, reviews=null) {
 
 		// Clone the claimed state
 		let lClaimed = clone(claimed);
@@ -243,7 +243,8 @@ export default function Header(props) {
 			orderId: order_id,
 			continuous: continuous,
 			provider: provider,
-			viewed: 1
+			viewed: 1,
+			reviews: reviews
 		});
 
 		// Set the new claimed
@@ -624,7 +625,8 @@ export default function Header(props) {
 							customerId: res.data.customerId,
 							customerName: res.data.customerName,
 							customerPhone: number,
-							claimedUser: res.data.claimedUser
+							claimedUser: res.data.claimedUser,
+							reviews: res.data.reviews || null
 						});
 
 						// Set the new state

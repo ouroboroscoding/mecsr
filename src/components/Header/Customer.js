@@ -37,6 +37,11 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import NewReleasesIcon from '@material-ui/icons/NewReleases';
 import ViewListIcon from '@material-ui/icons/ViewList';
 
+// Composite components
+import ReviewSummary from 'components/composites/ReviewSummary';
+import { ReminderDialog } from 'components/composites/Reminder';
+import { CustomListsDialog } from 'components/composites/CustomLists';
+
 // Dialogs components
 import CancelContinuous from 'components/dialogs/CancelContinuous';
 import Decline from 'components/dialogs/Decline';
@@ -44,10 +49,6 @@ import ProviderReturn from 'components/dialogs/ProviderReturn';
 import ProviderTransfer from 'components/dialogs/ProviderTransfer';
 import Resolve from 'components/dialogs/Resolve';
 import Transfer from 'components/dialogs/Transfer';
-
-// Composite components
-import { ReminderDialog } from 'components/composites/Reminder';
-import { CustomListsDialog } from 'components/composites/CustomLists';
 
 // Shared data modules
 import Tickets from 'shared/data/tickets';
@@ -170,7 +171,12 @@ export default function Customer(props) {
 							<React.Fragment>
 								<span className="customerDetails MuiTypography-colorTextSecondary">
 									<Typography>#: {nicePhone(props.customerPhone)}</Typography>
-									<Typography>ID: {props.customerId}</Typography>
+									<Typography>
+										<span>ID: {props.customerId}</span>
+										{props.reviews &&
+											<span>&nbsp;&nbsp;<ReviewSummary {...props.reviews} /></span>
+										}
+									</Typography>
 									{props.orderId &&
 										<Typography>Order: {props.orderId}</Typography>
 									}

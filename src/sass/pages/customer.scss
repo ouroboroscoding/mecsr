@@ -60,14 +60,14 @@
 			}
 		}
 
-		.templates, .label {
+		.templates {
 			flex-grow: 0;
 			flex-shrink: 0;
 			width: 100%;
+		}
 
-			.select {
-				width: 100%;
-			}
+		.select {
+			width: 100%;
 		}
 
 		.send {

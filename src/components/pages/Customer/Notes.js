@@ -30,6 +30,7 @@ import Events from 'shared/generic/events';
 import { clone } from 'shared/generic/tools';
 
 // Data
+import lRoles from 'definitions/attention_roles.json';
 import lLabels from 'definitions/status_labels.json';
 
 // Notes component
@@ -56,6 +57,7 @@ export default class Notes extends React.Component {
 		this.label = null;
 		this.messagesBottom = null;
 		this.sendEl = null;
+		this.role = null;
 		this.text = null;
 
 		// Bind methods
@@ -163,18 +165,33 @@ export default class Notes extends React.Component {
 					<div className="scroll" ref={el => this.messagesBottom = el} />
 				</div>
 				{(this.state.status && !this.props.readOnly) &&
-					<div className="label">
-						<Select
-							className='select'
-							defaultValue={this.state.status.label || ''}
-							native
-							inputRef={ref => this.label = ref}
-							variant="outlined"
-						>
-							{lLabels.map((s,i) =>
-								<option key={i} value={s}>{s}</option>
-							)}
-						</Select>
+					<div className="flexColumns">
+						<div className="role flexGrow">
+							<Select
+								className='select'
+								defaultValue={this.state.status.role || ''}
+								native
+								inputRef={ref => this.role = ref}
+								variant="outlined"
+							>
+								{lRoles.map((s,i) =>
+									<option key={i} value={s}>{s}</option>
+								)}
+							</Select>
+						</div>
+						<div className="label flexGrow">
+							<Select
+								className='select'
+								defaultValue={this.state.status.label || ''}
+								native
+								inputRef={ref => this.label = ref}
+								variant="outlined"
+							>
+								{lLabels.map((s,i) =>
+									<option key={i} value={s}>{s}</option>
+								)}
+							</Select>
+						</div>
 					</div>
 				}
 				{!this.props.readOnly &&
@@ -217,7 +234,8 @@ export default class Notes extends React.Component {
 
 		// Get the content of the note
 		let content = this.text.value;
-		let label = null
+		let label = null;
+		let role = null;
 
 		// If there's nothing, do nothing
 		if(content.trim() === '') {
@@ -234,11 +252,14 @@ export default class Notes extends React.Component {
 		// If we have an order
 		if(this.state.status) {
 
-			// Get the label
+			// Get the role and label
+			role = this.role.value;
 			label = this.label.value;
 
-			// If the label changed, send it with the order ID
-			if(this.state.status.label !== label) {
+			// If the role or label changed, send them with the order ID
+			if(this.state.status.role !== role ||
+				this.state.status.label !== label) {
+				oData.role = role;
 				oData.label = label;
 				oData.orderId = this.state.status.orderId;
 			}

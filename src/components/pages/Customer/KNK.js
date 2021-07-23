@@ -9,10 +9,13 @@
  */
 
 // NPM modules
-import React from 'react';
+import React, { useState } from 'react';
 
 // Material UI
 import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
@@ -24,10 +27,15 @@ import TableRow from '@material-ui/core/TableRow';
 import Tooltip from '@material-ui/core/Tooltip';
 
 // Material UI Icons
+import AddCircleIcon from '@material-ui/icons/AddCircle';
 import RefreshIcon from '@material-ui/icons/Refresh';
+
+// Composite components
+import KnkOrder from 'components/composites/KnkOrder';
 
 // Shared communications modules
 import Rest from 'shared/communication/rest';
+import Rights from 'shared/communication/rights';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
@@ -40,9 +48,22 @@ const EnToTxt = {
 	"": "N/A"
 }
 
-// KNK component
+/**
+ * KNK
+ *
+ * Shows Konnektive customer details and orders
+ *
+ * @name KNK
+ * @access public
+ * @param Object props Attributes sent to the component
+ * @returns React.Component
+ */
 export default function KNK(props) {
 
+	// State
+	let [create, createSet] = useState(false);
+
+	// Called to sync up order details in Konnektive with Memo
 	function memoSync(order_id) {
 		Rest.update('monolith', 'order/refresh', {
 			orderId: order_id
@@ -167,6 +188,13 @@ export default function KNK(props) {
 										<RefreshIcon />
 									</IconButton>
 								</Tooltip>
+								{Rights.has('orders', 'create') &&
+									<Tooltip title="Add Order">
+										<IconButton onClick={ev => createSet(true)}>
+											<AddCircleIcon />
+										</IconButton>
+									</Tooltip>
+								}
 							</TableCell>
 							<TableCell>&nbsp;</TableCell>
 							<TableCell>Products</TableCell>
@@ -189,7 +217,7 @@ export default function KNK(props) {
 												variant="contained"
 											>Sync Memo</Button>
 										</nobr></p>
-										<p><strong>Campaign: </strong><span>{o.campaign}</span></p>
+										<p><strong>Campaign: </strong><span>{o.campaign.name}</span></p>
 										<p><nobr><strong>Email: </strong><span>{o.email}</span></nobr></p>
 										<p><nobr><strong>Phone: </strong><span>{o.phone}</span></nobr></p>
 										<p><nobr><strong>Date: </strong><span>{o.date}</span></nobr></p>
@@ -285,6 +313,24 @@ export default function KNK(props) {
 		<React.Fragment>
 			{elCustomer}
 			{elOrders}
+			{create &&
+				<Dialog
+					maxWidth="lg"
+					onClose={props.onCancel}
+					open={true}
+					aria-labelledby="knk-order-dialog-title"
+				>
+					<DialogTitle id="knk-order-dialog-title">Add Order</DialogTitle>
+					<DialogContent dividers>
+						<KnkOrder
+							customer={props.customer}
+							onCancel={() => createSet(false)}
+							onSuccess={props.refreshOrders}
+							user={props.user}
+						/>
+					</DialogContent>
+				</Dialog>
+			}
 		</React.Fragment>
 	);
 }

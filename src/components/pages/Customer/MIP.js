@@ -21,8 +21,9 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
 import Grid from '@material-ui/core/Grid';
-import Select from '@material-ui/core/Select';
 import Paper from '@material-ui/core/Paper';
+import Select from '@material-ui/core/Select';
+import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
@@ -36,7 +37,7 @@ import Rest from 'shared/communication/rest';
 
 // Shared generic modules
 import Events from 'shared/generic/events';
-import { clone } from 'shared/generic/tools';
+import { clone, safeLocalStorageBool } from 'shared/generic/tools';
 
 // QuestionMultiple
 class QuestionMultiple extends React.Component {
@@ -272,28 +273,61 @@ function Question(props) {
 	);
 }
 
-// MIP component
+/**
+ * MIP
+ *
+ * Displays all MIPS for the given customer
+ *
+ * @name MIP
+ * @access public
+ * @param Object props Attributes sent to the component
+ * @returns React.Component
+ */
 export default function MIP(props) {
 
 	// State
-	const [expanded, expandedSet] = useState(false);
+	const [completedOnly, completedOnlySet] = useState(safeLocalStorageBool('mipCompletedOnly', true));
+	const [expanded, expandedSet] = useState({});
+	const [mips, mipsSet] = useState([]);
+
+	// Completed only effect
+	useEffect(() => {
+		if(props.mips && completedOnly) {
+			mipsSet(mips => {
+				mips = [];
+				for(let o of props.mips) {
+					if(o.completed) {
+						mips.push(o);
+					}
+				}
+				return mips;
+			});
+		} else {
+			mipsSet(props.mips);
+		}
+	}, [completedOnly, props.mips]);
 
 	// Handle accordian change
 	function handleChange(event, isExpanded) {
-
-		// Set the new expanded
-		expandedSet(isExpanded ? event.currentTarget.id : false);
+		expandedSet(value => {
+			if(event.currentTarget.id in value) {
+				delete value[event.currentTarget.id];
+			} else {
+				value[event.currentTarget.id] = true;
+			}
+			return clone(value);
+		});
 	}
 
 	// If we're still loading
-	if(props.mips === null) {
+	if(mips === null) {
 		return (
 			<Typography>Loading...</Typography>
 		);
 	}
 
 	// If there's no mip associated
-	else if(props.mips === 0) {
+	else if(mips === 0) {
 		return (
 			<Typography>No MIP found for this customer</Typography>
 		);
@@ -303,8 +337,20 @@ export default function MIP(props) {
 	else {
 		return (
 			<React.Fragment>
-				{props.mips.map((o, i) =>
-					<ExpansionPanel key={i} expanded={expanded === o.id || (!expanded && i === 0)} onChange={handleChange}>
+				<Box className="actions">
+					<FormControlLabel control={
+						<Switch
+							checked={completedOnly}
+							onChange={ev => {
+								completedOnlySet(ev.target.checked);
+								localStorage.setItem('mipCompletedOnly', ev.target.checked);
+							}}
+							color="primary"
+						/>
+					} label="Completed Only" />
+				</Box>
+				{mips.map((o, i) =>
+					<ExpansionPanel key={i} expanded={expanded[o.id] || false} onChange={handleChange}>
 						<ExpansionPanelSummary
 							expandIcon={<ExpandMoreIcon />}
 							aria-controls={o.id + "_content"}

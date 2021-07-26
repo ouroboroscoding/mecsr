@@ -9,7 +9,7 @@
  */
 
 // NPM modules
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // Material UI
 import Box from '@material-ui/core/Box';
@@ -38,6 +38,97 @@ import DoseSpotData from 'shared/data/dosespot';
 // Shared generic modules
 import Events from 'shared/generic/events';
 import { afindi, date, datetime, nicePhone } from 'shared/generic/tools';
+
+/**
+ * Continuous
+ *
+ * Shows continuous records if there are any
+ *
+ * @name Continuous
+ * @access private
+ * @param Object props Attributes sent to the component
+ * @returns React.Component
+ */
+function Continuous(props) {
+
+	// State
+	let [records, recordsSet] = useState(false);
+
+	// Load effect
+	useEffect(() => {
+
+		// If we have a user
+		if(props.user) {
+
+			// Fetch all the records
+			Rest.read('monolith', 'customer/continuous', {
+				customerId: parseInt(props.customerId, 0)
+			}).done(res => {
+				if(res.error && !res._handled) {
+					Events.trigger('error', Rest.errorMessage(res.error));
+				}
+				if(res.data && res.data.length) {
+					recordsSet(res.data);
+				}
+			});
+		}
+
+	}, [props.customerId, props.user])
+
+	// If there's no records
+	if(!records) {
+		return null;
+	}
+
+	// Render
+	return (
+		<Box>
+			<Box className="section_header">
+				<Typography className="title">Continuous ED</Typography>
+			</Box>
+			{records.map(o => {
+
+				// Generate the order / purchase string
+				let sPurchase = `for order ${o.orderId}, purchase ${o.purchaseId}. `;
+
+				// Init the string
+				let sText = 'Customer has ';
+				let sURL = false;
+
+				// If it's active
+				if(o.active) {
+					sText += 'a completed C-ED MIP ';
+					if(o.medsNotWorking) {
+						sText += '(MEDS NOT WORKING) ';
+					}
+					sText += ` created on ${date(o.createdAt)} ${sPurchase}`
+
+					// If it's approved
+					if(o.status === 'COMPLETE') {
+						sText += `It has been approved by ${o.providerName} on ${date(o.updatedAt)}.`;
+					} else {
+						sText += 'It has not yet been approved.';
+					}
+				}
+
+				// Else, if it's incomplete
+				else {
+					sText += ` an incomplete C-ED MIP created on ${date(o.createdAt)} ${sPurchase}`
+					sURL = `https://www.maleexcelmip.com/mip/cont/ced?formId=MIP-CED&ktCustomerId=${props.customerId}`;
+				}
+
+				return (
+					<Paper key={o.purchaseId} className="padded">
+						<Typography>{sText}</Typography>
+						{sURL &&
+							<Typography>{sURL}</Typography>
+						}
+					</Paper>
+				);
+			})}
+		</Box>
+	);
+}
 
 /**
  * Dose Spot
@@ -478,6 +569,11 @@ export default function RX(props) {
 	// Render
 	return (
 		<Box>
+			<Continuous
+				customerId={props.customerId}
+				readOnly={props.readOnly}
+				user={props.user}
+			/>
 			{props.pharmacyFill &&
 				<PharmacyFill
 					create={Rights.has('pharmacy_fill', 'create')}

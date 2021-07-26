@@ -316,7 +316,7 @@ export default function KNK(props) {
 			{create &&
 				<Dialog
 					maxWidth="lg"
-					onClose={props.onCancel}
+					onClose={ev => createSet(false)}
 					open={true}
 					aria-labelledby="knk-order-dialog-title"
 				>
@@ -325,7 +325,10 @@ export default function KNK(props) {
 						<KnkOrder
 							customer={props.customer}
 							onCancel={() => createSet(false)}
-							onSuccess={props.refreshOrders}
+							onSuccess={() => {
+								createSet(false);
+								props.refreshOrders();
+							}}
 							user={props.user}
 						/>
 					</DialogContent>

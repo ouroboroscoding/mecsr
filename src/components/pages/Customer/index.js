@@ -665,6 +665,7 @@ export default class Customer extends React.Component {
 				</div>
 				<div className="prescriptions" style={{display: this.state.tab === 5 ? 'block' : 'none'}}>
 					<RX
+						customerId={this.props.customerId}
 						details={this.state.patient_details}
 						hrtLabs={this.state.hrtLabs}
 						onAdhocAdd={this.adhocAdd}

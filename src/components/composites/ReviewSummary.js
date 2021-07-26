@@ -54,8 +54,8 @@ export default function ReviewSummary(props) {
 // Force props
 ReviewSummary.propTypes = {
 	count: PropTypes.number.isRequired,
-	total: PropTypes.string.isRequired,
-	last: PropTypes.string.isRequired
+	total: PropTypes.number.isRequired,
+	last: PropTypes.number.isRequired
 }
 
 // Default props

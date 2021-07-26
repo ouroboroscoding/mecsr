@@ -645,6 +645,7 @@ export default class Customer extends React.Component {
 						refreshCustomer={this.knkCustomerRefresh}
 						refreshOrders={this.knkOrdersRefresh}
 						tracking={this.state.shipping}
+						user={this.props.user}
 					/>
 				</div>
 				<div className="mip" style={{display: this.state.tab === 3 ? 'block' : 'none'}}>

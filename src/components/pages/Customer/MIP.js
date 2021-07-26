@@ -15,9 +15,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
 import Grid from '@material-ui/core/Grid';
@@ -350,8 +350,8 @@ export default function MIP(props) {
 					} label="Completed Only" />
 				</Box>
 				{mips.map((o, i) =>
-					<ExpansionPanel key={i} expanded={expanded[o.id] || false} onChange={handleChange}>
-						<ExpansionPanelSummary
+					<Accordion key={i} expanded={expanded[o.id] || false} onChange={handleChange}>
+						<AccordionSummary
 							expandIcon={<ExpandMoreIcon />}
 							aria-controls={o.id + "_content"}
 							id={o.id}
@@ -362,8 +362,8 @@ export default function MIP(props) {
 								<Grid item xs={2}>{o.form}</Grid>
 								<Grid item xs={2}>{o.completed ? "Completed" : <span style={{color: "red"}}>Incomplete</span>}</Grid>
 							</Grid>
-						</ExpansionPanelSummary>
-						<ExpansionPanelDetails>
+						</AccordionSummary>
+						<AccordionDetails>
 							{o.questions.map((oQ, iQ) =>
 								<Question
 									editable={i === 0 && !props.readOnly}
@@ -373,8 +373,8 @@ export default function MIP(props) {
 									landing={o.id}
 								/>
 							)}
-						</ExpansionPanelDetails>
-					</ExpansionPanel>
+						</AccordionDetails>
+					</Accordion>
 				)}
 			</React.Fragment>
 		);

@@ -254,7 +254,7 @@ export default function KnkOrder(props) {
 
 			// If there's data, notify the parent
 			if(res.data) {
-				props.onSuccess();
+				props.onSuccess(res.data);
 			}
 		});
 	}

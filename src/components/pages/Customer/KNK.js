@@ -37,6 +37,9 @@ import KnkOrder from 'components/composites/KnkOrder';
 import Rest from 'shared/communication/rest';
 import Rights from 'shared/communication/rights';
 
+// Shared data modules
+import Tickets from 'shared/data/tickets';
+
 // Shared generic modules
 import Events from 'shared/generic/events';
 
@@ -82,6 +85,21 @@ export default function KNK(props) {
 				Events.trigger('success', 'Konnektive order data synced with Memo');
 			}
 		})
+	}
+
+	// Called when a new order has been created
+	function orderCreated(orderId) {
+
+		// Hide the create dialog
+		createSet(false);
+
+		// Add the order to the current ticket (if there is one)
+		if(Tickets.current()) {
+			Tickets.item('order', 'outgoing', orderId, props.user.id);
+		}
+
+		// Refresh konnektive orders
+		props.refreshOrders();
 	}
 
 	// Init customer section
@@ -325,10 +343,7 @@ export default function KNK(props) {
 						<KnkOrder
 							customer={props.customer}
 							onCancel={() => createSet(false)}
-							onSuccess={() => {
-								createSet(false);
-								props.refreshOrders();
-							}}
+							onSuccess={orderCreated}
 							user={props.user}
 						/>
 					</DialogContent>

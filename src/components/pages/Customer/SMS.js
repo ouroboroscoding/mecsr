@@ -638,7 +638,7 @@ export default class SMS extends React.Component {
 									variant="outlined"
 								>
 									{this.props.orders.map(o =>
-										<option key={o.orderId} value={o.orderId}>{o.date} - {o.orderId} - {o.campaign}</option>
+										<option key={o.orderId} value={o.orderId}>{o.date} - {o.orderId} - {o.campaign.name}</option>
 									)}
 								</Select>
 							</FormControl>

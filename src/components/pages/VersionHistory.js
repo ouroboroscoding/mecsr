@@ -19,6 +19,9 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 
 const VERSION = [
+	['1.37.0', 'May 31st, 2021', [
+		'Added ability to create new orders on Customer KNK tab.'
+	]],
 	['1.34.0', 'May 31st, 2021', [
 		'Added ticketing system.'
 	]],

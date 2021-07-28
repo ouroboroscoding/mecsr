@@ -5,6 +5,7 @@
 $menu-width: 250px;
 
 /* shared */
+@import '../shared/sass/creditcard';
 @import '../shared/sass/flex';
 @import '../shared/sass/format';
 @import '../shared/sass/Messages';
@@ -137,6 +138,7 @@ div.field {
 }
 
 .MuiBox-root.actions {
+	margin-top: 10px;
 	text-align: right;
 
 	button {

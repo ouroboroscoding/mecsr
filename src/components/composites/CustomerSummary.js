@@ -25,6 +25,7 @@ import ReviewSummary from 'components/composites/ReviewSummary';
 import Claim from 'components/dialogs/Claim';
 
 // Shared generic modules
+import Events from 'shared/generic/events';
 import { datetime } from 'shared/generic/tools';
 
 // Encounter types
@@ -40,6 +41,11 @@ export default function CustomerSummary(props) {
 
 	// State
 	let [claim, claimSet] = useState(false);
+
+	// Called when View button is pressed
+	function view() {
+		Events.trigger('viewedAdd', props.customerPhone, props.customerName, props.customerId);
+	}
 
 	// If we're the one who claimed it
 	let sClaimedBy = (props.userId === props.user.id) ? 'You' : props.claimedBy;
@@ -58,7 +64,10 @@ export default function CustomerSummary(props) {
 						{props.claimedAt ?
 							<p>Claimed by {sClaimedBy}</p>
 						:
-							<p><Button variant="contained" color="primary" size="large" onClick={ev => claimSet(true)}>Claim</Button></p>
+							<Button className="action" variant="contained" color="primary" size="large" onClick={ev => claimSet(true)}>Claim</Button>
+						}
+						{sClaimedBy !== 'You' &&
+							<Button className="action" variant="contained" color="primary" size="large" onClick={view}>View</Button>
 						}
 					</Grid>
 					<Grid item xs={12} sm={5}>
